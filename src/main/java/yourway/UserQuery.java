@@ -1,7 +1,8 @@
-package yourway.job;
+package yourway;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.SparkConf;
@@ -36,10 +37,10 @@ public final class UserQuery {
             streamingContext.checkpoint(Settings.CHECKPOINT_PATH);
 
             Map<String, Object> kafkaParams = new HashMap<>();
-            kafkaParams.put("bootstrap.servers", Settings.KAFKA_URI);
-            kafkaParams.put("key.deserializer", StringDeserializer.class);
-            kafkaParams.put("value.deserializer", StringDeserializer.class);
-            kafkaParams.put("group.id", "group_user_query");
+            kafkaParams.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
+            kafkaParams.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            kafkaParams.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            kafkaParams.put(ConsumerConfig.GROUP_ID_CONFIG, "group_user_query");
             JavaInputDStream<ConsumerRecord<String, String>> inputKafka = KafkaUtils.createDirectStream(
                     streamingContext,
                     LocationStrategies.PreferConsistent(),
@@ -50,7 +51,7 @@ public final class UserQuery {
             JavaPairDStream<String, Map<String, Object>> results = inputKafka.mapToPair(
                     record -> new Tuple2<>(record.key(), (new Gson()).fromJson(record.value(), type))
             );
-            results.print(5);
+
             JavaPairDStream<Object, Map<String, Object>> userQuery = results.mapToPair(
                     s -> new Tuple2<>(s._2.get("id"), s._2)
             ).updateStateByKey(updateFunction);
