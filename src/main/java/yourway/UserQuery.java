@@ -29,9 +29,17 @@ public final class UserQuery {
     public static void main(String[] args) throws Exception {
         Type type = new TypeToken<Map<String, Object>>() {}.getType();
         Function2<List<Map<String, Object>>, Optional<Map<String, Object>>, Optional<Map<String, Object>>> updateFunction =
-                (maps, hashMapOptional) -> hashMapOptional;
+                (maps, hashMapOptional) -> {
+                    Map<String, Object> out;
+                    if (hashMapOptional.isPresent()) {
+                        out = hashMapOptional.get();
+                    } else {
+                        out = maps.get(maps.size() - 1);
+                    }
+                    return Optional.of(out);
+                };
         SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("Storing User Query");
-        JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(1));
+        JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(2));
         try {
             streamingContext.sparkContext().setLogLevel("ERROR");
             streamingContext.checkpoint(Settings.CHECKPOINT_PATH);
@@ -54,9 +62,10 @@ public final class UserQuery {
 
             JavaPairDStream<Object, Map<String, Object>> userQuery = results.mapToPair(
                     s -> new Tuple2<>(s._2.get("id"), s._2)
-            ).updateStateByKey(updateFunction);
+            );
+            JavaPairDStream<Object, Map<String, Object>> newState = userQuery.updateStateByKey(updateFunction);
 
-            userQuery.print(5);
+            newState.print();
             streamingContext.start();
             streamingContext.awaitTermination();
             streamingContext.close();
@@ -70,4 +79,3 @@ public final class UserQuery {
         }
     }
 }
-

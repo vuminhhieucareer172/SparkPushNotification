@@ -1,26 +1,24 @@
 package example;
 
-import java.util.*;
-import java.util.regex.Pattern;
-
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.Function3;
-import org.apache.spark.streaming.State;
-import org.apache.spark.streaming.StateSpec;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.spark.api.java.Optional;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.Optional;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.Function3;
+import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.State;
+import org.apache.spark.streaming.StateSpec;
 import org.apache.spark.streaming.api.java.*;
 import org.apache.spark.streaming.kafka010.ConsumerStrategies;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
-import org.apache.spark.streaming.Durations;
 import scala.Tuple2;
 import settings.Settings;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 public final class JavaDirectKafkaWordCount {
     private static final Pattern SPACE = Pattern.compile(" ");
@@ -46,7 +44,6 @@ public final class JavaDirectKafkaWordCount {
                 };
         List<Tuple2<String, Integer>> tuples =
                 Arrays.asList(new Tuple2<>("hello", 1), new Tuple2<>("world", 1));
-        JavaPairRDD<String, Integer> initialRDD = jssc.sparkContext().parallelizePairs(tuples);
 
         // Create direct kafka stream with brokers and topics
         JavaInputDStream<ConsumerRecord<String, String>> messages = KafkaUtils.createDirectStream(
@@ -69,7 +66,7 @@ public final class JavaDirectKafkaWordCount {
 
         // DStream made of get cumulative counts that get updated in every batch
         JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> stateDstream =
-                wordCounts.mapWithState(StateSpec.function(mappingFunc).initialState(initialRDD));
+                wordCounts.mapWithState(StateSpec.function(mappingFunc));
 
         stateDstream.print();
         // Start the computation
