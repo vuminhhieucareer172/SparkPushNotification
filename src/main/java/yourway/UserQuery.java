@@ -1,10 +1,10 @@
 package yourway;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function2;
@@ -18,19 +18,13 @@ import org.apache.spark.streaming.kafka010.LocationStrategies;
 import scala.Tuple2;
 import settings.Settings;
 
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class UserQuery {
-
     public static void main(String[] args) throws Exception {
-        Type type = new TypeToken<Map<String, Object>>() {}.getType();
-        Function2<List<Map<String, Object>>, Optional<Map<String, Object>>, Optional<Map<String, Object>>> updateFunction =
+        Function2<List<String>, Optional<String>, Optional<String>> updateFunction =
                 (maps, hashMapOptional) -> {
-                    Map<String, Object> out;
+                    String out;
                     if (hashMapOptional.isPresent()) {
                         out = hashMapOptional.get();
                     } else {
@@ -42,6 +36,7 @@ public final class UserQuery {
         JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(2));
         try {
             streamingContext.sparkContext().setLogLevel("ERROR");
+//            streamingContext.sparkContext().broadcast();
             streamingContext.checkpoint(Settings.CHECKPOINT_PATH);
 
             Map<String, Object> kafkaParams = new HashMap<>();
@@ -56,18 +51,37 @@ public final class UserQuery {
                             kafkaParams)
             );
 
-            JavaPairDStream<String, Map<String, Object>> results = inputKafka.mapToPair(
-                    record -> new Tuple2<>(record.key(), (new Gson()).fromJson(record.value(), type))
-            );
+            Properties props = new Properties();
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
+            props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducer");
+            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
-            JavaPairDStream<Object, Map<String, Object>> userQuery = results.mapToPair(
-                    s -> new Tuple2<>(s._2.get("id"), s._2)
+            JavaPairDStream<String, String> results = inputKafka.mapToPair(
+                    record -> new Tuple2<>(record.key(), record.value())
             );
-            JavaPairDStream<Object, Map<String, Object>> newState = userQuery.updateStateByKey(updateFunction);
+            JavaPairDStream<String, String> newState = results.updateStateByKey(updateFunction);
 
             newState.print();
+
+            newState.foreachRDD(rdd -> rdd.foreach(message -> {
+                Producer<String, String> producer = new KafkaProducer<>(props);
+                long time = System.currentTimeMillis();
+
+                final ProducerRecord<String, String> record = new ProducerRecord<>(
+                        Settings.TOPIC_USER_QUERY, message._1, message._2
+                );
+                RecordMetadata metadata = producer.send(record).get();
+                long elapsedTime = System.currentTimeMillis() - time;
+                System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
+                        record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+                producer.flush();
+                producer.close();
+            }));
+
             streamingContext.start();
             streamingContext.awaitTermination();
+
             streamingContext.close();
             streamingContext.sparkContext().close();
             System.out.println("finish program!");
