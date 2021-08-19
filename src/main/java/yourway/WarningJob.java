@@ -1,26 +1,31 @@
 package yourway;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import models.UserQuery;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.api.java.UDF6;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
+import org.apache.spark.sql.types.DataTypes;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import settings.Settings;
 import utils.UtilKafka;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.json_tuple;
+import static org.apache.spark.sql.functions.*;
 import static org.apache.spark.sql.types.DataTypes.StringType;
 
 public class WarningJob {
@@ -45,46 +50,87 @@ public class WarningJob {
                 )
         );
 
+        // get user query from kafka
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "user");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
-        // get user query from kafka
         ConsumerRecord<String, String> mess = UtilKafka.getLatestMessage(props, Settings.TOPIC_USER_QUERY);
-        System.out.println(mess);
         Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(mess.value(), JsonObject.class);
-        System.out.println(jsonObject);
+        Type type = new TypeToken<ArrayList<UserQuery>>() {
+        }.getType();
 
-//        check_matching = udf(
-//                lambda address, age, salary, year, edu_level, job_attribute: matching(address, age, salary, year, edu_level,
-//                job_attribute), StringType()
-//    )
-//
-//        data = data.withColumn(
-//                "value", check_matching(data["company_address"], data["ages"], data["salary"], data["year_experiences"],
-//                        data["education_level"], data["job_attribute"])
-//        )
-//        data = data.withColumn(
-//                "key", col("id")
-//        )
-//
-//        data = data.filter(col("value") != "")
+        ArrayList<UserQuery> listUserQuery = gson.fromJson(mess.value(), type);
+
+        // matching
+        try {
+            UDF6<String, String, String, String, String, String, String> check_matching = (address, age, salary, yearExperiments, eduLevel, jobAttribute) -> {
+                List<String> user_id = new ArrayList<>();
+                int min_age = 0;
+                int max_age = 200;
+
+                if (age != null && !age.isEmpty()) {
+                    String[] array_age = age.split(",");
+                    if (array_age.length > 1) {
+                        min_age = Settings.DICT_MIN_AGE.get(array_age[0]);
+                        max_age = Settings.DICT_MAX_AGE.get(array_age[array_age.length - 1]);
+                    }
+                }
+                for (UserQuery query : listUserQuery) {
+                    String[] array_salary = query.getSalary().split("-", 2);
+                    int min_salary = NumberUtils.toInt(array_salary[0], 0);
+                    int max_salary = NumberUtils.toInt(array_salary[1], 1000000000);
+
+                    boolean is_number_salary = true;
+                    if (salary != null && !salary.isEmpty()) {
+                        double salaryDouble = Double.parseDouble(salary);
+                        is_number_salary = salaryDouble >= min_salary && salaryDouble <= max_salary;
+                    }
+                    boolean is_not_none_address = false;
+                    if (address != null && !address.isEmpty()) {
+                        is_not_none_address = address.contains(query.getCompanyAddress());
+                    }
+
+                    try {
+                        int ageInt = query.getAge();
+//                        if (is_not_none_address &&
+//                                min_age <= query.getAge() &&
+//                                query.getAge() <= max_age &&
+//                                is_number_salary &&
+//                                Objects.equals(query.getYearExperiences(), yearExperiments) &&
+//                                Objects.equals(query.getEducationLevel(), eduLevel) &&
+//                                Objects.equals(query.getJobAttribute(), jobAttribute)):
+                        if (is_not_none_address && min_age <= ageInt && ageInt <= max_age && is_number_salary) {
+                            user_id.add(String.valueOf(query.getId()));
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+                return String.join(",", user_id);
+            };
+            spark.sqlContext().udf().register("matching", check_matching, DataTypes.StringType);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        data = data.withColumn("value",
+                callUDF("matching",
+                        col("c2"), col("c14"), col("c10"), col("c22"), col("c15"), col("c19")));
+        data = data.withColumn(
+                "key", col("c0")
+        );
+        data = data.filter(col("value").isNotNull());
 
         StreamingQuery ds = data
                 .writeStream()
-                .format("console")
+                .format("kafka")
+                .option("kafka.bootstrap.servers", Settings.KAFKA_URI)
+                .option("checkpointLocation", Settings.CHECKPOINT_PATH)
+                .option("topic", Settings.TOPIC_USER)
                 .start();
-
-//        StreamingQuery ds = data
-//                .writeStream()
-//                .format("kafka")
-//                .option("kafka.bootstrap.servers", Settings.KAFKA_URI)
-//                .option("checkpointLocation", Settings.CHECKPOINT_PATH)
-//                .option("topic", Settings.TOPIC_USER)
-//                .start();
 
         ds.awaitTermination();
     }

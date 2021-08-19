@@ -1,8 +1,6 @@
 package settings;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Settings {
     public static final String CHECKPOINT_PATH = "checkpoint";
@@ -47,21 +45,27 @@ public class Settings {
             "job_attribute",
             "year_experiences"
             ));
-//    public static final Map<String, Integer> DICT_MIN_AGE =  {
-//        "Dưới 18": 0,
-//                "18-30": 18,
-//                "30-40": 30,
-//                "40-50": 40,
-//                "50-60": 50,
-//                "Trên 60": 60
-//    };
-//public static final Map<String, Integer> DICT_MAX_AGE = {
-//        "Dưới 18": 18,
-//                "18-30": 30,
-//                "30-40": 40,
-//                "40-50": 50,
-//                "50-60": 60,
-//                "Trên 60": 200
-//    };
-//    public static final String EXAMPLE_FILE_QUERY = "data/user_query.csv";
+    public static final Map<String, Integer> DICT_MIN_AGE;
+    static {
+        Map<String, Integer> aMap = new HashMap<>();
+        aMap.put("Dưới 18", 0);
+        aMap.put("18-30", 18);
+        aMap.put("30-40", 30);
+        aMap.put("40-50", 40);
+        aMap.put("50-60", 50);
+        aMap.put("Trên 60", 60);
+        DICT_MIN_AGE = Collections.unmodifiableMap(aMap);
+    }
+
+    public static final Map<String, Integer> DICT_MAX_AGE;
+    static {
+        Map<String, Integer> aMap = new HashMap<>();
+        aMap.put("Dưới 18", 18);
+        aMap.put("18-30", 30);
+        aMap.put("30-40", 40);
+        aMap.put("40-50", 50);
+        aMap.put("50-60", 60);
+        aMap.put("Trên 60", 200);
+        DICT_MAX_AGE = Collections.unmodifiableMap(aMap);
+    }
 }
