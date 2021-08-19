@@ -17,7 +17,6 @@ import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
 import scala.Tuple2;
 import settings.Settings;
-
 import java.util.*;
 
 public final class UserQuery {
@@ -50,7 +49,6 @@ public final class UserQuery {
                     ConsumerStrategies.Subscribe(Collections.singleton(Settings.TOPIC_SET_USER_QUERY),
                             kafkaParams)
             );
-
             Properties props = new Properties();
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
             props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducer");
@@ -64,12 +62,13 @@ public final class UserQuery {
 
             newState.print();
 
-            newState.foreachRDD(rdd -> rdd.foreach(message -> {
-                Producer<String, String> producer = new KafkaProducer<>(props);
+            newState.foreachRDD(rdd -> {
                 long time = System.currentTimeMillis();
-
+                Producer<String, String> producer = new KafkaProducer<>(props);
+                String key = "userQuery";
+                List<String> list = rdd.values().collect();
                 final ProducerRecord<String, String> record = new ProducerRecord<>(
-                        Settings.TOPIC_USER_QUERY, message._1, message._2
+                        Settings.TOPIC_USER_QUERY, key, list.toString()
                 );
                 RecordMetadata metadata = producer.send(record).get();
                 long elapsedTime = System.currentTimeMillis() - time;
@@ -77,7 +76,7 @@ public final class UserQuery {
                         record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
                 producer.flush();
                 producer.close();
-            }));
+            });
 
             streamingContext.start();
             streamingContext.awaitTermination();

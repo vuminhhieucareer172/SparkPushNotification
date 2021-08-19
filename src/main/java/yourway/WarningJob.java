@@ -1,20 +1,21 @@
 package yourway;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
+import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import settings.Settings;
-import scala.collection.JavaConverters;
+import utils.UtilKafka;
 
-import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
@@ -36,9 +37,7 @@ public class WarningJob {
                 .option("kafka.bootstrap.servers", Settings.KAFKA_URI)
                 .option("subscribe", Settings.TOPIC_JOB)
                 .load();
-
         Seq<String> seq = JavaConverters.asScalaIteratorConverter(Settings.FIELD_JOB.iterator()).asScala().toSeq();
-
 
         Dataset<Row> data = df.select(
                 json_tuple(
@@ -52,12 +51,12 @@ public class WarningJob {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList(Settings.TOPIC_USER_QUERY));
-        ConsumerRecords<String, String> records = consumer.poll(100);
-        System.out.println(records);
-        for (ConsumerRecord<String, String> record : records)
-            System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+        // get user query from kafka
+        ConsumerRecord<String, String> mess = UtilKafka.getLatestMessage(props, Settings.TOPIC_USER_QUERY);
+        System.out.println(mess);
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(mess.value(), JsonObject.class);
+        System.out.println(jsonObject);
 
 //        check_matching = udf(
 //                lambda address, age, salary, year, edu_level, job_attribute: matching(address, age, salary, year, edu_level,
