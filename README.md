@@ -14,6 +14,9 @@ Make sure to install enough requirements before continue. All requirements are l
 * [Kafka 2.x](https://kafka.apache.org/quickstart) & [docs](https://kafka.apache.org/documentation/)
 * Maven
 
+Config kafka information in class Settings then run the following command to build file jar:
+
+    mvn install
 
 ## Usage
 ### Start job user query

@@ -1,4 +1,5 @@
 checkpoint/
+.env
 
 # vscode
 .vscode/
