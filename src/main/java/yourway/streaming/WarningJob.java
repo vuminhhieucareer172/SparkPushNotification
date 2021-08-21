@@ -56,7 +56,7 @@ public class WarningJob {
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<UserQuery>>() {
         }.getType();
-
+        System.out.println(mess.value());
         ArrayList<UserQuery> listUserQuery = gson.fromJson(mess.value(), type);
 
         // matching
@@ -123,6 +123,7 @@ public class WarningJob {
                 .writeStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", Settings.KAFKA_URI)
+                .option("kafka.group.id", Settings.GROUP_ID_USER)
                 .option("checkpointLocation", Settings.CHECKPOINT_PATH)
                 .option("topic", Settings.TOPIC_USER)
                 .start();

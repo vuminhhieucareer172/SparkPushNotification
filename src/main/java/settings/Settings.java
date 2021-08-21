@@ -7,6 +7,7 @@ public class Settings {
     public static final String KAFKA_URI = "localhost:9092";
     public static final String TOPIC_JOB = "jobYourway";
     public static final String TOPIC_USER = "userId";
+    public static final String GROUP_ID_USER = "userId";
     public static final String TOPIC_SET_USER_QUERY = "setUserQuery";
     public static final String TOPIC_USER_QUERY = "userQuery";
 
