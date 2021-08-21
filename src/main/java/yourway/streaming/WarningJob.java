@@ -1,4 +1,4 @@
-package yourway;
+package yourway.streaming;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -51,12 +51,7 @@ public class WarningJob {
         );
 
         // get user query from kafka
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "user");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-
+        Properties props = UtilKafka.createConsumer("user");
         ConsumerRecord<String, String> mess = UtilKafka.getLatestMessage(props, Settings.TOPIC_USER_QUERY);
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<UserQuery>>() {

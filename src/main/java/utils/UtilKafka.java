@@ -1,13 +1,12 @@
 package utils;
 
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
 import settings.Settings;
 
 import java.time.Duration;
@@ -19,31 +18,50 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class UtilKafka {
 
-    public static Producer<String, String> createProducer(String groupId) {
+    public static Properties createProducer(String groupId) {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, groupId);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return new KafkaProducer<>(props);
+        return props;
     }
 
-    public static Consumer<String, String> createConsumer(String groupId) {
+    public static Properties createConsumer(String groupId) {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Settings.KAFKA_URI);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        return new KafkaConsumer<>(props);
+        return props;
     }
 
-    public static void sendRDDToKafka(Properties props, String topic, String key, JavaPairRDD<String, String> rdd) throws Exception {
+    public static void sendRDDToKafka(Properties props, String topic, String key, JavaPairDStream<String, String> rdd) {
+        rdd.foreachRDD(eRdd -> {
+            long time = System.currentTimeMillis();
+            Producer<String, String> producer = new KafkaProducer<>(props);
+            try {
+                List<String> list = eRdd.values().collect();
+                final ProducerRecord<String, String> record = new ProducerRecord<>(
+                        topic, key, list.toString()
+                );
+                RecordMetadata metadata = producer.send(record).get();
+                long elapsedTime = System.currentTimeMillis() - time;
+                System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
+                        record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+            } finally {
+                producer.flush();
+                producer.close();
+            }
+        });
+    }
+
+    public static void sendMessageToKafka(Properties props, String topic, String key, String message) throws Exception {
         long time = System.currentTimeMillis();
         Producer<String, String> producer = new KafkaProducer<>(props);
         try {
-            List<String> list = rdd.values().collect();
             final ProducerRecord<String, String> record = new ProducerRecord<>(
-                    topic, key, list.toString()
+                    topic, key, message
             );
             RecordMetadata metadata = producer.send(record).get();
             long elapsedTime = System.currentTimeMillis() - time;
@@ -68,8 +86,6 @@ public class UtilKafka {
 
         // get the last offsets for each partition
         consumer.endOffsets(consumer.assignment()).forEach((topicPartition, offset) -> {
-            System.out.println("offset: " + offset);
-
             // seek to the last offset of each partition
             consumer.seek(topicPartition, (offset == 0) ? offset : offset - 1);
 
@@ -83,7 +99,7 @@ public class UtilKafka {
                 }
             });
         });
-        System.out.println(latestRecord.get());
+        consumer.close();
         return latestRecord.get();
     }
 }
