@@ -5,8 +5,6 @@ import settings.Email;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Properties;
 

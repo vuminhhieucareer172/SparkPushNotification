@@ -2,8 +2,6 @@ package settings;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
-import java.util.*;
-
 public class Email {
     public static final Dotenv dotenv = Dotenv.configure()
             .directory(".")
