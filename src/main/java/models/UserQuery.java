@@ -1,9 +1,15 @@
 package models;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class UserQuery implements Serializable {
     private int id;
@@ -31,60 +37,32 @@ public class UserQuery implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getCompanyAddress() {
+    public String getCompany_address() {
         return company_address;
     }
 
-    public void setCompanyAddress(String company_address) {
-        this.company_address = company_address;
-    }
-
-    public int getAge() {
+    public Integer getAge() {
         return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
     }
 
     public String getSalary() {
         return salary;
     }
 
-    public void setSalary(String salary) {
-        this.salary = salary;
-    }
-
-    public String getYearExperiences() {
+    public String getYear_experiences() {
         return year_experiences;
     }
 
-    public void setYearExperiences(String year_experiences) {
-        this.year_experiences = year_experiences;
-    }
-
-    public String getEducationLevel() {
+    public String getEducation_level() {
         return education_level;
     }
 
-    public void setEducationLevel(String education_level) {
-        this.education_level = education_level;
-    }
-
-    public String getJobAttribute() {
+    public String getJob_attribute() {
         return job_attribute;
     }
 
-    public void setJobAttribute(String job_attribute) {
-        this.job_attribute = job_attribute;
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
+    public String toStringJson() {
+        SortedMap<String, Object> map = new TreeMap<>();
         map.put("id", id);
         map.put("company_address", company_address);
         map.put("age", age);
@@ -92,7 +70,9 @@ public class UserQuery implements Serializable {
         map.put("year_experiences", year_experiences);
         map.put("education_level", education_level);
         map.put("job_attribute", job_attribute);
-        return map;
+        Gson gson = new Gson();
+        Type gsonType = new TypeToken<HashMap<String, Object>>(){}.getType();
+        return gson.toJson(map,gsonType);
     }
 
     @Override

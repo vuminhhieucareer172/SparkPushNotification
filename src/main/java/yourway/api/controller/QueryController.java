@@ -62,8 +62,7 @@ public class QueryController {
         HashMap<String, Object> response = new HashMap<>();
         response.put("status", "ok");
         Properties properties = UtilKafka.createProducer("KafkaProducer");
-        System.out.println(query.toMap().toString());
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", query.toMap().toString());
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", query.toStringJson());
         return response;
     }
 
@@ -73,8 +72,7 @@ public class QueryController {
         response.put("deleted", Boolean.TRUE);
         Properties properties = UtilKafka.createProducer("KafkaProducer");
         UserQuery deleteQuery = new UserQuery(queryId, null, null, null, null, null, null);
-        System.out.println(deleteQuery.toMap().toString());
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", deleteQuery.toMap().toString());
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", deleteQuery.toStringJson());
         return response;
     }
 }

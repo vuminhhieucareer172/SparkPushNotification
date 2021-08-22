@@ -1,8 +1,22 @@
 package models;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Job {
     private int id;
@@ -30,7 +44,8 @@ public class Job {
     private String year_experiences;
     private String position_number;
 
-    public Job() {}
+    public Job() {
+    }
 
     public Job(int id, String application_deadline, String company_address, String company_name, String job_benefits, String job_descriptions, String job_formality, String job_other_info, String job_requirements, String job_trial_period, String salary, String skills, String title, String url, String ages, String education_level, String genders, String domains, String position, String job_attribute, String locations, String time, String year_experiences, String position_number) {
         this.id = id;
@@ -155,8 +170,8 @@ public class Job {
         return position_number;
     }
 
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
+    public String toStringJson() {
+        SortedMap<String, Object> map = new TreeMap<>();
         map.put("id", id);
         map.put("application_deadline", application_deadline);
         map.put("company_address", company_address);
@@ -181,7 +196,9 @@ public class Job {
         map.put("time", time);
         map.put("year_experiences", year_experiences);
         map.put("position_number", position_number);
-        return map;
+        Gson gson = new Gson();
+        Type gsonType = new TypeToken<HashMap<String, Object>>(){}.getType();
+        return gson.toJson(map,gsonType);
     }
 
     @Override

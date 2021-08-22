@@ -42,13 +42,15 @@ public class UtilKafka {
             Producer<String, String> producer = new KafkaProducer<>(props);
             try {
                 List<String> list = eRdd.values().collect();
-                final ProducerRecord<String, String> record = new ProducerRecord<>(
-                        topic, key, list.toString()
-                );
-                RecordMetadata metadata = producer.send(record).get();
-                long elapsedTime = System.currentTimeMillis() - time;
-                System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
-                        record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+                if (!list.isEmpty()) {
+                    final ProducerRecord<String, String> record = new ProducerRecord<>(
+                            topic, key, list.toString()
+                    );
+                    RecordMetadata metadata = producer.send(record).get();
+                    long elapsedTime = System.currentTimeMillis() - time;
+                    System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
+                            record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+                }
             } finally {
                 producer.flush();
                 producer.close();

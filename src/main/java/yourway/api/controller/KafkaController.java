@@ -10,23 +10,30 @@ import settings.Settings;
 import utils.UtilEmail;
 
 import javax.mail.MessagingException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Objects;
 
 @Service
 public class KafkaController {
     @KafkaListener(topics = Settings.TOPIC_USER, groupId = Settings.GROUP_ID_USER)
-    public void listen(@Payload String foo,
+    public void listen(@Payload String message,
                        @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key,
-                       @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
-                       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                        @Header(KafkaHeaders.RECEIVED_TIMESTAMP) long ts
     ) throws MessagingException {
-        System.out.println(topic);
-        System.out.println(foo);
+        System.out.println("---------------------------------");
+        System.out.println(message);
         System.out.println(key);
 
-        UtilEmail.sendAsHtml("tienmetien011111@gmail.com",
-                Email.MAIL_WARNING_TITLE,
-                Email.MAIL_WARNING_CONTENT + foo
-        );
+        Timestamp timestamp = new Timestamp(ts);
+        Date date= new Date(timestamp.getTime());
+        System.out.println(date);
+
+        if (!Objects.equals(message, "")) {
+            UtilEmail.sendAsHtml("tienmetien011111@gmail.com",
+                    Email.MAIL_WARNING_TITLE,
+                    Email.MAIL_WARNING_CONTENT + message
+            );
+        }
     }
 }

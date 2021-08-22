@@ -21,7 +21,7 @@ public class JobController {
         HashMap<String, Object> response = new HashMap<>();
         response.put("status", "ok");
         Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_JOB, String.valueOf(job.getId()), job.toMap().toString());
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_JOB, String.valueOf(job.getId()), job.toStringJson());
         return response;
     }
 }

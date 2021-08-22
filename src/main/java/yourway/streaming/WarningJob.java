@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import models.UserQuery;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -22,6 +20,7 @@ import utils.UtilKafka;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
@@ -49,71 +48,69 @@ public class WarningJob {
                         col("value").cast(StringType), seq
                 )
         );
-
+        data.printSchema();
         // get user query from kafka
         Properties props = UtilKafka.createConsumer("user");
         ConsumerRecord<String, String> mess = UtilKafka.getLatestMessage(props, Settings.TOPIC_USER_QUERY);
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<UserQuery>>() {
         }.getType();
-        System.out.println(mess.value());
-        ArrayList<UserQuery> listUserQuery = gson.fromJson(mess.value(), type);
+        System.out.println(1);
+        if (mess != null) {
+            ArrayList<UserQuery> listUserQuery = gson.fromJson(mess.value(), type);
+            // matching
+            try {
+                UDF6<String, String, String, String, String, String, String> check_matching = (address, age, salary, yearExperiments, eduLevel, jobAttribute) -> {
+                    List<String> user_id = new ArrayList<>();
+                    int min_age = 0;
+                    int max_age = 200;
 
-        // matching
-        try {
-            UDF6<String, String, String, String, String, String, String> check_matching = (address, age, salary, yearExperiments, eduLevel, jobAttribute) -> {
-                List<String> user_id = new ArrayList<>();
-                int min_age = 0;
-                int max_age = 200;
-
-                if (age != null && !age.isEmpty()) {
-                    String[] array_age = age.split(",");
-                    if (array_age.length > 1) {
-                        min_age = Settings.DICT_MIN_AGE.get(array_age[0]);
-                        max_age = Settings.DICT_MAX_AGE.get(array_age[array_age.length - 1]);
-                    }
-                }
-                for (UserQuery query : listUserQuery) {
-                    String[] array_salary = query.getSalary().split("-", 2);
-                    int min_salary = NumberUtils.toInt(array_salary[0], 0);
-                    int max_salary = NumberUtils.toInt(array_salary[1], 1000000000);
-
-                    boolean is_number_salary = true;
-                    if (salary != null && !salary.isEmpty()) {
-                        double salaryDouble = Double.parseDouble(salary);
-                        is_number_salary = salaryDouble >= min_salary && salaryDouble <= max_salary;
-                    }
-                    boolean is_not_none_address = false;
-                    if (address != null && !address.isEmpty()) {
-                        is_not_none_address = address.contains(query.getCompanyAddress());
-                    }
-
-                    try {
-                        int ageInt = query.getAge();
-//                        if (is_not_none_address &&
-//                                min_age <= query.getAge() &&
-//                                query.getAge() <= max_age &&
-//                                is_number_salary &&
-//                                Objects.equals(query.getYearExperiences(), yearExperiments) &&
-//                                Objects.equals(query.getEducationLevel(), eduLevel) &&
-//                                Objects.equals(query.getJobAttribute(), jobAttribute)):
-                        if (is_not_none_address && min_age <= ageInt && ageInt <= max_age && is_number_salary) {
-                            user_id.add(String.valueOf(query.getId()));
+                    if (age != null && !age.isEmpty()) {
+                        String[] array_age = age.split(",");
+                        if (array_age.length > 1) {
+                            min_age = Settings.DICT_MIN_AGE.get(array_age[0]);
+                            max_age = Settings.DICT_MAX_AGE.get(array_age[array_age.length - 1]);
                         }
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
                     }
-                }
-                return String.join(",", user_id);
-            };
-            spark.sqlContext().udf().register("matching", check_matching, DataTypes.StringType);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+                    for (UserQuery query : listUserQuery) {
+                        String[] array_salary = query.getSalary().split("-", 2);
+                        int min_salary = NumberUtils.toInt(array_salary[0], 0);
+                        int max_salary = NumberUtils.toInt(array_salary[1], 1000000000);
+
+                        boolean is_number_salary = true;
+                        if (salary != null && !salary.isEmpty()) {
+                            double salaryDouble = Double.parseDouble(salary);
+                            is_number_salary = salaryDouble >= min_salary && salaryDouble <= max_salary;
+                        }
+                        boolean is_not_none_address = false;
+                        if (address != null && !address.isEmpty()) {
+                            is_not_none_address = address.contains(query.getCompany_address());
+                        }
+
+                        try {
+                            if (is_not_none_address && min_age <= query.getAge() && query.getAge() <= max_age &&
+                                    is_number_salary && Objects.equals(query.getYear_experiences(), yearExperiments) &&
+                                    Objects.equals(query.getEducation_level(), eduLevel) &&
+                                    Objects.equals(query.getJob_attribute(), jobAttribute)) {
+                                user_id.add(String.valueOf(query.getId()));
+                            }
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    return String.join(",", user_id);
+                };
+                spark.sqlContext().udf().register("matching", check_matching, DataTypes.StringType);
+                data = data.withColumn("value",
+                        callUDF("matching",
+                                col("c2"), col("c14"), col("c10"), col("c22"), col("c15"), col("c19")));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            data = data.withColumn("value", lit(null).cast(StringType));
         }
 
-        data = data.withColumn("value",
-                callUDF("matching",
-                        col("c2"), col("c14"), col("c10"), col("c22"), col("c15"), col("c19")));
         data = data.withColumn(
                 "key", col("c0")
         );
