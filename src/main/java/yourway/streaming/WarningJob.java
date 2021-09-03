@@ -84,14 +84,14 @@ public class WarningJob {
                         }
                         boolean is_not_none_address = false;
                         if (address != null && !address.isEmpty()) {
-                            is_not_none_address = address.contains(query.getCompany_address());
+                            is_not_none_address = address.contains(query.getCompanyAddress());
                         }
 
                         try {
                             if (is_not_none_address && min_age <= query.getAge() && query.getAge() <= max_age &&
-                                    is_number_salary && Objects.equals(query.getYear_experiences(), yearExperiments) &&
-                                    Objects.equals(query.getEducation_level(), eduLevel) &&
-                                    Objects.equals(query.getJob_attribute(), jobAttribute)) {
+                                    is_number_salary && Objects.equals(query.getYearExperiences(), yearExperiments) &&
+                                    Objects.equals(query.getEducationLevel(), eduLevel) &&
+                                    Objects.equals(query.getJobAttribute(), jobAttribute)) {
                                 user_id.add(String.valueOf(query.getId()));
                             }
                         } catch (Exception e) {

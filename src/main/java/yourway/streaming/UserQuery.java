@@ -35,7 +35,6 @@ public final class UserQuery {
         JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(2));
         try {
             streamingContext.sparkContext().setLogLevel("ERROR");
-//            streamingContext.sparkContext().broadcast();
             streamingContext.checkpoint(Settings.CHECKPOINT_PATH);
 
             Map<String, Object> kafkaParams = new HashMap<>();

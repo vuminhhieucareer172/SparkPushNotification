@@ -6,37 +6,46 @@ import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class UserQuery implements Serializable {
     private int id;
-    private String company_address;
+    private String companyAddress;
+    private String jobRole;
     private Integer age;
     private String salary;
-    private String year_experiences;
-    private String education_level;
-    private String job_attribute;
+    private Double yearExperiences;
+    private String educationLevel;
+    private String jobAttribute;
+    private List<HashMap<String, String>> contact;
 
     public UserQuery() {
     }
 
-    public UserQuery(int id, String company_address, Integer age, String salary, String year_experiences, String education_level, String job_attribute) {
+    public UserQuery(int id, String companyAddress, String jobRole, Integer age, String salary, Double yearExperiences, String educationLevel, String jobAttribute, List<HashMap<String, String>> contact) {
         this.id = id;
-        this.company_address = company_address;
+        this.companyAddress = companyAddress;
+        this.jobRole = jobRole;
         this.age = age;
         this.salary = salary;
-        this.year_experiences = year_experiences;
-        this.education_level = education_level;
-        this.job_attribute = job_attribute;
+        this.yearExperiences = yearExperiences;
+        this.educationLevel = educationLevel;
+        this.jobAttribute = jobAttribute;
+        this.contact = contact;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getCompany_address() {
-        return company_address;
+    public String getCompanyAddress() {
+        return companyAddress;
+    }
+
+    public String getJobRole() {
+        return jobRole;
     }
 
     public Integer getAge() {
@@ -47,42 +56,51 @@ public class UserQuery implements Serializable {
         return salary;
     }
 
-    public String getYear_experiences() {
-        return year_experiences;
+    public Double getYearExperiences() {
+        return yearExperiences;
     }
 
-    public String getEducation_level() {
-        return education_level;
+    public String getEducationLevel() {
+        return educationLevel;
     }
 
-    public String getJob_attribute() {
-        return job_attribute;
+    public String getJobAttribute() {
+        return jobAttribute;
+    }
+
+    public List<HashMap<String, String>> getContact() {
+        return contact;
     }
 
     public String toStringJson() {
         SortedMap<String, Object> map = new TreeMap<>();
         map.put("id", id);
-        map.put("company_address", company_address);
+        map.put("companyAddress", companyAddress);
+        map.put("jobRole", jobRole);
         map.put("age", age);
         map.put("salary", salary);
-        map.put("year_experiences", year_experiences);
-        map.put("education_level", education_level);
-        map.put("job_attribute", job_attribute);
+        map.put("yearExperiences", yearExperiences);
+        map.put("educationLevel", educationLevel);
+        map.put("jobAttribute", jobAttribute);
+        map.put("contact", contact);
         Gson gson = new Gson();
-        Type gsonType = new TypeToken<HashMap<String, Object>>(){}.getType();
-        return gson.toJson(map,gsonType);
+        Type gsonType = new TypeToken<HashMap<String, Object>>() {
+        }.getType();
+        return gson.toJson(map, gsonType);
     }
 
     @Override
     public String toString() {
         return "UserQuery{" +
                 "id=" + id +
-                ", company_address='" + company_address + '\'' +
+                ", company_address='" + companyAddress + '\'' +
+                ", job_role=" + jobRole +
                 ", age=" + age +
                 ", salary='" + salary + '\'' +
-                ", year_experiences='" + year_experiences + '\'' +
-                ", education_level='" + education_level + '\'' +
-                ", job_attribute='" + job_attribute + '\'' +
+                ", year_experiences='" + yearExperiences + '\'' +
+                ", education_level='" + educationLevel + '\'' +
+                ", job_attribute='" + jobAttribute + '\'' +
+                ", contact='" + contact + '\'' +
                 '}';
     }
 }

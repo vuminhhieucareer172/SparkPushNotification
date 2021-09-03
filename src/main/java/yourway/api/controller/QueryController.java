@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import models.UserQuery;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import settings.Settings;
@@ -16,13 +17,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+@CrossOrigin(maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(value = "/api/v1", produces = "application/json;charset=UTF-8")
 public class QueryController {
 
     private ArrayList<UserQuery> getLatestMessageQuery() {
         Properties propsConsumerQuery = UtilKafka.createConsumer("userQuery");
         ConsumerRecord<String, String> latestMessage = UtilKafka.getLatestMessage(propsConsumerQuery, Settings.TOPIC_USER_QUERY);
+        System.out.println(latestMessage.value());
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<UserQuery>>() {
         }.getType();
@@ -30,11 +33,8 @@ public class QueryController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, Object>> getDefault() {
-        HashMap<String, Object> response = new HashMap<>();
-        response.put("status", "ok");
-        response.put("message", "Hello from Yourway!");
-        return ResponseEntity.ok().body(response);
+    public ResponseEntity<String> getDefault() {
+        return new ResponseEntity<>("Hello from Yourway!", HttpStatus.OK);
     }
 
     @GetMapping("/query")
@@ -43,27 +43,25 @@ public class QueryController {
         return ResponseEntity.ok().body(allQuery);
     }
 
-    @GetMapping("/query/{queryId}")
-    public ResponseEntity<UserQuery> getQuery(@PathVariable(value = "queryId") int queryId) {
+    @GetMapping("/query/{userId}")
+    public ResponseEntity<ArrayList<UserQuery>> getQuery(@PathVariable(value = "userId") int userId) {
         ArrayList<UserQuery> allQuery = getLatestMessageQuery();
-        UserQuery response = null;
+        System.out.println(allQuery);
+        ArrayList<UserQuery> response = new ArrayList<>();
         for (UserQuery userQuery : allQuery)
-            if (userQuery.getId() == queryId) {
-                response = userQuery;
+            if (userQuery.getId() == userId) {
+                response.add(userQuery);
             }
-        if (response != null) {
-            return ResponseEntity.ok().body(response);
-        }
-        return ResponseEntity.ok().body(null);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping("/query")
-    public Map<String, Object> createUser(@Valid @RequestBody UserQuery query) throws Exception {
+    public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody UserQuery query) throws Exception {
         HashMap<String, Object> response = new HashMap<>();
         response.put("status", "ok");
         Properties properties = UtilKafka.createProducer("KafkaProducer");
         UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", query.toStringJson());
-        return response;
+        return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/query/{queryId}")
@@ -71,7 +69,7 @@ public class QueryController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
         Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UserQuery deleteQuery = new UserQuery(queryId, null, null, null, null, null, null);
+        UserQuery deleteQuery = new UserQuery(queryId, null, null, null, null, null, null, null, null);
         UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, "setQuery", deleteQuery.toStringJson());
         return response;
     }

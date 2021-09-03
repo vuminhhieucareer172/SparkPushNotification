@@ -1,10 +1,7 @@
 package yourway.api.controller;
 
 import models.Job;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import settings.Settings;
 import utils.UtilKafka;
 
@@ -13,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1")
 public class JobController {
