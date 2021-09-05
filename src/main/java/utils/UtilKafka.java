@@ -1,5 +1,8 @@
 package utils;
 
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import models.JsonQuery;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -11,6 +14,7 @@ import settings.Settings;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,15 +40,20 @@ public class UtilKafka {
         return props;
     }
 
-    public static void sendRDDToKafka(Properties props, String topic, String key, JavaPairDStream<String, String> rdd) {
+    public static void sendRDDToKafka(Properties props, String topic, String key, JavaPairDStream<String, JsonQuery> rdd) {
         rdd.foreachRDD(eRdd -> {
+            Gson gson = new Gson();
             long time = System.currentTimeMillis();
             Producer<String, String> producer = new KafkaProducer<>(props);
             try {
-                List<String> list = eRdd.values().collect();
+                List<JsonQuery> list = eRdd.values().collect();
+                HashMap<String, Object> map = new HashMap<>();
+                for (JsonQuery e : list)
+                    map.put(e.entrySet().iterator().next().getKey(), e.entrySet().iterator().next().getValue());
+
                 if (!list.isEmpty()) {
                     final ProducerRecord<String, String> record = new ProducerRecord<>(
-                            topic, key, list.toString()
+                            topic, key, gson.toJson(map)
                     );
                     RecordMetadata metadata = producer.send(record).get();
                     long elapsedTime = System.currentTimeMillis() - time;

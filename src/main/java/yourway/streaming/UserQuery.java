@@ -1,5 +1,8 @@
 package yourway.streaming;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import models.JsonQuery;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -17,20 +20,46 @@ import scala.Tuple2;
 import settings.Settings;
 import utils.UtilKafka;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public final class UserQuery {
     public static void main(String[] args) throws Exception {
-        Function2<List<String>, Optional<String>, Optional<String>> updateFunction =
-                (maps, hashMapOptional) -> {
-                    String out;
-                    if (hashMapOptional.isPresent()) {
-                        out = hashMapOptional.get();
+        Function2<List<JsonQuery>, Optional<JsonQuery>, Optional<JsonQuery>> updateFunction = (maps, hashMapOptional) -> {
+            JsonQuery data;
+            if (hashMapOptional.isPresent()) {
+                data = hashMapOptional.get();
+            } else {
+                data = new JsonQuery();
+            }
+
+            // insert/update/delete query
+            for (JsonQuery newQuery : maps) {
+                HashMap<String, HashMap<String, Object>> query = newQuery.entrySet().iterator().next().getValue();
+                String userId = newQuery.entrySet().iterator().next().getKey();
+                String queryId = query.entrySet().iterator().next().getKey();
+                HashMap<String, Object> infoQuery = query.entrySet().iterator().next().getValue();
+                if (data.keySet().size() == 0) {
+                    data.put(userId, new HashMap<>());
+                }
+                if (Objects.equals(queryId, userId)) {
+                    // insert
+                    String key = Settings.KAFKA_URI + "_" + System.currentTimeMillis() + "_" + Math.random();
+                    data.get(userId).put(key, infoQuery);
+                    System.out.println(key);
+                } else {
+                    HashMap<String, Object> subQuery = query.get(queryId);
+                    if (subQuery.get("isDelete") == Boolean.TRUE) {
+                        // delete
+                        data.get(userId).remove(queryId);
                     } else {
-                        out = maps.get(maps.size() - 1);
+                        // update
+                        data.get(userId).put(queryId, infoQuery);
                     }
-                    return Optional.of(out);
-                };
+                }
+            }
+            return Optional.of(data);
+        };
         SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("Storing User Query");
         JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(2));
         try {
@@ -48,11 +77,13 @@ public final class UserQuery {
                     ConsumerStrategies.Subscribe(Collections.singleton(Settings.TOPIC_SET_USER_QUERY),
                             kafkaParams)
             );
+            Type type = new TypeToken<JsonQuery>() {
+            }.getType();
             Properties props = UtilKafka.createProducer("KafkaProducer");
-            JavaPairDStream<String, String> results = inputKafka.mapToPair(
-                    record -> new Tuple2<>(record.key(), record.value())
+            JavaPairDStream<String, JsonQuery> results = inputKafka.mapToPair(
+                    record -> new Tuple2<>(record.key(), (new Gson()).fromJson(record.value(), type))
             );
-            JavaPairDStream<String, String> newState = results.updateStateByKey(updateFunction);
+            JavaPairDStream<String, JsonQuery> newState = results.updateStateByKey(updateFunction);
 
             newState.print();
 

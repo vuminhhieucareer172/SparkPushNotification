@@ -92,7 +92,7 @@ public class WarningJob {
                                     is_number_salary && Objects.equals(query.getYearExperiences(), yearExperiments) &&
                                     Objects.equals(query.getEducationLevel(), eduLevel) &&
                                     Objects.equals(query.getJobAttribute(), jobAttribute)) {
-                                user_id.add(String.valueOf(query.getId()));
+                                user_id.add(String.valueOf(query.getUserId()));
                             }
                         } catch (Exception e) {
                             System.out.println(e.getMessage());

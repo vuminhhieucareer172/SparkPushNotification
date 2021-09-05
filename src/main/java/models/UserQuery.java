@@ -1,31 +1,51 @@
 package models;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import org.apache.spark.sql.sources.In;
+import scala.Int;
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class UserQuery implements Serializable {
-    private int id;
-    private String companyAddress;
-    private String jobRole;
-    private Integer age;
-    private String salary;
-    private Double yearExperiences;
-    private String educationLevel;
-    private String jobAttribute;
-    private List<HashMap<String, String>> contact;
+    private final int userId;
+    private final String name;
+    private final String companyAddress;
+    private final String jobRole;
+    private final Integer age;
+    private final String salary;
+    private final Double yearExperiences;
+    private final String educationLevel;
+    private final String jobAttribute;
+    private final Boolean isDelete;
+    private final List<HashMap<String, String>> contact;
 
-    public UserQuery() {
+    public UserQuery(int userId) {
+        this.userId = userId;
+        this.isDelete = Boolean.TRUE;
+        this.name = null;
+        this.companyAddress = null;
+        this.jobRole = null;
+        this.age = null;
+        this.salary = null;
+        this.yearExperiences = null;
+        this.educationLevel = null;
+        this.jobAttribute = null;
+        this.contact = null;
     }
 
-    public UserQuery(int id, String companyAddress, String jobRole, Integer age, String salary, Double yearExperiences, String educationLevel, String jobAttribute, List<HashMap<String, String>> contact) {
-        this.id = id;
+    public UserQuery(int userId,
+                     String name,
+                     String companyAddress,
+                     String jobRole,
+                     Integer age,
+                     String salary,
+                     Double yearExperiences,
+                     String educationLevel,
+                     String jobAttribute,
+                     List<HashMap<String, String>> contact) {
+        this.userId = userId;
+        this.name = name;
         this.companyAddress = companyAddress;
         this.jobRole = jobRole;
         this.age = age;
@@ -33,11 +53,16 @@ public class UserQuery implements Serializable {
         this.yearExperiences = yearExperiences;
         this.educationLevel = educationLevel;
         this.jobAttribute = jobAttribute;
+        this.isDelete = Boolean.FALSE;
         this.contact = contact;
     }
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getCompanyAddress() {
@@ -72,9 +97,24 @@ public class UserQuery implements Serializable {
         return contact;
     }
 
-    public String toStringJson() {
-        SortedMap<String, Object> map = new TreeMap<>();
-        map.put("id", id);
+    public static UserQuery fromJson(HashMap<String, Object> map) {
+        assert map.containsKey("userId") && map.containsKey("jobRole");
+        return new UserQuery((int) map.get("userId"),
+                (String) map.get("name"),
+                (String) map.get("companyAddress"),
+                (String) map.get("jobRole"),
+                (Integer) map.get("age"),
+                (String) map.get("salary"),
+                Double.valueOf(map.get("yearExperiences").toString()),
+                (String) map.get("educationLevel"),
+                (String) map.get("jobAttribute"),
+                (List<HashMap<String, String>>) map.get("contact"));
+    }
+
+    public HashMap<String, Object> toJson() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("name", name);
         map.put("companyAddress", companyAddress);
         map.put("jobRole", jobRole);
         map.put("age", age);
@@ -82,17 +122,16 @@ public class UserQuery implements Serializable {
         map.put("yearExperiences", yearExperiences);
         map.put("educationLevel", educationLevel);
         map.put("jobAttribute", jobAttribute);
+        map.put("isDelete", isDelete);
         map.put("contact", contact);
-        Gson gson = new Gson();
-        Type gsonType = new TypeToken<HashMap<String, Object>>() {
-        }.getType();
-        return gson.toJson(map, gsonType);
+        return map;
     }
 
     @Override
     public String toString() {
         return "UserQuery{" +
-                "id=" + id +
+                "userId=" + userId +
+                ", name='" + name + '\'' +
                 ", company_address='" + companyAddress + '\'' +
                 ", job_role=" + jobRole +
                 ", age=" + age +
@@ -100,6 +139,7 @@ public class UserQuery implements Serializable {
                 ", year_experiences='" + yearExperiences + '\'' +
                 ", education_level='" + educationLevel + '\'' +
                 ", job_attribute='" + jobAttribute + '\'' +
+                ", is_delete='" + isDelete + '\'' +
                 ", contact='" + contact + '\'' +
                 '}';
     }
