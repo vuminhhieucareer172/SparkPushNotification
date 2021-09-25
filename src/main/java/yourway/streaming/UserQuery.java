@@ -19,13 +19,11 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
 import scala.Tuple2;
-import settings.Database;
 import settings.Settings;
 import utils.UtilKafka;
 import yourway.streaming.util.Util;
 
 import java.lang.reflect.Type;
-import java.sql.*;
 import java.util.*;
 
 public final class UserQuery {
