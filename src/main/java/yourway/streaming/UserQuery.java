@@ -7,9 +7,11 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -17,15 +19,18 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
 import scala.Tuple2;
+import settings.Database;
 import settings.Settings;
 import utils.UtilKafka;
+import yourway.streaming.util.Util;
 
 import java.lang.reflect.Type;
+import java.sql.*;
 import java.util.*;
 
 public final class UserQuery {
-    public static void main(String[] args) throws Exception {
-        Function2<List<JsonQuery>, Optional<JsonQuery>, Optional<JsonQuery>> updateFunction = (maps, hashMapOptional) -> {
+    public static void main(String[] args) {
+        Function2<List<JsonQuery>, Optional<JsonQuery>, Optional<JsonQuery>> updateFunction = (List<JsonQuery> maps, Optional<JsonQuery> hashMapOptional) -> {
             JsonQuery data;
             if (hashMapOptional.isPresent()) {
                 data = hashMapOptional.get();
@@ -42,26 +47,35 @@ public final class UserQuery {
                 if (data.keySet().size() == 0) {
                     data.put(userId, new HashMap<>());
                 }
-                if (Objects.equals(queryId, userId)) {
-                    // insert
-                    String key = Settings.KAFKA_URI + "_" + System.currentTimeMillis() + "_" + Math.random();
-                    data.get(userId).put(key, infoQuery);
-                    System.out.println(key);
+                HashMap<String, Object> subQuery = query.get(queryId);
+                if (subQuery.get("isDelete") == Boolean.TRUE) {
+                    // delete
+                    data.get(userId).remove(queryId);
                 } else {
-                    HashMap<String, Object> subQuery = query.get(queryId);
-                    if (subQuery.get("isDelete") == Boolean.TRUE) {
-                        // delete
-                        data.get(userId).remove(queryId);
-                    } else {
-                        // update
-                        data.get(userId).put(queryId, infoQuery);
-                    }
+                    // update
+                    data.get(userId).put(queryId, infoQuery);
                 }
             }
             return Optional.of(data);
         };
+
+        JsonQuery queries = Util.loadDataFromMySQL();
+
+        ArrayList<JsonQuery> list = new ArrayList<>();
+        queries.forEach((k, v) -> {
+            JsonQuery a = new JsonQuery();
+            a.put(k, v);
+            list.add(a);
+        });
         SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("Storing User Query");
         JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Durations.seconds(2));
+        Queue<JavaRDD<JsonQuery>> rddQueue = new LinkedList<>();
+
+        rddQueue.add(streamingContext.sparkContext().parallelize(list));
+
+        JavaDStream<JsonQuery> dStream = streamingContext.queueStream(rddQueue);
+        JavaPairDStream<String, JsonQuery> initialData = dStream.mapToPair(
+                record -> new Tuple2<>(String.valueOf(record.entrySet().iterator().next().getKey()), record));
         try {
             streamingContext.sparkContext().setLogLevel("ERROR");
             streamingContext.checkpoint(Settings.CHECKPOINT_PATH);
@@ -83,6 +97,8 @@ public final class UserQuery {
             JavaPairDStream<String, JsonQuery> results = inputKafka.mapToPair(
                     record -> new Tuple2<>(record.key(), (new Gson()).fromJson(record.value(), type))
             );
+            results = results.union(initialData);
+            results.print();
             JavaPairDStream<String, JsonQuery> newState = results.updateStateByKey(updateFunction);
 
             newState.print();
@@ -95,7 +111,7 @@ public final class UserQuery {
             streamingContext.close();
             streamingContext.sparkContext().close();
             System.out.println("finish program!");
-        } catch (IllegalStateException | NoSuchMethodError e) {
+        } catch (IllegalStateException | NoSuchMethodError | InterruptedException e) {
             System.out.println(e.getMessage());
         } finally {
             streamingContext.close();

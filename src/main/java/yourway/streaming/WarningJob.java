@@ -55,7 +55,6 @@ public class WarningJob {
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<UserQuery>>() {
         }.getType();
-        System.out.println(1);
         if (mess != null) {
             ArrayList<UserQuery> listUserQuery = gson.fromJson(mess.value(), type);
             // matching

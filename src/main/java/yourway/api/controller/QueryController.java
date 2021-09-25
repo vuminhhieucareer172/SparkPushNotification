@@ -1,34 +1,30 @@
 package yourway.api.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import models.JsonQuery;
 import models.UserQuery;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import settings.Settings;
 import utils.UtilKafka;
+import yourway.api.repository.UserQueryRepository;
 
 import javax.validation.Valid;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 @CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping(value = "/api/v1", produces = "application/json;charset=UTF-8")
 public class QueryController {
-    private final Gson gson = new Gson();
+    private final Gson gson;
+    private final UserQueryRepository userQueryRepository;
 
-    private JsonQuery getLatestMessageQuery() {
-        Properties propsConsumerQuery = UtilKafka.createConsumer("userQuery");
-        ConsumerRecord<String, String> latestMessage = UtilKafka.getLatestMessage(propsConsumerQuery, Settings.TOPIC_USER_QUERY);
-        System.out.println(latestMessage.value());
-        Gson gson = new Gson();
-        Type type = new TypeToken<JsonQuery>() {
-        }.getType();
-        return gson.fromJson(latestMessage.value(), type);
+    public QueryController(UserQueryRepository userQueryRepository) {
+        this.userQueryRepository = userQueryRepository;
+        this.gson = new Gson();
     }
 
     @GetMapping("/")
@@ -37,51 +33,65 @@ public class QueryController {
     }
 
     @GetMapping("/query")
-    public ResponseEntity<JsonQuery> getAllQuery() {
-        JsonQuery allQuery = getLatestMessageQuery();
-        return ResponseEntity.ok().body(allQuery);
+    public Iterable<UserQuery> getAllQuery() {
+        try {
+            return userQueryRepository.findAll();
+        } catch (java.lang.NullPointerException e) {
+            return null;
+        }
     }
 
     @GetMapping("/query/{userId}")
-    public ResponseEntity<HashMap<String, HashMap<String, Object>>> getQuery(@PathVariable(value = "userId") int userId) {
-        JsonQuery allQuery = getLatestMessageQuery();
-        System.out.println(allQuery);
-        if (!allQuery.containsKey(String.valueOf(userId))) {
-            HashMap<String, HashMap<String, Object>> result = new HashMap<>();
-            return ResponseEntity.ok().body(result);
+    public ResponseEntity<List<UserQuery>> getQuery(@PathVariable(value = "userId") Integer userId) {
+        try {
+            List<UserQuery> response = userQueryRepository.findAllByUserId(userId);
+            return ResponseEntity.ok().body(response);
+        } catch (java.lang.NullPointerException e) {
+            return null;
         }
-        HashMap<String, HashMap<String, Object>> response = allQuery.get(String.valueOf(userId));
-        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping("/query")
     public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody HashMap<String, Object> query) throws Exception {
+        // process input
         HashMap<String, HashMap<String, HashMap<String, Object>>> data = new HashMap<>();
         HashMap<String, HashMap<String, Object>> infoQuery = new HashMap<>();
-        System.out.println(query);
         UserQuery userQuery = UserQuery.fromJson(query);
-        infoQuery.put(String.valueOf(userQuery.getUserId()), userQuery.toJson());
-        data.put(String.valueOf(userQuery.getUserId()), infoQuery);
+
+        // save to database
+        UserQuery newQuery = userQueryRepository.save(userQuery);
+
+        // save to kafka
+        infoQuery.put(String.valueOf(newQuery.getUserId()), newQuery.toJson());
+        data.put(String.valueOf(newQuery.getUserId()), infoQuery);
         Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(userQuery.getUserId()),
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(newQuery.getUserId()),
                 gson.toJson(data));
 
+        // return status
         HashMap<String, Object> response = new HashMap<>();
         response.put("status", "ok");
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/query/{userId}/{queryId}")
-    public Map<String, Boolean> deleteQuery(@PathVariable(value = "userId") int userId,
-                                            @PathVariable(value = "queryId") String queryId) throws Exception {
-        HashMap<String, HashMap<String, Object>> data = new HashMap<>();
-        HashMap<String, Object> temp = new HashMap<>();
-        UserQuery deleteQuery = new UserQuery(userId);
+    public Map<String, Boolean> deleteQuery(@PathVariable(value = "userId") Integer userId,
+                                            @PathVariable(value = "queryId") Integer queryId) throws Exception {
+        // process input
+        HashMap<Integer, HashMap<Integer, Object>> data = new HashMap<>();
+        HashMap<Integer, Object> temp = new HashMap<>();
+        UserQuery deleteQuery = userQueryRepository.findByQueryId(queryId);
+
+        // send message delete to kafka
         temp.put(queryId, deleteQuery.toJson());
-        data.put(String.valueOf(userId), temp);
+        data.put(userId, temp);
         Properties properties = UtilKafka.createProducer("KafkaProducer");
         UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(userId), gson.toJson(data));
 
+        // delete in database
+        userQueryRepository.delete(deleteQuery);
+
+        // return status
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
         return response;

@@ -1,40 +1,32 @@
 package models;
 
-import org.apache.spark.sql.sources.In;
-import scala.Int;
+import com.google.gson.Gson;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 
+@Entity
 public class UserQuery implements Serializable {
-    private final int userId;
-    private final String name;
-    private final String companyAddress;
-    private final String jobRole;
-    private final Integer age;
-    private final String salary;
-    private final Double yearExperiences;
-    private final String educationLevel;
-    private final String jobAttribute;
-    private final Boolean isDelete;
-    private final List<HashMap<String, String>> contact;
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Integer queryId;
+    private Integer userId;
+    private String name;
+    private String companyAddress;
+    private String jobRole;
+    private Integer age;
+    private String salary;
+    private Double yearExperiences;
+    private String educationLevel;
+    private String jobAttribute;
+    private Boolean isDelete;
+    private String contact;
 
-    public UserQuery(int userId) {
-        this.userId = userId;
-        this.isDelete = Boolean.TRUE;
-        this.name = null;
-        this.companyAddress = null;
-        this.jobRole = null;
-        this.age = null;
-        this.salary = null;
-        this.yearExperiences = null;
-        this.educationLevel = null;
-        this.jobAttribute = null;
-        this.contact = null;
-    }
-
-    public UserQuery(int userId,
+    public UserQuery(Integer userId,
                      String name,
                      String companyAddress,
                      String jobRole,
@@ -43,7 +35,7 @@ public class UserQuery implements Serializable {
                      Double yearExperiences,
                      String educationLevel,
                      String jobAttribute,
-                     List<HashMap<String, String>> contact) {
+                     String contact) {
         this.userId = userId;
         this.name = name;
         this.companyAddress = companyAddress;
@@ -57,7 +49,15 @@ public class UserQuery implements Serializable {
         this.contact = contact;
     }
 
-    public int getUserId() {
+    public UserQuery() {
+
+    }
+
+    public Integer getQueryId() {
+        return queryId;
+    }
+
+    public Integer getUserId() {
         return userId;
     }
 
@@ -93,12 +93,13 @@ public class UserQuery implements Serializable {
         return jobAttribute;
     }
 
-    public List<HashMap<String, String>> getContact() {
+    public String getContact() {
         return contact;
     }
 
     public static UserQuery fromJson(HashMap<String, Object> map) {
         assert map.containsKey("userId") && map.containsKey("jobRole");
+        Gson gson = new Gson();
         return new UserQuery((int) map.get("userId"),
                 (String) map.get("name"),
                 (String) map.get("companyAddress"),
@@ -108,11 +109,12 @@ public class UserQuery implements Serializable {
                 Double.valueOf(map.get("yearExperiences").toString()),
                 (String) map.get("educationLevel"),
                 (String) map.get("jobAttribute"),
-                (List<HashMap<String, String>>) map.get("contact"));
+                gson.toJson(map.get("contact")));
     }
 
     public HashMap<String, Object> toJson() {
         HashMap<String, Object> map = new HashMap<>();
+        map.put("queryId", queryId);
         map.put("userId", userId);
         map.put("name", name);
         map.put("companyAddress", companyAddress);
@@ -130,16 +132,17 @@ public class UserQuery implements Serializable {
     @Override
     public String toString() {
         return "UserQuery{" +
-                "userId=" + userId +
+                "queryId='" + queryId +
+                ", userId=" + userId +
                 ", name='" + name + '\'' +
-                ", company_address='" + companyAddress + '\'' +
-                ", job_role=" + jobRole +
+                ", companyAddress='" + companyAddress + '\'' +
+                ", jobRole=" + jobRole +
                 ", age=" + age +
                 ", salary='" + salary + '\'' +
-                ", year_experiences='" + yearExperiences + '\'' +
-                ", education_level='" + educationLevel + '\'' +
-                ", job_attribute='" + jobAttribute + '\'' +
-                ", is_delete='" + isDelete + '\'' +
+                ", yearExperiences='" + yearExperiences + '\'' +
+                ", educationLevel='" + educationLevel + '\'' +
+                ", jobAttribute='" + jobAttribute + '\'' +
+                ", isDelete='" + isDelete + '\'' +
                 ", contact='" + contact + '\'' +
                 '}';
     }
