@@ -2,12 +2,12 @@
 # This file will be used at compile time to generate Spring-MVC endpoint stubs using openapi-generator
 openapi: '3.0.1'
 info:
-  title: 'Yourwary_job_alert'
+  title: 'Yourway_job_alert'
   version: 0.0.1
 servers:
-  - url: http://localhost:8080/api
+  - url: http://localhost:8090/api
     description: Development server
-  - url: https://localhost:8080/api
+  - url: https://localhost:8090/api
     description: Development server with TLS Profile
 paths: {}
 components:

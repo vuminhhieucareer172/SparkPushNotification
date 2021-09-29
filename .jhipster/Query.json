@@ -1,0 +1,73 @@
+{
+  "name": "Query",
+  "fields": [
+    {
+      "fieldName": "userId",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "50"
+    },
+    {
+      "fieldName": "typeQuery",
+      "fieldType": "TypeQuery",
+      "fieldValues": "NORMAL,QUERY,HR"
+    },
+    {
+      "fieldName": "companyAddress",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "jobRole",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "age",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "salary",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "yearExperiences",
+      "fieldType": "Float"
+    },
+    {
+      "fieldName": "educationLevel",
+      "fieldType": "EducationLevel",
+      "fieldValues": "POSTGRADUATE,UNIVERSITY,COLLEGE,VOCATIONALIZATION"
+    },
+    {
+      "fieldName": "jobAttribute",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "contact",
+      "fieldType": "byte[]",
+      "fieldTypeBlobContent": "text"
+    },
+    {
+      "fieldName": "groupBy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "slideWindow",
+      "fieldType": "Duration"
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "query",
+  "dto": "no",
+  "pagination": "pagination",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": "*",
+  "changelogDate": "20210929150045"
+}

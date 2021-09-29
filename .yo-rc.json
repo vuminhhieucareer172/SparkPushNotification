@@ -1,7 +1,7 @@
 {
   "generator-jhipster": {
     "applicationType": "monolith",
-    "baseName": "Yourwary_job_alert",
+    "baseName": "Yourway_job_alert",
     "jhipsterVersion": "7.2.0",
     "skipClient": true,
     "skipServer": false,
@@ -20,7 +20,7 @@
     "reactive": false,
     "authenticationType": "jwt",
     "packageName": "com.yourway.alert",
-    "serverPort": "8080",
+    "serverPort": "8090",
     "cacheProvider": "no",
     "enableHibernateCache": false,
     "databaseType": "sql",
@@ -42,6 +42,8 @@
     "clientThemeVariant": "",
     "withAdminUi": true,
     "enableGradleEnterprise": false,
-    "languages": ["en", "fr"]
+    "languages": ["en", "fr"],
+    "entities": ["Query"],
+    "lastLiquibaseTimestamp": 1632927645000
   }
 }

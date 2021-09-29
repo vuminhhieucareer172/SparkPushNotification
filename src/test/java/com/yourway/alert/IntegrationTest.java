@@ -1,6 +1,6 @@
 package com.yourway.alert;
 
-import com.yourway.alert.YourwaryJobAlertApp;
+import com.yourway.alert.YourwayJobAlertApp;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest(classes = YourwaryJobAlertApp.class)
+@SpringBootTest(classes = YourwayJobAlertApp.class)
 public @interface IntegrationTest {
 }

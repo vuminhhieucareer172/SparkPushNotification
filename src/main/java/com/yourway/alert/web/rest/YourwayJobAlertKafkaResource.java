@@ -20,16 +20,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
-@RequestMapping("/api/yourwary-job-alert-kafka")
-public class YourwaryJobAlertKafkaResource {
+@RequestMapping("/api/Yourway-job-alert-kafka")
+public class YourwayJobAlertKafkaResource {
 
-    private final Logger log = LoggerFactory.getLogger(YourwaryJobAlertKafkaResource.class);
+    private final Logger log = LoggerFactory.getLogger(YourwayJobAlertKafkaResource.class);
 
     private final KafkaProperties kafkaProperties;
     private KafkaProducer<String, String> producer;
     private ExecutorService sseExecutorService = Executors.newCachedThreadPool();
 
-    public YourwaryJobAlertKafkaResource(KafkaProperties kafkaProperties) {
+    public YourwayJobAlertKafkaResource(KafkaProperties kafkaProperties) {
         this.kafkaProperties = kafkaProperties;
         this.producer = new KafkaProducer<>(kafkaProperties.getProducerProps());
     }

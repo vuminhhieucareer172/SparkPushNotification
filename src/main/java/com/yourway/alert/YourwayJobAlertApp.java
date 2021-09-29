@@ -20,18 +20,18 @@ import tech.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
-public class YourwaryJobAlertApp {
+public class YourwayJobAlertApp {
 
-    private static final Logger log = LoggerFactory.getLogger(YourwaryJobAlertApp.class);
+    private static final Logger log = LoggerFactory.getLogger(YourwayJobAlertApp.class);
 
     private final Environment env;
 
-    public YourwaryJobAlertApp(Environment env) {
+    public YourwayJobAlertApp(Environment env) {
         this.env = env;
     }
 
     /**
-     * Initializes Yourwary_job_alert.
+     * Initializes Yourway_job_alert.
      * <p>
      * Spring profiles can be configured with a program argument --spring.profiles.active=your-active-profile
      * <p>
@@ -64,7 +64,7 @@ public class YourwaryJobAlertApp {
      * @param args the command line arguments.
      */
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(YourwaryJobAlertApp.class);
+        SpringApplication app = new SpringApplication(YourwayJobAlertApp.class);
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();
         logApplicationStartup(env);

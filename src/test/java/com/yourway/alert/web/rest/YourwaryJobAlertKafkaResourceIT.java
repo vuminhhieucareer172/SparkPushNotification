@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-class YourwaryJobAlertKafkaResourceIT {
+class YourwayJobAlertKafkaResourceIT {
 
     private static boolean started = false;
     private static KafkaContainer kafkaContainer;
@@ -58,7 +58,7 @@ class YourwaryJobAlertKafkaResourceIT {
         consumerProps.put("client.id", "default-client");
         kafkaProperties.setConsumer(consumerProps);
 
-        YourwaryJobAlertKafkaResource kafkaResource = new YourwaryJobAlertKafkaResource(kafkaProperties);
+        YourwayJobAlertKafkaResource kafkaResource = new YourwayJobAlertKafkaResource(kafkaProperties);
 
         restMockMvc = MockMvcBuilders.standaloneSetup(kafkaResource).build();
     }
@@ -66,7 +66,7 @@ class YourwaryJobAlertKafkaResourceIT {
     @Test
     void producesMessages() throws Exception {
         restMockMvc
-            .perform(post("/api/yourwary-job-alert-kafka/publish/topic-produce?message=value-produce"))
+            .perform(post("/api/Yourway-job-alert-kafka/publish/topic-produce?message=value-produce"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
@@ -88,7 +88,7 @@ class YourwaryJobAlertKafkaResourceIT {
         producer.send(new ProducerRecord<>("topic-consume", "value-consume"));
 
         MvcResult mvcResult = restMockMvc
-            .perform(get("/api/yourwary-job-alert-kafka/consume?topic=topic-consume"))
+            .perform(get("/api/Yourway-job-alert-kafka/consume?topic=topic-consume"))
             .andExpect(status().isOk())
             .andExpect(request().asyncStarted())
             .andReturn();

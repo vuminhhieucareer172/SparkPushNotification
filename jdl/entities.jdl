@@ -1,0 +1,30 @@
+enum TypeQuery {
+	NORMAL
+    QUERY
+    HR
+}
+
+enum EducationLevel {
+    POSTGRADUATE
+	UNIVERSITY
+    COLLEGE
+    VOCATIONALIZATION
+}
+
+entity Query {
+	userId Integer,
+	name String maxlength(50),
+	typeQuery TypeQuery,
+	companyAddress String,
+	jobRole String,
+	age Integer,
+	salary Long,
+	yearExperiences Float,
+    educationLevel EducationLevel,
+    jobAttribute String,
+    contact TextBlob,
+    groupBy String,
+    slideWindow Duration,
+}
+
+paginate Query with pagination

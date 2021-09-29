@@ -68,7 +68,7 @@ spring:
   autoconfigure:
     exclude: org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration
   application:
-    name: Yourwary_job_alert
+    name: Yourway_job_alert
   profiles:
     # The commented value for `active` can be replaced with valid Spring profiles to load.
     # Otherwise, it will be filled in by maven when building the JAR file
@@ -112,13 +112,13 @@ spring:
     allow-bean-definition-overriding: true
   task:
     execution:
-      thread-name-prefix: yourwary-job-alert-task-
+      thread-name-prefix: Yourway-job-alert-task-
       pool:
         core-size: 2
         max-size: 50
         queue-capacity: 10000
     scheduling:
-      thread-name-prefix: yourwary-job-alert-scheduling-
+      thread-name-prefix: Yourway-job-alert-scheduling-
       pool:
         size: 2
   thymeleaf:
@@ -146,7 +146,7 @@ info:
 
 jhipster:
   clientApp:
-    name: 'yourwaryJobAlertApp'
+    name: 'YourwayJobAlertApp'
   # By default CORS is disabled. Uncomment to enable.
   # cors:
   #   allowed-origins: "http://localhost:8100,http://localhost:9000"
@@ -156,12 +156,12 @@ jhipster:
   #   allow-credentials: true
   #   max-age: 1800
   mail:
-    from: Yourwary_job_alert@localhost
+    from: Yourway_job_alert@localhost
   api-docs:
     default-include-pattern: ${server.servlet.context-path:}/api/.*
     management-include-pattern: ${server.servlet.context-path:}/management/.*
-    title: Yourwary_job_alert API
-    description: Yourwary_job_alert API documentation
+    title: Yourway_job_alert API
+    description: Yourway_job_alert API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:
@@ -176,7 +176,7 @@ kafka:
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: yourwary-job-alert
+    group.id: Yourway-job-alert
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer
