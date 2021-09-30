@@ -1,6 +1,7 @@
 package com.yourway.alert.web.rest;
 
 import com.google.gson.Gson;
+import com.mysql.cj.log.Log;
 import com.yourway.alert.domain.Query;
 import com.yourway.alert.repository.QueryRepository;
 import com.yourway.alert.streaming.settings.Settings;
@@ -31,6 +32,7 @@ import tech.jhipster.web.util.ResponseUtil;
 /**
  * REST controller for managing {@link com.yourway.alert.domain.Query}.
  */
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api")
 @Transactional
@@ -66,6 +68,12 @@ public class QueryResource {
             throw new BadRequestAlertException("A new query cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Query result = queryRepository.save(query);
+
+        // save to kafka
+        Properties properties = UtilKafka.createProducer("KafkaProducer");
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(result.getId()),
+            gson.toJson(result.toJson()));
+
         return ResponseEntity
             .created(new URI("/api/queries/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
@@ -80,11 +88,9 @@ public class QueryResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated query,
      * or with status {@code 400 (Bad Request)} if the query is not valid,
      * or with status {@code 500 (Internal Server Error)} if the query couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/queries/{id}")
-    public ResponseEntity<Query> updateQuery(@PathVariable(value = "id", required = false) final Long id, @Valid @RequestBody Query query)
-        throws URISyntaxException {
+    public ResponseEntity<Query> updateQuery(@PathVariable(value = "id", required = false) final Long id, @Valid @RequestBody Query query) {
         log.debug("REST request to update Query : {}, {}", id, query);
         if (query.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -113,13 +119,12 @@ public class QueryResource {
      * or with status {@code 400 (Bad Request)} if the query is not valid,
      * or with status {@code 404 (Not Found)} if the query is not found,
      * or with status {@code 500 (Internal Server Error)} if the query couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/queries/{id}", consumes = {"application/json", "application/merge-patch+json"})
     public ResponseEntity<Query> partialUpdateQuery(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody Query query
-    ) throws URISyntaxException {
+    ) {
         log.debug("REST request to partial update Query partially : {}, {}", id, query);
         if (query.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -221,28 +226,22 @@ public class QueryResource {
     @DeleteMapping("/queries/{id}")
     public ResponseEntity<Void> deleteQuery(@PathVariable Long id) {
         log.debug("REST request to delete Query : {}", id);
+        // process input
+        HashMap<Long, HashMap<Long, Object>> data = new HashMap<>();
+        HashMap<Long, Object> temp = new HashMap<>();
+        Query deleteQuery = queryRepository.findQueryById(id);
+
+        // send message delete to kafka
+        temp.put(id, deleteQuery.toJson());
+        data.put(id, temp);
+        Properties properties = UtilKafka.createProducer("KafkaProducer");
+        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(id), gson.toJson(data));
+
         queryRepository.deleteById(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
-    }
-
-    /**
-     *
-     */
-    @GetMapping("/")
-    public ResponseEntity<String> getDefault() {
-        return new ResponseEntity<>("Hello from Yourway!", HttpStatus.OK);
-    }
-
-    @GetMapping("/query")
-    public Iterable<Query> getAllQuery() {
-        try {
-            return queryRepository.findAll();
-        } catch (java.lang.NullPointerException e) {
-            return null;
-        }
     }
 
     @GetMapping("/query/{userId}")
@@ -253,51 +252,5 @@ public class QueryResource {
         } catch (java.lang.NullPointerException e) {
             return null;
         }
-    }
-
-    @PostMapping("/query")
-    public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody HashMap<String, Object> query) throws Exception {
-        // process input
-        HashMap<String, HashMap<String, HashMap<String, Object>>> data = new HashMap<>();
-        HashMap<String, HashMap<String, Object>> infoQuery = new HashMap<>();
-        Query mapQuery = Query.fromJson(query);
-
-        // save to database
-        Query newQuery = queryRepository.save(mapQuery);
-
-        // save to kafka
-        infoQuery.put(String.valueOf(newQuery.getUserId()), newQuery.toJson());
-        data.put(String.valueOf(newQuery.getUserId()), infoQuery);
-        Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(newQuery.getUserId()),
-            gson.toJson(data));
-
-        // return status
-        HashMap<String, Object> response = new HashMap<>();
-        response.put("status", "ok");
-        return ResponseEntity.ok().body(response);
-    }
-
-    @DeleteMapping("/query/{userId}/{queryId}")
-    public Map<String, Boolean> deleteQuery(@PathVariable(value = "userId") Integer userId,
-                                            @PathVariable(value = "queryId") Integer queryId) throws Exception {
-        // process input
-        HashMap<Integer, HashMap<Integer, Object>> data = new HashMap<>();
-        HashMap<Integer, Object> temp = new HashMap<>();
-        Query deleteQuery = queryRepository.findByQueryId(queryId);
-
-        // send message delete to kafka
-        temp.put(queryId, deleteQuery.toJson());
-        data.put(userId, temp);
-        Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(userId), gson.toJson(data));
-
-        // delete in database
-        queryRepository.delete(deleteQuery);
-
-        // return status
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
-        return response;
     }
 }

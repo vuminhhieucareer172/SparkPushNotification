@@ -3,18 +3,20 @@
   "fields": [
     {
       "fieldName": "userId",
-      "fieldType": "Integer"
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "name",
       "fieldType": "String",
-      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRules": ["maxlength", "required"],
       "fieldValidateRulesMaxlength": "50"
     },
     {
       "fieldName": "typeQuery",
       "fieldType": "TypeQuery",
-      "fieldValues": "NORMAL,QUERY,HR"
+      "fieldValues": "NORMAL,QUERY,HR",
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "companyAddress",
@@ -22,19 +24,26 @@
     },
     {
       "fieldName": "jobRole",
-      "fieldType": "String"
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "age",
-      "fieldType": "Integer"
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
     },
     {
       "fieldName": "salary",
-      "fieldType": "Long"
+      "fieldType": "Long",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
     },
     {
       "fieldName": "yearExperiences",
-      "fieldType": "Float"
+      "fieldType": "Float",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0.0"
     },
     {
       "fieldName": "educationLevel",
@@ -48,7 +57,8 @@
     {
       "fieldName": "contact",
       "fieldType": "byte[]",
-      "fieldTypeBlobContent": "text"
+      "fieldTypeBlobContent": "text",
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "groupBy",

@@ -12,17 +12,17 @@ enum EducationLevel {
 }
 
 entity Query {
-	userId Integer,
-	name String maxlength(50),
-	typeQuery TypeQuery,
+	userId Integer required,
+	name String maxlength(50) required,
+	typeQuery TypeQuery required,
 	companyAddress String,
-	jobRole String,
-	age Integer,
-	salary Long,
-	yearExperiences Float,
+	jobRole String required,
+	age Integer required min(0),
+	salary Long min(0),
+	yearExperiences Float min(0.0),
     educationLevel EducationLevel,
     jobAttribute String,
-    contact TextBlob,
+    contact TextBlob required,
     groupBy String,
     slideWindow Duration,
 }

@@ -30,7 +30,7 @@ public class UserQueryStructuredStreaming {
         Dataset<Row> df_static = spark.read()
             .format("jdbc")
             .option("url", "jdbc:mysql://localhost:3306/yourway")
-            .option("dbtable", "userquery")
+            .option("dbtable", "query")
             .option("user", Database.DB_USERNAME)
             .option("password", Database.DB_PASSWORD)
             .option("driver", "com.mysql.jdbc.Driver")

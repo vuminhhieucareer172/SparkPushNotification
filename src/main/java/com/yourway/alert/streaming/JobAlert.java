@@ -27,12 +27,12 @@ import java.util.concurrent.TimeoutException;
 import static org.apache.spark.sql.functions.*;
 import static org.apache.spark.sql.types.DataTypes.StringType;
 
-public class WarningJob {
+public class JobAlert {
 
     public static void main(String[] args) throws TimeoutException, StreamingQueryException {
         SparkSession spark = SparkSession
                 .builder()
-                .appName("Warning Job Yourway")
+                .appName("Alert Job Yourway")
                 .getOrCreate();
         spark.sparkContext().setLogLevel("ERROR");
         Dataset<Row> df = spark

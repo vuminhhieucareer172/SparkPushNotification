@@ -16,7 +16,7 @@ public class Email {
     public static final String MAIL_PASSWORD = dotenv.get("MAIL_PASSWORD");
     public static final String MAIL_FROM_ADDRESS = dotenv.get("MAIL_FROM_ADDRESS");
     public static final String MAIL_ENCRYPTION = dotenv.get("MAIL_ENCRYPTION");
-    public static final String MAIL_WARNING_TITLE = "Yourway - Đề xuất công việc mới";
-    public static final String MAIL_WARNING_CONTENT = "<h2>BẠN CÓ CÔNG VIỆC ĐỀ XUẤT MỚI</h2>" +
+    public static final String MAIL_ALERT_TITLE = "Yourway - Đề xuất công việc mới";
+    public static final String MAIL_ALERT_CONTENT = "<h2>BẠN CÓ CÔNG VIỆC ĐỀ XUẤT MỚI</h2>" +
             "<p>hi there!</p>";
 }

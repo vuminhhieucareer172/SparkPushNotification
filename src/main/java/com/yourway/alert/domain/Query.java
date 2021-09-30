@@ -3,8 +3,6 @@ package com.yourway.alert.domain;
 import com.google.gson.Gson;
 import com.yourway.alert.domain.enumeration.EducationLevel;
 import com.yourway.alert.domain.enumeration.TypeQuery;
-import com.yourway.alert.streaming.models.UserQuery;
-
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.HashMap;
@@ -25,29 +23,37 @@ public class Query implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id")
+    @NotNull
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
 
+    @NotNull
     @Size(max = 50)
-    @Column(name = "name", length = 50)
+    @Column(name = "name", length = 50, nullable = false)
     private String name;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "type_query")
+    @Column(name = "type_query", nullable = false)
     private TypeQuery typeQuery;
 
     @Column(name = "company_address")
     private String companyAddress;
 
-    @Column(name = "job_role")
+    @NotNull
+    @Column(name = "job_role", nullable = false)
     private String jobRole;
 
-    @Column(name = "age")
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "age", nullable = false)
     private Integer age;
 
+    @Min(value = 0L)
     @Column(name = "salary")
     private Long salary;
 
+    @DecimalMin(value = "0.0")
     @Column(name = "year_experiences")
     private Float yearExperiences;
 
@@ -59,7 +65,7 @@ public class Query implements Serializable {
     private String jobAttribute;
 
     @Lob
-    @Column(name = "contact")
+    @Column(name = "contact", nullable = false)
     private String contact;
 
     @Column(name = "group_by")
@@ -314,7 +320,7 @@ public class Query implements Serializable {
 
     public HashMap<String, Object> toJson() {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("queryId", id);
+        map.put("id", id);
         map.put("userId", userId);
         map.put("name", name);
         map.put("companyAddress", companyAddress);
@@ -325,6 +331,9 @@ public class Query implements Serializable {
         map.put("educationLevel", educationLevel);
         map.put("jobAttribute", jobAttribute);
         map.put("contact", contact);
+        map.put("groupBy", groupBy);
+        map.put("slideWindow", slideWindow);
+        map.put("typeQuery", typeQuery);
         return map;
     }
 

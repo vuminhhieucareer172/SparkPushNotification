@@ -53,8 +53,8 @@ public class UtilEmail {
 
     public static void main(String[] args) throws MessagingException {
         UtilEmail.sendAsHtml("tienmetien011111@gmail.com",
-                Email.MAIL_WARNING_TITLE,
-                Email.MAIL_WARNING_CONTENT
+                Email.MAIL_ALERT_TITLE,
+                Email.MAIL_ALERT_CONTENT
         );
     }
 }

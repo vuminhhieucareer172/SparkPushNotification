@@ -1,6 +1,6 @@
 package com.yourway.alert.utils;
 
-import com.yourway.alert.streaming.models.JsonQuery;
+import com.yourway.alert.domain.JsonQuery;
 import com.yourway.alert.streaming.settings.Database;
 
 import java.sql.*;

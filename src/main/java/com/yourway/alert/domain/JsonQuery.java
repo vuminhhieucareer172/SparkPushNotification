@@ -1,4 +1,4 @@
-package com.yourway.alert.streaming.models;
+package com.yourway.alert.domain;
 
 import java.util.HashMap;
 

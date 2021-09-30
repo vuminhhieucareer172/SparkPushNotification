@@ -9,10 +9,9 @@ import java.util.List;
 /**
  * Spring Data SQL repository for the Query entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface QueryRepository extends JpaRepository<Query, Long> {
     List<Query> findAllByUserId(Integer userId);
 
-    Query findByQueryId(Integer queryId);
+    Query findQueryById(Long queryId);
 }

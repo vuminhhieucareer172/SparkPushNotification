@@ -2,7 +2,7 @@ package com.yourway.alert.streaming;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.yourway.alert.streaming.models.JsonQuery;
+import com.yourway.alert.domain.JsonQuery;
 import com.yourway.alert.streaming.settings.Settings;
 import com.yourway.alert.utils.Util;
 import com.yourway.alert.utils.UtilKafka;

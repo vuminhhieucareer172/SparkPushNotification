@@ -50,7 +50,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**").antMatchers("/swagger-ui/**").antMatchers("/test/**");
+        web.ignoring()
+            .antMatchers(HttpMethod.OPTIONS, "/**")
+            .antMatchers("/swagger-ui/**")
+            .antMatchers("/test/**");
     }
 
     @Override
@@ -61,22 +64,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .disable()
             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling()
-                .authenticationEntryPoint(problemSupport)
-                .accessDeniedHandler(problemSupport)
-        .and()
+            .authenticationEntryPoint(problemSupport)
+            .accessDeniedHandler(problemSupport)
+            .and()
             .headers()
             .contentSecurityPolicy(jHipsterProperties.getSecurity().getContentSecurityPolicy())
-        .and()
+            .and()
             .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-        .and()
+            .and()
             .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; fullscreen 'self'; payment 'none'")
-        .and()
+            .and()
             .frameOptions()
             .deny()
-        .and()
+            .and()
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
+            .and()
             .authorizeRequests()
             .antMatchers("/api/authenticate").permitAll()
             .antMatchers("/api/register").permitAll()
@@ -90,9 +93,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/management/info").permitAll()
             .antMatchers("/management/prometheus").permitAll()
             .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
-        .and()
+            .and()
             .httpBasic()
-        .and()
+            .and()
             .apply(securityConfigurerAdapter());
         // @formatter:on
     }

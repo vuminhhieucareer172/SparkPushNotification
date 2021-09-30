@@ -1,4 +1,4 @@
-package com.yourway.alert.streaming.models;
+package com.yourway.alert.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

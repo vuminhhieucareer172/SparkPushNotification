@@ -31,8 +31,8 @@ public class KafkaResource {
 
         if (!Objects.equals(message, "")) {
             UtilEmail.sendAsHtml("tienmetien011111@gmail.com",
-                    Email.MAIL_WARNING_TITLE,
-                    Email.MAIL_WARNING_CONTENT + message
+                    Email.MAIL_ALERT_TITLE,
+                    Email.MAIL_ALERT_CONTENT + message
             );
         }
     }

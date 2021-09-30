@@ -1,7 +1,7 @@
 package com.yourway.alert.utils;
 
 import com.google.gson.Gson;
-import com.yourway.alert.streaming.models.JsonQuery;
+import com.yourway.alert.domain.JsonQuery;
 import com.yourway.alert.streaming.settings.Settings;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -52,12 +52,12 @@ public class UtilKafka {
 
                 if (!list.isEmpty()) {
                     final ProducerRecord<String, String> record = new ProducerRecord<>(
-                            topic, key, gson.toJson(map)
+                        topic, key, gson.toJson(map)
                     );
                     RecordMetadata metadata = producer.send(record).get();
                     long elapsedTime = System.currentTimeMillis() - time;
                     System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
-                            record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+                        record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
                 }
             } finally {
                 producer.flush();
@@ -66,17 +66,19 @@ public class UtilKafka {
         });
     }
 
-    public static void sendMessageToKafka(Properties props, String topic, String key, String message) throws Exception {
+    public static void sendMessageToKafka(Properties props, String topic, String key, String message) {
         long time = System.currentTimeMillis();
         Producer<String, String> producer = new KafkaProducer<>(props);
         try {
             final ProducerRecord<String, String> record = new ProducerRecord<>(
-                    topic, key, message
+                topic, key, message
             );
             RecordMetadata metadata = producer.send(record).get();
             long elapsedTime = System.currentTimeMillis() - time;
             System.out.printf("sent record(key=%s value=%s) meta(partition=%d, offset=%d) time=%d\n",
-                    record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+                record.key(), record.value(), metadata.partition(), metadata.offset(), elapsedTime);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         } finally {
             producer.flush();
             producer.close();
