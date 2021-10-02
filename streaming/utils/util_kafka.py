@@ -1,12 +1,13 @@
 from confluent_kafka import Consumer
 
 from settings import KAFKA_URI
+import json
 
 
 def get_latest_message(topic: str, group_id: str) -> str:
     settings = {
         "bootstrap.servers": KAFKA_URI,
-        "group.id": group_id,
+        "group.id": 'group_id',
         "enable.auto.commit": False,
         "session.timeout.ms": 6000,
         "default.topic.config": {"auto.offset.reset": "largest"},
@@ -22,3 +23,9 @@ def get_latest_message(topic: str, group_id: str) -> str:
 
     msg = consumer.poll(6.0)
     return msg.value().decode('utf-8')
+
+
+if __name__ == '__main__':
+    data = get_latest_message('userQuery', '')
+    data_json = json.loads(data)
+    print(len(data_json))
