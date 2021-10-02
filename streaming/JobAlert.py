@@ -1,9 +1,11 @@
 import json
+import multiprocessing
 import time
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, json_tuple, col
 from pyspark.sql.types import StringType
+from multiprocessing import Process
 
 from settings import TOPIC_USER, FIELD_JOB, KAFKA_URI, CHECKPOINT_PATH, DICT_MAX_AGE, DICT_MIN_AGE, \
     TOPIC_JOB, TOPIC_USER_QUERY
@@ -25,27 +27,48 @@ def matching(queries, address: str, age=None, salary=None, year=None, edu_level=
     else:
         min_age = 0
         max_age = 200
-    for query in queries:
-        # is_number_salary = True
-        # if salary is not None:
-        #     is_number_salary = query['salary'] >= float(salary)
-        #
-        # is_not_none_address = False
-        # if address is not None:
-        #     is_not_none_address = query['company_address'] in address
-        # try:
-        #     # if is_not_none_address and min_age <= int(query[2]) <= max_age and is_number_salary and \
-        #     #         query[4] == year and query[5] == edu_level and query[6] == job_attribute:
-        #     if min_age <= int(query['age']) <= max_age and is_number_salary:
-        #         user_id.append(
-        #             dict(user_id=query['user_id'], contact=query['contact'])
-        #         )
-        # except Exception as e:
-        #     logging.error(e)
-        # time.sleep(0.01)
-        user_id.append(
-            dict(user_id=query['user_id'], contact=query['contact'])
-        )
+    num_thread = multiprocessing.cpu_count()
+    num_queries = len(queries)
+    query = [queries[i * num_queries: (i + 1) * num_queries] for i in range(num_thread)]
+
+    def print_func(q):
+        for e in q:
+            for i in range(1000):
+                a = 1 + 1
+            user_id.append(
+                dict(user_id=e['user_id'], contact=e['contact'])
+            )
+
+    procs = []
+    for q in query:
+        proc = Process(target=print_func, args=(q,))
+        procs.append(proc)
+        proc.start()
+    for proc in procs:
+        proc.join()
+
+    # for query in queries:
+    #     # is_number_salary = True
+    #     # if salary is not None:
+    #     #     is_number_salary = query['salary'] >= float(salary)
+    #     #
+    #     # is_not_none_address = False
+    #     # if address is not None:
+    #     #     is_not_none_address = query['company_address'] in address
+    #     # try:
+    #     #     # if is_not_none_address and min_age <= int(query[2]) <= max_age and is_number_salary and \
+    #     #     #         query[4] == year and query[5] == edu_level and query[6] == job_attribute:
+    #     #     if min_age <= int(query['age']) <= max_age and is_number_salary:
+    #     #         user_id.append(
+    #     #             dict(user_id=query['user_id'], contact=query['contact'])
+    #     #         )
+    #     # except Exception as e:
+    #     #     logging.error(e)
+    #     for i in range(1000):
+    #         a = 1 + 1
+    #     user_id.append(
+    #         dict(user_id=query['user_id'], contact=query['contact'])
+    #     )
 
     return '[' + ','.join(str(x) for x in user_id) + ']'
 
@@ -62,6 +85,7 @@ def main():
         .option("kafka.bootstrap.servers", KAFKA_URI) \
         .option("subscribe", TOPIC_JOB) \
         .load()
+    df.writeStream.format('console')
     spark.sparkContext.setLogLevel("ERROR")
 
     data = df.select(
@@ -85,10 +109,15 @@ def main():
         "value", check_matching(data["company_address"], data["ages"], data["salary"], data["year_experiences"],
                                 data["education_level"], data["job_attribute"])
     )
-    print(time.time() - start)
+    duration = time.time() - start
 
     data = data.withColumn(
         "key", col("id")
+    )
+    my_udf = udf(lambda x: duration, StringType())
+
+    data = data.withColumn(
+        "duration", my_udf(col("id"))
     )
 
     data = data.filter(col("value").isNotNull())
