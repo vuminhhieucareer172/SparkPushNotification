@@ -1,15 +1,19 @@
+import csv
 import json
-import multiprocessing
+import random
 import time
+from multiprocessing import Process
+import multiprocessing
+
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import as_completed
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, json_tuple, col
 from pyspark.sql.types import StringType
-from multiprocessing import Process
 
-from settings import TOPIC_USER, FIELD_JOB, KAFKA_URI, CHECKPOINT_PATH, DICT_MAX_AGE, DICT_MIN_AGE, \
-    TOPIC_JOB, TOPIC_USER_QUERY
-from utils.util_kafka import get_latest_message
+from settings import FIELD_JOB, KAFKA_URI, DICT_MAX_AGE, DICT_MIN_AGE, \
+    TOPIC_JOB
 
 decode_string = udf(lambda x: x.decode('utf-8'), StringType())
 
@@ -27,25 +31,31 @@ def matching(queries, address: str, age=None, salary=None, year=None, edu_level=
     else:
         min_age = 0
         max_age = 200
+
+    # old concept
     num_thread = multiprocessing.cpu_count()
     num_queries = len(queries)
     query = [queries[i * num_queries: (i + 1) * num_queries] for i in range(num_thread)]
 
-    def print_func(q):
-        for e in q:
-            for i in range(1000):
-                a = 1 + 1
-            user_id.append(
-                dict(user_id=e['user_id'], contact=e['contact'])
-            )
+    def match_query(q):
+        # for e in q:
+        for i in range(1000):
+            a = 1 + 1
+        user_id.append(
+            dict(user_id=q['user_id'], contact=q['contact'])
+        )
+    #
+    # procs = []
+    # for q in query:
+    #     proc = Process(target=match_query, args=(q,))
+    #     procs.append(proc)
+    #     proc.start()
+    # for proc in procs:
+    #     proc.join()
 
-    procs = []
-    for q in query:
-        proc = Process(target=print_func, args=(q,))
-        procs.append(proc)
-        proc.start()
-    for proc in procs:
-        proc.join()
+    # new concept
+    with ProcessPoolExecutor(max_workers=None) as executor:
+        results = executor.map(match_query, queries)
 
     # for query in queries:
     #     # is_number_salary = True
@@ -70,7 +80,17 @@ def matching(queries, address: str, age=None, salary=None, year=None, edu_level=
     #         dict(user_id=query['user_id'], contact=query['contact'])
     #     )
 
-    return '[' + ','.join(str(x) for x in user_id) + ']'
+    # return '[' + ','.join(str(x) for x in user_id) + ']'
+    return str(random.randint(1, 100000))
+
+
+def read_data():
+    data = []
+    with open('user_query.csv', encoding='utf-8') as f:
+        csv_reader = csv.DictReader(f)
+        for row in csv_reader:
+            data.append(row)
+    return json.loads(json.dumps(data, indent=4))
 
 
 def main():
@@ -94,9 +114,11 @@ def main():
             *FIELD_JOB
         ).alias(*FIELD_JOB)
     )
-    user_queries = get_latest_message(topic=TOPIC_USER_QUERY, group_id="KafkaProducer")
-    data_json = json.loads(user_queries)
-    print(len(data_json))
+    # user_queries = get_latest_message(topic=TOPIC_USER_QUERY, group_id="KafkaProducer")
+    # data_json = json.loads(user_queries)
+
+    data_json = read_data()
+    print("number of queries: ", len(data_json))
 
     check_matching = udf(
         lambda address, age, salary, year, edu_level, job_attribute:
@@ -114,12 +136,8 @@ def main():
     data = data.withColumn(
         "key", col("id")
     )
-    my_udf = udf(lambda x: duration, StringType())
 
-    data = data.withColumn(
-        "duration", my_udf(col("id"))
-    )
-
+    print("duration: ", duration)
     data = data.filter(col("value").isNotNull())
 
     # run app
