@@ -5,6 +5,6 @@ package com.yourway.alert.domain.enumeration;
  */
 public enum TypeQuery {
     NORMAL,
-    QUERY,
+    CV,
     HR,
 }

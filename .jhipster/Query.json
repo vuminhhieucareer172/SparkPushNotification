@@ -15,7 +15,7 @@
     {
       "fieldName": "typeQuery",
       "fieldType": "TypeQuery",
-      "fieldValues": "NORMAL,QUERY,HR",
+      "fieldValues": "NORMAL,CV,HR",
       "fieldValidateRules": ["required"]
     },
     {

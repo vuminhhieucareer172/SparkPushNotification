@@ -229,13 +229,18 @@ public class QueryResource {
         // process input
         HashMap<Long, HashMap<Long, Object>> data = new HashMap<>();
         HashMap<Long, Object> temp = new HashMap<>();
-        Query deleteQuery = queryRepository.findQueryById(id);
 
-        // send message delete to kafka
-        temp.put(id, deleteQuery.toJson());
-        data.put(id, temp);
-        Properties properties = UtilKafka.createProducer("KafkaProducer");
-        UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(id), gson.toJson(data));
+        Optional<Query> deleteQuery = queryRepository.findById(id);
+        Query query;
+        if (deleteQuery.isPresent()) {
+            query = deleteQuery.get();
+
+            // send message delete to kafka
+            temp.put(id, query.toJson());
+            data.put(id, temp);
+            Properties properties = UtilKafka.createProducer("KafkaProducer");
+            UtilKafka.sendMessageToKafka(properties, Settings.TOPIC_SET_USER_QUERY, String.valueOf(id), gson.toJson(data));
+        }
 
         queryRepository.deleteById(id);
         return ResponseEntity
@@ -245,9 +250,10 @@ public class QueryResource {
     }
 
     @GetMapping("/query/{userId}")
-    public ResponseEntity<List<Query>> getQuery(@PathVariable(value = "userId") Integer userId) {
+    public ResponseEntity<List<Query>> getQuery(@PathVariable(value = "userId") Integer userId,
+                                                Pageable pageable) {
         try {
-            List<Query> response = queryRepository.findAllByUserId(userId);
+            List<Query> response = queryRepository.findAllByUserId(userId, pageable);
             return ResponseEntity.ok().body(response);
         } catch (java.lang.NullPointerException e) {
             return null;

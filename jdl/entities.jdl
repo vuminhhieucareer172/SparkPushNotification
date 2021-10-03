@@ -1,6 +1,6 @@
 enum TypeQuery {
 	NORMAL
-    QUERY
+    CV
     HR
 }
 
