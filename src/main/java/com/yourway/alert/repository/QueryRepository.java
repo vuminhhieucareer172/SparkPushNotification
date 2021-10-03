@@ -1,6 +1,7 @@
 package com.yourway.alert.repository;
 
 import com.yourway.alert.domain.Query;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,5 @@ import java.util.List;
  */
 @Repository
 public interface QueryRepository extends JpaRepository<Query, Long> {
-    List<Query> findAllByUserId(Integer userId);
-
-    Query findQueryById(Long queryId);
+    List<Query> findAllByUserId(Integer userId, Pageable pageable);
 }
