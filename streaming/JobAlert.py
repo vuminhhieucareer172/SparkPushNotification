@@ -1,19 +1,13 @@
 import csv
 import json
 import random
-import time
-from multiprocessing import Process
-import multiprocessing
-
-from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures import as_completed
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, json_tuple, col
-from pyspark.sql.types import StringType
+from pyspark.sql.functions import udf, expr, json_tuple, from_json, col
+from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType, Row
 
-from settings import FIELD_JOB, KAFKA_URI, DICT_MAX_AGE, DICT_MIN_AGE, \
-    TOPIC_JOB
+from settings import KAFKA_URI, DICT_MAX_AGE, DICT_MIN_AGE, \
+    TOPIC_JOB, TOPIC_USER_QUERY, FIELD_JOB, FIELD_QUERY
 
 decode_string = udf(lambda x: x.decode('utf-8'), StringType())
 
@@ -31,31 +25,6 @@ def matching(queries, address: str, age=None, salary=None, year=None, edu_level=
     else:
         min_age = 0
         max_age = 200
-
-    # old concept
-    num_thread = multiprocessing.cpu_count()
-    num_queries = len(queries)
-    query = [queries[i * num_queries: (i + 1) * num_queries] for i in range(num_thread)]
-
-    def match_query(q):
-        # for e in q:
-        for i in range(1000):
-            a = 1 + 1
-        user_id.append(
-            dict(user_id=q['user_id'], contact=q['contact'])
-        )
-    #
-    # procs = []
-    # for q in query:
-    #     proc = Process(target=match_query, args=(q,))
-    #     procs.append(proc)
-    #     proc.start()
-    # for proc in procs:
-    #     proc.join()
-
-    # new concept
-    with ProcessPoolExecutor(max_workers=None) as executor:
-        results = executor.map(match_query, queries)
 
     # for query in queries:
     #     # is_number_salary = True
@@ -98,47 +67,81 @@ def main():
         .builder \
         .appName("Job Alert Yourway") \
         .getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
-    df = spark \
+    spark.conf.set("spark.sql.crossJoin.enabled", "true")
+    df_job = spark \
         .readStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", KAFKA_URI) \
         .option("subscribe", TOPIC_JOB) \
         .load()
-    df.writeStream.format('console')
-    spark.sparkContext.setLogLevel("ERROR")
+    df_query = spark \
+        .readStream \
+        .format("kafka") \
+        .option("kafka.bootstrap.servers", KAFKA_URI) \
+        .option("subscribe", TOPIC_USER_QUERY) \
+        .load()
+    schema_job = StructType([
+        StructField("id", LongType()),
+        StructField("application_deadline", DateType()),
+        StructField("company_address", IntegerType()),
+        StructField("salary", FloatType()),
+        StructField("ages", StringType()),
+        StructField("education_level", StringType()),
+        StructField("position", StringType()),
+        StructField("job_attribute", StringType()),
+        StructField("year_experiences", FloatType()),
+    ])
+    schema_query = StructType([
+        StructField("query_id", LongType()),
+        StructField("query_user_id", LongType()),
+        StructField("query_company_address", StringType()),
+        StructField("query_job_role", StringType()),
+        StructField("query_age", IntegerType()),
+        StructField("query_salary", FloatType()),
+        StructField("query_year_experiences", FloatType()),
+        StructField("query_education_level", StringType()),
+        StructField("query_job_attribute", StringType()),
+        StructField("query_contact", StringType()),
+        StructField("query_group_by", StringType()),
+        StructField("query_slide_window", StringType()),
+    ])
 
-    data = df.select(
-        json_tuple(
-            decode_string(df["value"]),
-            *FIELD_JOB
-        ).alias(*FIELD_JOB)
-    )
-    # user_queries = get_latest_message(topic=TOPIC_USER_QUERY, group_id="KafkaProducer")
-    # data_json = json.loads(user_queries)
+    data_job = df_job.withColumn(
+        "data", from_json(col("value").astype(StringType()), schema_job)
+    ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
 
-    data_json = read_data()
-    print("number of queries: ", len(data_json))
+    data_query = df_query.withColumn(
+        "data", from_json(col("value").astype(StringType()), schema_query)
+    ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
 
-    check_matching = udf(
-        lambda address, age, salary, year, edu_level, job_attribute:
-        matching(data_json, address, age, salary, year, edu_level, job_attribute), StringType()
-    )
+    data = data_job.alias("JOB").join(data_query.alias("QUERY"), expr("""
+        QUERY.query_job_attribute = JOB.job_attribute AND
+        QUERY.query_job_role = JOB.position AND
+        JOB.education_level = QUERY.query_education_level AND
+        JOB.company_address like concat("%", QUERY.query_company_address, "%") AND
+        JOB.salary >= QUERY.query_salary AND
+        QUERY.timestamp <= JOB.timestamp + interval 1 hour AND
+        QUERY.timestamp > JOB.timestamp
+    """), "full_outer")
 
-    # match
-    start = time.time()
-    data = data.withColumn(
-        "value", check_matching(data["company_address"], data["ages"], data["salary"], data["year_experiences"],
-                                data["education_level"], data["job_attribute"])
-    )
-    duration = time.time() - start
-
-    data = data.withColumn(
-        "key", col("id")
-    )
-
-    print("duration: ", duration)
-    data = data.filter(col("value").isNotNull())
+    # check_matching = udf(
+    #     lambda address, age, salary, year, edu_level, job_attribute:
+    #     matching(address, age, salary, year, edu_level, job_attribute), StringType()
+    # )
+    #
+    # # match
+    # data = data.withColumn(
+    #     "value", check_matching(data["company_address"], data["ages"], data["salary"], data["year_experiences"],
+    #                             data["education_level"], data["job_attribute"])
+    # )
+    #
+    # data = data.withColumn(
+    #     "key", col("id")
+    # )
+    #
+    # data = data.filter(col("value").isNotNull())
 
     # run app
     # app = data \

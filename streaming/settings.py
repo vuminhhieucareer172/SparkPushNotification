@@ -4,43 +4,15 @@ TOPIC_USER = 'userId'
 TOPIC_SET_USER_QUERY = 'setUserQuery'
 TOPIC_USER_QUERY = 'userQuery'
 
-FIELD_JOB = [
-    "id",
-    "application_deadline",
-    "company_address",
-    "company_name",
-    "job_benefits",
-    "job_descriptions",
-    "job_formality",
-    "job_other_info",
-    "job_requirements",
-    "job_trial_period",
-    "salary",
-    "skills",
-    "title",
-    "url",
-    "ages",
-    "education_level",
-    "genders",
-    "domains",
-    "position",
-    "job_attribute",
-    "locations",
-    "time",
-    "year_experiences",
-    "position_number"
-]
-FIELD_QUERY = [
-    "id",
-    "company_address",
-    "salary",
-    "age",
-    "education_level",
-    "job_attribute",
-    "year_experiences",
-]
+FIELD_JOB = ["id", "application_deadline", "company_address", "company_name", "job_benefits", "job_descriptions",
+             "job_formality", "job_other_info", "job_requirements", "job_trial_period", "salary", "skills", "title",
+             "url", "ages", "education_level", "genders", "domains", "position", "job_attribute", "locations", "time",
+             "year_experiences", "position_number"]
 
-EXAMPLE_FILE_QUERY = 'data/user_query.csv'
+FIELD_QUERY = field = ['query_id', 'query_user_id', 'query_name', 'query_type_query', 'query_company_address',
+                       'query_job_role', 'query_age', 'query_salary', 'query_year_experiences', 'query_education_level',
+                       'query_job_attribute', 'query_contact', 'query_group_by', 'query_slide_window']
+
 CHECKPOINT_PATH = 'checkpoint'
 DICT_MIN_AGE = {
     'Dưới 18': 0,
