@@ -3,7 +3,6 @@
 ######################
 /target/classes/static/**
 /src/test/javascript/coverage/
-checkpoint/
 Test.java
 .env
 

@@ -9,9 +9,9 @@ FIELD_JOB = ["id", "application_deadline", "company_address", "company_name", "j
              "url", "ages", "education_level", "genders", "domains", "position", "job_attribute", "locations", "time",
              "year_experiences", "position_number"]
 
-FIELD_QUERY = field = ['query_id', 'query_user_id', 'query_name', 'query_type_query', 'query_company_address',
-                       'query_job_role', 'query_age', 'query_salary', 'query_year_experiences', 'query_education_level',
-                       'query_job_attribute', 'query_contact', 'query_group_by', 'query_slide_window']
+FIELD_QUERY = ['query_id', 'query_user_id', 'query_name', 'query_type_query', 'query_company_address',
+               'query_job_role', 'query_age', 'query_salary', 'query_year_experiences', 'query_education_level',
+               'query_job_attribute', 'query_contact', 'query_group_by', 'query_slide_window']
 
 CHECKPOINT_PATH = 'checkpoint'
 DICT_MIN_AGE = {
@@ -31,8 +31,12 @@ DICT_MAX_AGE = {
     'Trên 60': 200
 }
 
+DB_HOST = 'localhost'
 DB_PORT = 3306
 DB_NAME = "yourway"
 DB_USERNAME = "yourway"
 DB_PASSWORD = "Jobalert@123"
-DB_URL = "jdbc:mysql://localhost:" + str(DB_PORT) + "/" + DB_NAME
+DB_CHARSET = 'utf8mb4'
+
+SQLALCHEMY_DATABASE_URI = 'mysql://' + DB_USERNAME + ':' + DB_PASSWORD + '@' + DB_HOST + ':' + str(DB_PORT) + '/' + \
+                          DB_NAME + '?charset=' + DB_CHARSET

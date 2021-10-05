@@ -3,3 +3,4 @@ confluent-kafka
 pyarrow>=1.0.0
 pickle5~=0.0.1
 pandas
+sqlalchemy

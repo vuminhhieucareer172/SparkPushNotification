@@ -4,5 +4,4 @@ __pycache__/
 *.pkl
 .vscode/
 .idea/
-checkpoint/
 .DS_Store
