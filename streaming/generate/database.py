@@ -3,7 +3,7 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
-from streaming import settings
+import settings
 
 
 def connect_database():
