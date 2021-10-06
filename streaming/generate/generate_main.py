@@ -5,7 +5,7 @@ from streaming import settings
 from streaming.generate.database import connect_database
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-p', '--path', type=str, default='example_gen_code.py', help='Path to file generated code')
+parser.add_argument('-p', '--path', type=str, default='streaming/job_stream/example_gen_code.py', help='Path to file generated code')
 parser.add_argument('-m', '--master', type=str, default='', help='IP master in spark cluster')
 parser.add_argument('-n', '--app-name', type=str, default='Alert Job', help='Application name')
 parser.add_argument('--level-log', type=str, default='ERROR', help='Enable log or not')

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from constants import constants
+from backend.constants import constants
 
 # db mysql
 engine = create_engine(
