@@ -1,0 +1,7 @@
+example/
+__pycache__/
+*.csv
+*.pkl
+.vscode/
+.idea/
+.DS_Store
