@@ -62,12 +62,8 @@ def main():
         "data", from_json(col("value").astype(StringType()), schema_job)
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
 """.format("Job Alert Yourway", opt.level_log, settings.KAFKA_URI, settings.TOPIC_JOB)
-        count = 0
+
         for record in data:
-            if count < 100:
-                count += 1
-            else:
-                break
             table = 'table' + str(record['id'])
             r += """
     data_job.createOrReplaceTempView("{}")
