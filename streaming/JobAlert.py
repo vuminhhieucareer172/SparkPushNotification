@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import from_json, col
+from pyspark.sql.functions import from_json, col, udf
 from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType
 
-from settings import KAFKA_URI, TOPIC_JOB, TOPIC_USER, CHECKPOINT_PATH, TOPIC_SET_USER_QUERY
+from settings import KAFKA_URI, TOPIC_JOB, TOPIC_USER, CHECKPOINT_PATH
 
 
 def init_app():
@@ -48,20 +48,28 @@ def main():
 
     data_job = df.withColumn(
         "data", from_json(col("value").astype(StringType()), schema_job)
-    ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*") \
-        .withColumn("value", col("key"))
+    ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
 
     data_job.createOrReplaceTempView("userId")
     data = spark.sql("select * from userId where salary > 1.0")
+    check_matching = udf(
+        lambda x: "userId----" + str(x), StringType()
+    )
+    data = data.withColumn("value", check_matching(col("key")))
+
     data.writeStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", KAFKA_URI) \
         .option("checkpointLocation", CHECKPOINT_PATH + '/user1') \
         .trigger(processingTime='1 second') \
-        .option("topic", TOPIC_SET_USER_QUERY).start()
+        .option("topic", TOPIC_USER).start()
 
     data_job.createOrReplaceTempView("job")
     data = spark.sql("select * from job where salary > 1.0")
+    check_matching = udf(
+        lambda x: "job----" + str(x), StringType()
+    )
+    data = data.withColumn("value", check_matching(col("key")))
     data.writeStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", KAFKA_URI) \
