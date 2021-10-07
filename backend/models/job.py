@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, Column, Enum, VARCHAR, DATETIME, INTEGER
+from sqlalchemy import Boolean, Column, Enum, VARCHAR, INTEGER
 from sqlalchemy.dialects.mysql import LONGTEXT
 
 from database import Model
 
 
-class User(Model):
+class Job(Model):
     __tablename__ = "dbstreaming_job_stream"
 
     id = Column('id', INTEGER, primary_key=True, index=True, autoincrement=True)
@@ -17,7 +17,7 @@ class User(Model):
     log = Column('log', LONGTEXT)
 
     def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+        super(Job, self).__init__(**kwargs)
 
     def to_full_json(self):
         return dict(
@@ -33,7 +33,7 @@ class User(Model):
 
     @staticmethod
     def from_json(json_post):
-        return User(
+        return Job(
             job_name=json_post.get('job_name'),
             config=json_post.get('config'),
             status=json_post.get('status'),
