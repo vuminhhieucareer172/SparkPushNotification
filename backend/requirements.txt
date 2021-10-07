@@ -1,0 +1,12 @@
+fastapi
+sqlalchemy
+uvicorn[standard]
+alembic
+mysqlclient
+pydantic
+starlette
+pydantic[email]
+twisted
+requests
+itemadapter
+apscheduler

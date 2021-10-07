@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller.table import create
-from backend.database import db
+from database import db
 from backend.schemas.table import Table
 
 app = FastAPI()

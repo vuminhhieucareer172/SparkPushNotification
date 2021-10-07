@@ -1,12 +1,12 @@
 import argparse
-from pathlib import Path
 
-from streaming import settings
-from streaming.generate.database import connect_database
-
+from constants import constants
+from database import db
 parser = argparse.ArgumentParser()
-parser.add_argument('-p', '--path', type=str, default='streaming/job_stream/example_gen_code.py', help='Path to file generated code')
-parser.add_argument('-m', '--master', type=str, default='', help='IP master in spark cluster')
+parser.add_argument('-p', '--path', type=str, default='streaming/job_stream/job/', help='Path to file generated code')
+parser.add_argument('-ep', '--exec-path', type=str, default='streaming/job_stream/executor/',
+                    help='Path to file generated code')
+parser.add_argument('-m', '--master', type=str, default='spark://192.168.1.5:7077', help='IP master in spark cluster')
 parser.add_argument('-n', '--app-name', type=str, default='Alert Job', help='Application name')
 parser.add_argument('--level-log', type=str, default='ERROR', help='Enable log or not')
 parser.add_argument('--network-timeout', type=str, default='fourier', help='Model to predict')
@@ -17,14 +17,13 @@ opt = parser.parse_args()
 
 
 def get_query():
-    db = connect_database()
     return db.execute("select * from query")
 
 
 def main():
-    Path(opt.path).touch()
+    file_name = opt.app_name.lower().replace(" ", "_") + ".py"
     data = get_query()
-    with open(opt.path, 'w') as f_gen:
+    with open(opt.path + file_name, 'w') as f_job:
         r = """from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, udf
 from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType
@@ -61,7 +60,7 @@ def main():
     data_job = df.withColumn(
         "data", from_json(col("value").astype(StringType()), schema_job)
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
-""".format("Job Alert Yourway", opt.level_log, settings.KAFKA_URI, settings.TOPIC_JOB)
+""".format("Job Alert Yourway", opt.level_log, constants.KAFKA_URI, constants.TOPIC_JOB)
 
         for record in data:
             table = 'table' + str(record['id'])
@@ -78,9 +77,9 @@ def main():
         .option("checkpointLocation", "{}") \\
         .trigger(processingTime='{}') \\
         .option("topic", "{}").start()
-""".format(table, 'select * from ' + table, table, settings.KAFKA_URI,
-           settings.CHECKPOINT_PATH + '/query-' + str(record['id']),
-           '1 second', settings.TOPIC_USER)
+""".format(table, 'select * from ' + table, table, constants.KAFKA_URI,
+           constants.CHECKPOINT_PATH + '/query-' + str(record['id']),
+           '1 second', constants.TOPIC_USER)
 
         r += """
     spark.streams.awaitAnyTermination()
@@ -89,7 +88,14 @@ def main():
 if __name__ == '__main__':
     main()
 """
-        f_gen.write(r)
+        f_job.write(r)
+
+    with open(opt.exec_path + file_name, 'w') as f_exec:
+        f_exec.write("""import os
+
+def run():
+    os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
+        """.format(opt.master, opt.path + file_name))
 
 
 if __name__ == '__main__':
