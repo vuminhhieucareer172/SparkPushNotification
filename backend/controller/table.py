@@ -3,7 +3,7 @@ import logging
 from sqlalchemy import exc
 from starlette.responses import JSONResponse
 from fastapi import status
-from backend.database import db
+from database import db
 from backend.schemas.table import Table
 
 

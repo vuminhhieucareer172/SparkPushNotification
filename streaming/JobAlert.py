@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, udf
 from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType
 
-from settings import KAFKA_URI, TOPIC_JOB, TOPIC_USER, CHECKPOINT_PATH
+from constants.constants import KAFKA_URI, TOPIC_JOB, TOPIC_USER, CHECKPOINT_PATH
 
 
 def init_app():

@@ -1,6 +1,6 @@
 from confluent_kafka import Consumer
 
-from streaming.settings import KAFKA_URI
+from constants.constants import KAFKA_URI
 import json
 
 
