@@ -29,7 +29,7 @@ def get_version_of_spark():
 
 @app.get("/job-stream")
 def get_job_stream():
-    return stream.get_list_job_stream()
+    return stream.get_list_applications()
 
 
 @app.on_event("shutdown")

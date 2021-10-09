@@ -34,6 +34,12 @@ def main():
         .builder \\
         .appName("{}") \\
         .getOrCreate()
+    conf = spark.sparkContext.getConf().setAll(
+        [('spark.executor.memory', '4g'), ('spark.app.name', 'Job Alert Yourway'), ('spark.executor.cores', '4'),
+         ('spark.cores.max', '12'), ('spark.driver.memory', '4g')])
+    spark.sparkContext.stop()
+    spark = SparkSession.builder.config(conf=conf).getOrCreate()
+
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
     spark.sparkContext.setLogLevel("{}")
