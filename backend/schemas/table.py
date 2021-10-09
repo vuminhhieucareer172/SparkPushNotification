@@ -4,18 +4,23 @@ from pydantic import BaseModel
 from enum import Enum
 
 
-class PrimaryKey(BaseModel):
-    name_field: str = 'id'
+class FieldSQL(BaseModel):
+    name_field: str
+    collation: str = 'latin1_swedish_ci'
     type: str
+    comment: str = None
+
+
+class PrimaryKey(FieldSQL):
+    name_field = 'id'
     auto_increment: bool = True
 
 
-class OtherField(BaseModel):
-    name_field: str
-    type: str
+class OtherField(FieldSQL):
     nullable: bool = True
     unique: bool = False
-    default: str
+    default: str = None
+    length: int = None
 
 
 class Engine(str, Enum):
@@ -34,6 +39,6 @@ class FIElDS(BaseModel):
 class Table(BaseModel):
     name: str
     fields: FIElDS
-    character_set: str = 'utf8'
-    collate: str = 'utf8_general_ci'
-    engine: Engine
+    charset: str = 'latin1'
+    collate: str = 'latin1_swedish_ci'
+    engine: Engine = 'InnoDB'

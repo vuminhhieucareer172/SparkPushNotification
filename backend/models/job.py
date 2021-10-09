@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column, Enum, VARCHAR, INTEGER, TEXT
 from database import Model
 
 
-class User(Model):
+class Job(Model):
     __tablename__ = "dbstreaming_job_stream"
 
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
@@ -20,7 +20,7 @@ class User(Model):
     log = Column(TEXT)
 
     def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+        super(Job, self).__init__(**kwargs)
 
     def to_full_json(self):
         return dict(
@@ -36,7 +36,7 @@ class User(Model):
 
     @staticmethod
     def from_json(json_post):
-        return User(
+        return Job(
             job_name=json_post.get('job_name'),
             config=json_post.get('config'),
             status=json_post.get('status'),

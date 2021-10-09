@@ -23,7 +23,7 @@ async def create_table_streaming(new_schema: Table):
 
 @app.post("/create-table/query")
 async def create_table_query(new_schema: Table):
-    return table.create_table_query(new_schema)
+    return table.create_table(new_schema)
 
 
 @app.on_event("shutdown")
