@@ -7,7 +7,7 @@ from database import db
 from backend.schemas.table import Table
 
 
-def create(new_schema: Table):
+def create_table_query(new_schema: Table):
     try:
         sql = "CREATE TABLE {} (".format(new_schema.name)
         primary = new_schema.fields.primary

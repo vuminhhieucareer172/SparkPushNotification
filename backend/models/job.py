@@ -1,5 +1,4 @@
-from sqlalchemy import Boolean, Column, Enum, VARCHAR, DATETIME, INTEGER
-from sqlalchemy.dialects.mysql import LONGTEXT
+from sqlalchemy import Boolean, Column, Enum, VARCHAR, INTEGER, TEXT
 
 from database import Model
 
@@ -7,14 +6,18 @@ from database import Model
 class User(Model):
     __tablename__ = "dbstreaming_job_stream"
 
-    id = Column('id', INTEGER, primary_key=True, index=True, autoincrement=True)
-    job_name = Column('job_name', VARCHAR(50), nullable=False)
-    config = Column('config', VARCHAR(255), nullable=False)
-    status = Column('status', Enum('RUNNING', 'STOP', 'ERROR'), nullable=False, default='RUNNING')
-    enabled = Column('enabled', Boolean, nullable=False, default=True)
-    time = Column('time', VARCHAR(50), nullable=False, default='0 0 * * *')
-    template = Column('template', VARCHAR(255), nullable=False)
-    log = Column('log', LONGTEXT)
+    id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
+    job_name = Column(VARCHAR(50), nullable=False)
+    table_streaming = Column(VARCHAR(50), nullable=False)
+    table_query = Column(VARCHAR(50), nullable=False)
+    topic_kafka_input = Column(VARCHAR(50), nullable=False)
+    topic_kafka_output = Column(VARCHAR(50), nullable=False)
+    config = Column(VARCHAR(255), nullable=False)
+    status = Column(Enum('RUNNING', 'STOP', 'ERROR'), nullable=False, default='RUNNING')
+    enabled = Column(Boolean, nullable=False, default=True)
+    time = Column(VARCHAR(50), nullable=False, default='0 0 * * *')
+    template = Column(VARCHAR(255), nullable=False)
+    log = Column(TEXT)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
