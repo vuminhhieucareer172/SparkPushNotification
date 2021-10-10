@@ -27,7 +27,6 @@ def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_QUER
 
         for other in new_schema.fields.others:
             type_ = convert_to_sqlalchemy(other.type)
-            print(type_)
             if type_ in DATATYPE_STRING:
                 if other.length is not None or other.length != 0:
                     data_type = type_(other.length, collation=other.collation)
