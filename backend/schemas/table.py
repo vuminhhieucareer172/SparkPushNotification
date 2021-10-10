@@ -21,6 +21,7 @@ class OtherField(FieldSQL):
     unique: bool = False
     default: str = None
     length: int = None
+    value: str = None
 
 
 class Engine(str, Enum):

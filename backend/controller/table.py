@@ -1,27 +1,18 @@
 import logging
 
+import sqlalchemy
 from fastapi import status
-from sqlalchemy import exc, Column, Table, VARCHAR, INTEGER, TEXT, DATETIME, TIMESTAMP, DATE, ARRAY, func, text
+from sqlalchemy import exc, Column, Table, text
 from starlette.responses import JSONResponse
 
 from backend.schemas import table
-from constants.constants import PREFIX_DB_TABLE_QUERY, PREFIX_DB_TABLE_STREAMING
+from constants.constants import PREFIX_DB_TABLE_QUERY, PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
+    DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
 from database import meta
-
-to_type_sqlalchemy = {
-    "VARCHAR": VARCHAR,
-    "INTEGER": INTEGER,
-    "TEXT": TEXT,
-    "DATETIME": DATETIME,
-    "TIMESTAMP": TIMESTAMP,
-    "DATE": DATE,
-    "FLOAT": VARCHAR,
-    "ARRAY": ARRAY
-}
 
 
 def convert_to_sqlalchemy(data_type: str):
-    return to_type_sqlalchemy.get(data_type)
+    return DATA_TYPE_SQLALCHEMY.get(data_type.upper())
 
 
 def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_QUERY):
@@ -36,19 +27,40 @@ def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_QUER
 
         for other in new_schema.fields.others:
             type_ = convert_to_sqlalchemy(other.type)
-            if other.length is not None or other.length != 0:
-                type_ = convert_to_sqlalchemy(other.type)(other.length)
-            if other.type in ["TIMESTAMP"]:
-                other.collation = None
+            print(type_)
+            if type_ in DATATYPE_STRING:
+                if other.length is not None or other.length != 0:
+                    data_type = type_(other.length, collation=other.collation)
+                else:
+                    data_type = type_(collation=other.collation)
+                new_table.append_column(Column(other.name_field, type_=data_type, nullable=other.nullable,
+                                               server_default=other.default, comment=other.comment))
+            elif type_ in DATATYPE_NUMERIC:
+                if other.length is not None or other.length != 0:
+                    data_type = type_(other.length)
+                else:
+                    data_type = type_
+                new_table.append_column(Column(other.name_field, type_=data_type, nullable=other.nullable,
+                                               server_default=other.default, comment=other.comment))
+            elif type_ in DATATYPE_DATE_AND_TIME:
                 new_table.append_column(
                     Column(other.name_field, type_=type_, nullable=other.nullable,
-                           unique=other.unique, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+                           server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
                            comment=other.comment))
-
+            elif type_ == sqlalchemy.ARRAY:
+                return JSONResponse(content="Not implemented", status_code=status.HTTP_501_NOT_IMPLEMENTED)
+            elif type_ == sqlalchemy.JSON:
+                new_table.append_column(
+                    Column(other.name_field, type_=sqlalchemy.JSON, nullable=other.nullable, comment=other.comment))
+            elif type_ == sqlalchemy.Enum:
+                list_enum = other.value.split(', ')
+                new_table.append_column(
+                    Column(other.name_field, type_=sqlalchemy.Enum(*list_enum), nullable=other.nullable,
+                           default=other.default, comment=other.comment))
             else:
                 new_table.append_column(
-                    Column(other.name_field, type_=type_, nullable=other.nullable,
-                           unique=other.unique, default=other.default, comment=other.comment))
+                    Column(other.name_field, type_=type_, nullable=other.nullable, unique=other.unique,
+                           default=other.default, comment=other.comment))
         new_table.create()
     except TypeError as e:
         return JSONResponse(content="TypeError: {}".format(e), status_code=status.HTTP_400_BAD_REQUEST)
