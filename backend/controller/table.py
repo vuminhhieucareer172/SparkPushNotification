@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from backend.schemas import table
 from constants.constants import PREFIX_DB_TABLE_QUERY, PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
     DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
-from database import meta
+from database import meta, db, session
 
 
 def convert_to_sqlalchemy(data_type: str):
@@ -60,11 +60,12 @@ def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_QUER
                 new_table.append_column(
                     Column(other.name_field, type_=type_, nullable=other.nullable, unique=other.unique,
                            default=other.default, comment=other.comment))
-        new_table.create()
+        new_table.create(checkfirst=True)
     except TypeError as e:
         return JSONResponse(content="TypeError: {}".format(e), status_code=status.HTTP_400_BAD_REQUEST)
     except exc.SQLAlchemyError as e:
         logging.error(e)
+        session.rollback()
         return JSONResponse(content="Failed with error {}".format(e), status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content="Table is created", status_code=status.HTTP_201_CREATED)
 

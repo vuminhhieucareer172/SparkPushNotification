@@ -20,8 +20,8 @@ def get_query():
     return db.execute("select * from query")
 
 
-def main():
-    file_name = opt.app_name.lower().replace(" ", "_") + ".py"
+def generate_job_stream(app_name: str, ):
+    file_name = app_name.lower().replace(" ", "_") + ".py"
     data = get_query()
     with open(opt.path + file_name, 'w') as f_job:
         r = """from pyspark.sql import SparkSession
@@ -96,7 +96,3 @@ if __name__ == '__main__':
 def run():
     os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
         """.format(opt.master, opt.path + file_name))
-
-
-if __name__ == '__main__':
-    main()

@@ -26,7 +26,7 @@ def upgrade():
         sa.Column('table_query', sa.VARCHAR(50), nullable=False),
         sa.Column('topic_kafka_input', sa.VARCHAR(50), nullable=False),
         sa.Column('topic_kafka_output', sa.VARCHAR(50), nullable=False),
-        sa.Column('config', sa.VARCHAR(255), nullable=False),
+        sa.Column('config', sa.JSON, nullable=False),
         sa.Column('status', sa.Enum('RUNNING', 'STOP', 'ERROR'), nullable=False, server_default='RUNNING'),
         sa.Column('enabled', sa.Boolean(), nullable=False, server_default=sa.sql.true()),
         sa.Column('time', sa.VARCHAR(50), nullable=False, server_default='0 0 * * *'),
