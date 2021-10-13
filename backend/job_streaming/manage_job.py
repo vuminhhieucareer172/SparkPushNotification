@@ -1,7 +1,7 @@
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
 
-from backend.models.job import JobStream
+from backend.models.dbstreaming_query import JobStream
 from constants import constants
 from apscheduler.schedulers.background import BackgroundScheduler
 from database import session
@@ -12,6 +12,7 @@ scheduler = BackgroundScheduler({
 })
 
 
+import os
 def job_exec(job_id, func):
     job = session.query(JobStream).filter_by(id=job_id).first()
     job.status = constants.JOB_STREAMING_STATUS_RUNNING
@@ -20,6 +21,7 @@ def job_exec(job_id, func):
         session.commit()
     except Exception as error:
         print(error)
+    os.system("top")
     log = 'this is log'
     if log != '':
         job.status = constants.JOB_STREAMING_STATUS_ERROR
@@ -38,7 +40,7 @@ def init_scheduler():
     jobs = session.query(JobStream).all()
     for job in jobs:
         if job.enabled:
-            scheduler.add_job(job_exec, CronTrigger.from_crontab(job.time), args=[job.id, job.template])
+            scheduler.add_job(job_exec, CronTrigger.from_crontab(job.time), id=str(job.id), args=[job.id, job.template])
     scheduler.start()
     for e in scheduler.get_jobs():
         e.modify(next_run_time=datetime.now())

@@ -6,7 +6,7 @@ from sqlalchemy import exc, Column, Table, text
 from starlette.responses import JSONResponse
 
 from backend.schemas import table
-from constants.constants import PREFIX_DB_TABLE_QUERY, PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
+from constants.constants import PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
     DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
 from database import meta, db, session
 
@@ -15,7 +15,7 @@ def convert_to_sqlalchemy(data_type: str):
     return DATA_TYPE_SQLALCHEMY.get(data_type.upper())
 
 
-def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_QUERY):
+def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STREAMING):
     try:
         new_table = Table(table_prefix_name + new_schema.name, meta, mysql_engine=new_schema.engine,
                           mysql_default_charset=new_schema.charset, mysql_collate=new_schema.collate)
