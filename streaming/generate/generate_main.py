@@ -1,33 +1,32 @@
-import argparse
+from sqlalchemy import inspect
 
+from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
+from backend.utils.util_get_config import get_config_spark, get_config_kafka
 from constants import constants
-from database import db
-parser = argparse.ArgumentParser()
-parser.add_argument('-p', '--path', type=str, default='streaming/job_stream/job/', help='Path to file generated code')
-parser.add_argument('-ep', '--exec-path', type=str, default='streaming/job_stream/executor/',
-                    help='Path to file generated code')
-parser.add_argument('-m', '--master', type=str, default='spark://192.168.1.5:7077', help='IP master in spark cluster')
-parser.add_argument('-n', '--app-name', type=str, default='Alert Job', help='Application name')
-parser.add_argument('--level-log', type=str, default='ERROR', help='Enable log or not')
-parser.add_argument('--network-timeout', type=str, default='fourier', help='Model to predict')
-parser.add_argument('--executor-instances', type=str, default='fourier', help='Model to predict')
-parser.add_argument('--cores-max', type=int, default=6, help='Model to predict')
-parser.add_argument('--executor-memory', type=str, default='1g', help='Size executor memory')
-opt = parser.parse_args()
+from constants.constants import PREFIX_DB_TABLE_STREAMING
+from database import db, session, engine
+from streaming.generate.generate_database_schema import get_schema_table
 
 
 def get_query():
-    return db.execute("select * from query")
+    return db.execute("select * from dbstreaming_query")
 
 
-def main():
-    file_name = opt.app_name.lower().replace(" ", "_") + ".py"
+def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
+                        path_executor_folder: str = 'streaming/job_stream/executor/', **kwargs):
     data = get_query()
-    with open(opt.path + file_name, 'w') as f_job:
+    spark_config = get_config_spark().value
+    kafka_config = get_config_kafka().value
+
+    with open(path_job_folder + file_job_name, 'w') as f_job:
+        # import dependency
         r = """from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, udf
-from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType
+from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType,
+DatetimeConverter, TimestampType, ArrayType, ShortType, BinaryType, DecimalType, DoubleType, MapType"""
 
+        # init spark app with name and log level
+        r += """
 def main():
     concurrent_job = 3
     spark = SparkSession \\
@@ -37,38 +36,48 @@ def main():
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
     spark.sparkContext.setLogLevel("{}")
-    spark.conf.set("spark.streaming.concurrentJobs", str(concurrent_job))
+    spark.conf.set("spark.streaming.concurrentJobs", str(concurrent_job))""".format(app_name,
+                                                                                    kwargs.get("log_level", "ERROR"))
 
-    df = spark \\
+        # set other config
+        for config in kwargs.keys():
+            r += """
+    spark.conf.set("{}", "{}")""".format(config, kwargs.get(config))
+
+        # read from streaming tables in db
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        for table in tables:
+            if table.startswith(PREFIX_DB_TABLE_STREAMING):
+                mapping_kafka_streaming = session.query(KafkaStreaming).filter_by(table_streaming=table).scalar()
+                r += """
+    {} = spark \\
         .readStream \\
         .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("subscribe", "{}") \\
-        .load()
+        .load()""".format(table, kafka_config['bootstrap.servers'], mapping_kafka_streaming.topic_kafka)
+                r += """
+    schema_{} = {}
+""".format(table, get_schema_table(inspector, table))
 
-    schema_job = StructType([
-        StructField("id", LongType()),
-        StructField("application_deadline", DateType()),
-        StructField("company_address", IntegerType()),
-        StructField("salary", FloatType()),
-        StructField("ages", StringType()),
-        StructField("education_level", StringType()),
-        StructField("position", StringType()),
-        StructField("job_attribute", StringType()),
-        StructField("year_experiences", FloatType()),
-    ])
-    data_job = df.withColumn(
-        "data", from_json(col("value").astype(StringType()), schema_job)
+                r += """
+    data_{} = df.withColumn(
+        "data", from_json(col("value").astype(StringType()), schema_{})
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
-""".format("Job Alert Yourway", opt.level_log, constants.KAFKA_URI, constants.TOPIC_JOB)
+""".format(table, table)
 
+                r += """
+    data_{}.createOrReplaceTempView("{}")
+""".format(table, table)
+
+        # generate query
         for record in data:
-            table = 'table' + str(record['id'])
+            table_name = 'table' + str(record['id'])
             r += """
-    data_job.createOrReplaceTempView("{}")
     data = spark.sql("{}")
     check_matching = udf(
-        lambda x: "{}----" + str(x), StringType()
+        lambda x: "{}----" + str({}), StringType()
     )
     data = data.withColumn("value", check_matching(col("key")))
     data.writeStream \\
@@ -77,26 +86,19 @@ def main():
         .option("checkpointLocation", "{}") \\
         .trigger(processingTime='{}') \\
         .option("topic", "{}").start()
-""".format(table, 'select * from ' + table, table, constants.KAFKA_URI,
-           constants.CHECKPOINT_PATH + '/query-' + str(record['id']),
-           '1 second', constants.TOPIC_USER)
+""".format(record['sql'], table_name, record['id'], kafka_config['bootstrap.servers'],
+           constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'], record['topic_kafka_output'])
 
         r += """
     spark.streams.awaitAnyTermination()
-
 
 if __name__ == '__main__':
     main()
 """
         f_job.write(r)
 
-    with open(opt.exec_path + file_name, 'w') as f_exec:
+    with open(path_executor_folder + file_job_name, 'w') as f_exec:
         f_exec.write("""import os
-
 def run():
     os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
-        """.format(opt.master, opt.path + file_name))
-
-
-if __name__ == '__main__':
-    main()
+        """.format(spark_config['master'], path_job_folder + file_job_name))

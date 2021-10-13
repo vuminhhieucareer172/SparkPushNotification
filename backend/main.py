@@ -1,7 +1,9 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller import table, database_connection
+from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
 from database import db
 from backend.schemas.table import Table
@@ -40,3 +42,9 @@ def connect_database(database_information: Database):
 @app.on_event("shutdown")
 async def shutdown_event():
     db.close()
+
+
+if __name__ == '__main__':
+    init_scheduler()
+    uvicorn.run(app, host="0.0.0.0", port=5005)
+    scheduler.shutdown(wait=False)
