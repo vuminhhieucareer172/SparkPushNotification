@@ -2,9 +2,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.controller import table, database_connection
+from backend.controller import table, database_connection, query
 from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
+from backend.schemas.query import Query
 from database import db
 from backend.schemas.table import Table
 
@@ -42,6 +43,11 @@ def connect_database(database_information: Database):
 @app.on_event("shutdown")
 async def shutdown_event():
     db.close()
+
+
+@app.post("/add-query")
+def add_query(new_query: Query):
+    return query.add_query(new_query)
 
 
 if __name__ == '__main__':

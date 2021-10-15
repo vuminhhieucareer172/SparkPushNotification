@@ -1,6 +1,6 @@
 from sqlalchemy import Column, VARCHAR, INTEGER, JSON, TIMESTAMP, func
-
 from database import Model
+from backend.schemas.query import Query
 
 
 class UserQuery(Model):
@@ -29,10 +29,10 @@ class UserQuery(Model):
         )
 
     @staticmethod
-    def from_json(json_post):
+    def from_json(schema_query: Query):
         return UserQuery(
-            sql=json_post.get('sql'),
-            topic_kafka_output=json_post.get('topic_kafka_output'),
-            time_trigger=json_post.get('time_trigger'),
-            contact=json_post.get('contact'),
+            sql=schema_query.sql,
+            topic_kafka_output=schema_query.topic_kafka_output,
+            time_trigger=schema_query.time_trigger,
+            contact=schema_query.contact,
         )
