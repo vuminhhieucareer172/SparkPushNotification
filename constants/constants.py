@@ -1,6 +1,6 @@
 import sqlalchemy
 
-KAFKA_URI = "192.168.1.2:9092"
+KAFKA_URI = "localhost:9092"
 TOPIC_JOB = "jobYourway"
 TOPIC_USER = "userId"
 TOPIC_USER_QUERY = "userQuery"
