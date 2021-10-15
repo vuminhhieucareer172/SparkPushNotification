@@ -1,5 +1,5 @@
 from sqlalchemy import Column, VARCHAR, INTEGER
-
+from backend.schemas.stream import Stream
 from database import Model
 
 
@@ -21,8 +21,8 @@ class KafkaStreaming(Model):
         )
 
     @staticmethod
-    def from_json(json_post):
+    def from_json(table_streaming: str, topic_kafka: str):
         return KafkaStreaming(
-            table_streaming=json_post.get('table_streaming'),
-            topic_kafka=json_post.get('topic_kafka'),
+            table_streaming=table_streaming,
+            topic_kafka=topic_kafka,
         )

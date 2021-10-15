@@ -8,14 +8,14 @@ from starlette.responses import JSONResponse
 from backend.schemas import table
 from constants.constants import PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
     DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
-from database import meta, db, session
+from database import meta, session
 
 
 def convert_to_sqlalchemy(data_type: str):
     return DATA_TYPE_SQLALCHEMY.get(data_type.upper())
 
 
-def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STREAMING):
+def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STREAMING) -> JSONResponse:
     try:
         new_table = Table(table_prefix_name + new_schema.name, meta, mysql_engine=new_schema.engine,
                           mysql_default_charset=new_schema.charset, mysql_collate=new_schema.collate)
@@ -70,7 +70,7 @@ def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STRE
     return JSONResponse(content="Table is created", status_code=status.HTTP_201_CREATED)
 
 
-def create_table_streaming(new_schema: table.Table):
+def create_table_streaming(new_schema: table.Table) -> JSONResponse:
     require_field = ['sql', 'created_at', 'time_trigger', 'updated_at']
     for field in new_schema.fields.others:
         if field.name_field in require_field:

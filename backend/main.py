@@ -2,12 +2,12 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.controller import table, database_connection, query
+from backend.controller import stream, database_connection, query
 from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
 from backend.schemas.query import Query
+from backend.schemas.stream import Stream
 from database import db
-from backend.schemas.table import Table
 
 app = FastAPI()
 
@@ -20,14 +20,9 @@ app.add_middleware(
 )
 
 
-@app.post("/create-table/streaming")
-async def create_table_streaming(new_schema: Table):
-    return table.create_table_streaming(new_schema)
-
-
-@app.post("/create-table/query")
-async def create_table_query(new_schema: Table):
-    return table.create_table(new_schema)
+@app.post("/add-stream")
+async def add_stream(new_schema: Stream):
+    return stream.add_stream(new_schema)
 
 
 @app.post("/test-connect-database")
