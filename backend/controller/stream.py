@@ -5,9 +5,9 @@ from sqlalchemy import exc
 from backend.controller.table import create_table_streaming
 from backend.schemas.stream import Stream
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
+from backend.utils.util_get_config import get_config_spark
 from database import session
 
-from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from starlette.responses import JSONResponse
 
@@ -16,7 +16,13 @@ from constants import constants
 
 
 def spark_version():
-    version = requests.get(constants.SPARK_URL_API + '/version').json()
+    try:
+        spark_properties = get_config_spark()
+        version = requests.get(spark_properties.value.get("master") + '/version').json()
+    except exc.SQLAlchemyError as e:
+        print(e)
+        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
+
     return JSONResponse(version)
 
 
@@ -41,6 +47,5 @@ def add_stream(new_schema: Stream):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"},
-                            status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)

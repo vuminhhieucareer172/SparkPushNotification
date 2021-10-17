@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller import stream, database_connection, query
-from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
@@ -66,6 +65,4 @@ def delete_query(query_id: int):
 
 
 if __name__ == '__main__':
-    init_scheduler()
     uvicorn.run(app, host="0.0.0.0", port=5005)
-    scheduler.shutdown(wait=False)
