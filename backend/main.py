@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.controller import stream, database_connection, query
 from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
-from backend.schemas.query import Query
+from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
 from database import db
 
@@ -43,6 +43,16 @@ async def shutdown_event():
 @app.post("/add-query")
 def add_query(new_query: Query):
     return query.add_query(new_query)
+
+
+@app.put("/update-query")
+def update_query(new_query: QueryUpdate):
+    return query.update_query(new_query)
+
+
+@app.delete("/delete-query/{query_id}")
+def delete_query(query_id: int):
+    return query.delete_query(query_id)
 
 
 if __name__ == '__main__':
