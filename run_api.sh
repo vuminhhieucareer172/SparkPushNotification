@@ -1,4 +1,7 @@
 #!/bin/bash
 
+# run migration mysql structure
+cd backend && alembic upgrade head
+
 # run app
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 5005
+cd .. && PYTHONPATH=$PWD python backend/main.py
