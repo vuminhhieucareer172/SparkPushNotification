@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Enum, INTEGER, JSON
 
+from backend.schemas.configuration import Configuration
 from constants import constants
 from database import Model
 
@@ -22,9 +23,16 @@ class Config(Model):
             value=self.value,
         )
 
+    # @staticmethod
+    # def from_json(json_post):
+    #     return Config(
+    #         name=json_post.get('name'),
+    #         value=json_post.get('value'),
+    #     )
+
     @staticmethod
-    def from_json(json_post):
+    def from_json(schemas_config: Configuration):
         return Config(
-            name=json_post.get('name'),
-            value=json_post.get('value'),
+            name=schemas_config.name,
+            value=schemas_config.value,
         )

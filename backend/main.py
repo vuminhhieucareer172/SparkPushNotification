@@ -2,8 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.controller import stream, database_connection, query
-from backend.job_streaming.manage_job import init_scheduler, scheduler
+from backend.controller import stream, database_connection, query, configuration
+# from backend.job_streaming.manage_job import init_scheduler, scheduler
+from backend.schemas.configuration import Configuration
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
@@ -44,6 +45,9 @@ async def shutdown_event():
 def add_query(new_query: Query):
     return query.add_query(new_query)
 
+@app.post("/add-config")
+def add_config(new_config: Configuration):
+    return configuration.add_config(new_config)
 
 @app.put("/update-query")
 def update_query(new_query: QueryUpdate):
@@ -56,6 +60,6 @@ def delete_query(query_id: int):
 
 
 if __name__ == '__main__':
-    init_scheduler()
+    # init_scheduler()
     uvicorn.run(app, host="0.0.0.0", port=5005)
-    scheduler.shutdown(wait=False)
+    # scheduler.shutdown(wait=False)
