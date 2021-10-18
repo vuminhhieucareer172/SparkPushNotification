@@ -19,7 +19,7 @@ def add_query(new_query: Query):
 
 
 def update_query(new_query: QueryUpdate):
-    query = session.query(UserQuery).filter_by(username=new_query.id).scalar()
+    query = session.query(UserQuery).filter_by(id=new_query.id).scalar()
     try:
         query.sql = new_query.sql
         query.topic_kafka_output = new_query.topic_kafka_output

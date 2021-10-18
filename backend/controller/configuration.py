@@ -16,7 +16,7 @@ def add_config(new_config: Configuration):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e},
+        return JSONResponse(content={"message": "Failed"},
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)

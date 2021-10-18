@@ -1,14 +1,14 @@
-import requests
 from fastapi import status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import exc
 from starlette.responses import JSONResponse
+import subprocess
 
 from backend.controller.table import create_table_streaming
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.schemas.stream import Stream
 from backend.utils.util_get_config import get_config_spark
 from database import session
-from fastapi.responses import RedirectResponse
 
 
 def check_status_spark():
@@ -36,3 +36,10 @@ def add_stream(new_schema: Stream):
         session.rollback()
         return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
+
+
+def submit_job_spark():
+    cmd = "nohup", "spark-submit", "--packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2", \
+          "streaming/job_stream/job/JobAlert1.py"
+    proc = subprocess.Popen(cmd)
+    return proc

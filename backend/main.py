@@ -1,14 +1,19 @@
+import os
+
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette import status
+from starlette.responses import JSONResponse
+
 from backend.controller import stream, database_connection, query, configuration
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
 from database import db
-import os
-from dotenv import load_dotenv
+from streaming.spark import spark_instance, spark_pid
 
 load_dotenv()
 app = FastAPI()
@@ -71,9 +76,23 @@ def add_config(new_config: Configuration):
 def update_query(new_config: ConfigurationUpdate):
     return configuration.update_config(new_config)
 
+
 @app.delete("/delete-config/{config_id}")
 def delete_query(config_id: int):
     return configuration.delete_config(config_id)
+
+
+@app.get("/stop-spark")
+def stop_spark():
+    spark_instance.stop()
+    return JSONResponse(content={"message": "stopped"}, status_code=status.HTTP_200_OK)
+
+
+@app.get("/start-spark")
+def run():
+    job = stream.submit_job_spark()
+    return JSONResponse(content={"message": "started", "process_id": job.pid}, status_code=status.HTTP_200_OK)
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
