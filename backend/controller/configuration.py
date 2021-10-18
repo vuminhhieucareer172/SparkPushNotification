@@ -16,7 +16,7 @@ def add_config(new_config: Configuration):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"},
+        return JSONResponse(content={"message": "Failed", "detail": e},
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
@@ -31,7 +31,7 @@ def update_config(new_config: ConfigurationUpdate):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"},
+        return JSONResponse(content={"message": "Failed", "detail": e},
                             status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
@@ -43,5 +43,5 @@ def delete_config(config_id: int):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
