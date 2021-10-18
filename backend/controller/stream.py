@@ -11,7 +11,6 @@ from database import session
 import requests
 from starlette.responses import JSONResponse
 
-from backend.models.job import Job
 from constants import constants
 
 
