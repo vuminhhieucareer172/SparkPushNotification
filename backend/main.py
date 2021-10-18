@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller import stream, database_connection, query, configuration
 # from backend.job_streaming.manage_job import init_scheduler, scheduler
-from backend.schemas.configuration import Configuration
+from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
@@ -45,9 +45,6 @@ async def shutdown_event():
 def add_query(new_query: Query):
     return query.add_query(new_query)
 
-@app.post("/add-config")
-def add_config(new_config: Configuration):
-    return configuration.add_config(new_config)
 
 @app.put("/update-query")
 def update_query(new_query: QueryUpdate):
@@ -58,6 +55,19 @@ def update_query(new_query: QueryUpdate):
 def delete_query(query_id: int):
     return query.delete_query(query_id)
 
+
+@app.post("/add-config")
+def add_config(new_config: Configuration):
+    return configuration.add_config(new_config)
+
+
+@app.put("/update-config")
+def update_query(new_config: ConfigurationUpdate):
+    return configuration.update_config(new_config)
+
+@app.delete("/delete-config/{config_id}")
+def delete_query(config_id: int):
+    return configuration.delete_config(config_id)
 
 if __name__ == '__main__':
     # init_scheduler()

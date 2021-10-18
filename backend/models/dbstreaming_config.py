@@ -23,13 +23,6 @@ class Config(Model):
             value=self.value,
         )
 
-    # @staticmethod
-    # def from_json(json_post):
-    #     return Config(
-    #         name=json_post.get('name'),
-    #         value=json_post.get('value'),
-    #     )
-
     @staticmethod
     def from_json(schemas_config: Configuration):
         return Config(
