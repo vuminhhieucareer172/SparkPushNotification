@@ -15,8 +15,12 @@ def get_query():
 def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
                         path_executor_folder: str = 'streaming/job_stream/executor/', **kwargs):
     data = get_query()
-    spark_config = get_config_spark().value
-    kafka_config = get_config_kafka().value
+    spark_config = get_config_spark()
+    if spark_config is None:
+        return None
+    kafka_config = get_config_kafka()
+    if kafka_config is None:
+        return None
 
     with open(path_job_folder + file_job_name, 'w') as f_job:
         # import dependency
@@ -62,7 +66,7 @@ def main():
         .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("subscribe", "{}") \\
-        .load()""".format(table, kafka_config['bootstrap.servers'], mapping_kafka_streaming.topic_kafka)
+        .load()""".format(table, kafka_config.value['bootstrap.servers'], mapping_kafka_streaming.topic_kafka)
                 r += """
     schema_{} = {}
 """.format(table, get_schema_table(inspector, table))
@@ -92,8 +96,9 @@ def main():
         .option("checkpointLocation", "{}") \\
         .trigger(processingTime='{}') \\
         .option("topic", "{}").start()
-""".format(record['sql'], table_name, record['id'], kafka_config['bootstrap.servers'],
-           constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'], record['topic_kafka_output'])
+""".format(record['sql'], table_name, record['id'], kafka_config.value['bootstrap.servers'],
+           constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'],
+           record['topic_kafka_output'])
 
         r += """
     spark.streams.awaitAnyTermination()
@@ -107,4 +112,4 @@ if __name__ == '__main__':
         f_exec.write("""import os
 def run():
     os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
-        """.format(spark_config['master'], path_job_folder + file_job_name))
+        """.format(spark_config.value['master'], path_job_folder + file_job_name))

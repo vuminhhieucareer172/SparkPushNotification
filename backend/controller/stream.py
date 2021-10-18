@@ -1,38 +1,26 @@
-from datetime import datetime
+import requests
 from fastapi import status
 from sqlalchemy import exc
-
-from backend.controller.table import create_table_streaming
-from backend.schemas.stream import Stream
-from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
-from backend.utils.util_get_config import get_config_spark
-from database import session
-
-import requests
 from starlette.responses import JSONResponse
 
-from constants import constants
+from backend.controller.table import create_table_streaming
+from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
+from backend.schemas.stream import Stream
+from backend.utils.util_get_config import get_config_spark
+from database import session
+from fastapi.responses import RedirectResponse
 
 
-def spark_version():
+def check_status_spark():
+    spark_config = get_config_spark()
+    if spark_config is None:
+        return JSONResponse(content={"message": "Error database"}, status_code=status.HTTP_400_BAD_REQUEST)
     try:
-        spark_properties = get_config_spark()
-        version = requests.get(spark_properties.value.get("master") + '/version').json()
-    except exc.SQLAlchemyError as e:
+        print(spark_config.value.get("master") + ":8888")
+        return RedirectResponse("http://" + spark_config.value.get("master") + ":8888")
+    except Exception as e:
         print(e)
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
-
-    return JSONResponse(version)
-
-
-def get_list_applications():
-    list_app = requests.get(constants.SPARK_URL_API + '/applications').json()
-    return JSONResponse(list_app)
-
-
-def get_detail_application(app_id: str):
-    detail = requests.get(constants.SPARK_URL_API + '/applications/' + app_id).json()
-    return JSONResponse(detail)
+        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def add_stream(new_schema: Stream):
@@ -46,5 +34,5 @@ def add_stream(new_schema: Stream):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)

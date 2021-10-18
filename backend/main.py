@@ -37,14 +37,9 @@ def connect_database(database_information: Database):
     return database_connection.connect_database(database_information)
 
 
-@app.get("/spark-version")
-def get_version_of_spark():
-    return stream.spark_version()
-
-
-@app.get("/job-stream")
-def get_job_stream():
-    return stream.get_list_applications()
+@app.get("/check-status-job-on-spark")
+def check_status_spark():
+    return stream.check_status_spark()
 
 
 @app.on_event("shutdown")
@@ -68,4 +63,4 @@ def delete_query(query_id: int):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host=os.getenv('APP_HOST'), port=os.getenv('APP_PORT'))
+    uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
