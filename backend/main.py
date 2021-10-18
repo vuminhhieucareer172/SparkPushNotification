@@ -3,12 +3,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller import stream, database_connection, query
-from backend.job_streaming.manage_job import init_scheduler, scheduler
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
 from database import db
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
 
 app.add_middleware(
@@ -35,6 +37,11 @@ def connect_database(database_information: Database):
     return database_connection.connect_database(database_information)
 
 
+@app.get("/check-status-job-on-spark")
+def check_status_spark():
+    return stream.check_status_spark()
+
+
 @app.on_event("shutdown")
 async def shutdown_event():
     db.close()
@@ -56,6 +63,4 @@ def delete_query(query_id: int):
 
 
 if __name__ == '__main__':
-    init_scheduler()
-    uvicorn.run(app, host="0.0.0.0", port=5005)
-    scheduler.shutdown(wait=False)
+    uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
