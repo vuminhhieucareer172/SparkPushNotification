@@ -21,7 +21,6 @@ def check_status_spark():
     if spark_config is None:
         return JSONResponse(content={"message": "Error database"}, status_code=status.HTTP_400_BAD_REQUEST)
     try:
-        print(spark_config.value.get("master") + ":8888")
         return RedirectResponse("http://" + spark_config.value.get("master") + ":8888")
     except Exception as e:
         print(e)
