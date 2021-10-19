@@ -74,5 +74,5 @@ def stop_job_streaming():
 
 
 def start_job_streaming():
-    job = submit_job_spark(file="JobAlert11")
+    job = submit_job_spark(file="job_streaming_example")
     return JSONResponse(content={"message": "started", "process_id": job.pid}, status_code=status.HTTP_200_OK)
