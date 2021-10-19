@@ -1,5 +1,4 @@
 import logging
-import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -11,7 +10,7 @@ from backend.controller.stream import submit_job_spark
 from backend.utils.util_generate import generate_job_id
 from backend.utils.util_get_config import get_config
 from constants import constants
-from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_SPARK, CONFIG_JOB_STREAMING
+from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING
 from streaming.generate.generate_main import generate_job_stream
 from streaming.spark import spark
 

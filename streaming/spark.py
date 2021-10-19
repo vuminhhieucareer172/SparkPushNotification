@@ -1,5 +1,4 @@
 from pyspark import SparkConf, SparkContext, SQLContext
-from pyspark.sql import SparkSession
 
 
 class Spark:
