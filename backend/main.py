@@ -115,4 +115,5 @@ def stop_job_streaming():
 if __name__ == '__main__':
     result_scheduler = init_scheduler()
     uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
-    scheduler.shutdown()
+    if scheduler.running:
+        scheduler.shutdown()
