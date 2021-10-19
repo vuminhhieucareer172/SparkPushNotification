@@ -1,9 +1,29 @@
+import logging
+
 from sqlalchemy import exc
 from starlette.responses import JSONResponse
 from starlette import status
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query, QueryUpdate
 from database import session
+
+
+def get_query():
+    try:
+        queries = session.query(UserQuery).all()
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+        return None
+    return queries
+
+
+def get_query_by_id(id_query: int):
+    try:
+        query = session.query(UserQuery).filter_by(id=id_query).scalar()
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+        return None
+    return query
 
 
 def add_query(new_query: Query):

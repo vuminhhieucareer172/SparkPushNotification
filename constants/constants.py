@@ -77,3 +77,6 @@ CONFIG_SPARK = 'spark'
 CONFIG_KAFKA = 'kafka'
 CONFIG_MAIL = 'mail'
 CONFIG_ZALO = 'zalo'
+
+
+GENERATE_STREAMING_SUCCESSFUL = "successful"

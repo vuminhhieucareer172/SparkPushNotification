@@ -1,26 +1,25 @@
 from sqlalchemy import inspect
 
+from backend.controller.query import get_query
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.utils.util_get_config import get_config_spark, get_config_kafka
 from constants import constants
-from constants.constants import PREFIX_DB_TABLE_STREAMING
-from database import db, session, engine
+from constants.constants import PREFIX_DB_TABLE_STREAMING, GENERATE_STREAMING_SUCCESSFUL
+from database import session, engine
 from streaming.generate.generate_database_schema import get_schema_table
 
 
-def get_query():
-    return db.execute("select * from dbstreaming_query")
-
-
-def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
-                        path_executor_folder: str = 'streaming/job_stream/executor/', **kwargs):
+async def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
+                              path_executor_folder: str = 'streaming/job_stream/executor/', **kwargs):
     data = get_query()
+    if data is None:
+        return "No query in database"
     spark_config = get_config_spark()
     if spark_config is None:
-        return None
+        return "No config spark in database"
     kafka_config = get_config_kafka()
     if kafka_config is None:
-        return None
+        return "No config kafka in database"
 
     with open(path_job_folder + file_job_name, 'w') as f_job:
         # import dependency
@@ -113,3 +112,5 @@ if __name__ == '__main__':
 def run():
     os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
         """.format(spark_config.value['master'], path_job_folder + file_job_name))
+    return GENERATE_STREAMING_SUCCESSFUL
+
