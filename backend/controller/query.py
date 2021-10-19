@@ -34,7 +34,7 @@ def add_query(new_query: Query):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -49,7 +49,7 @@ def update_query(new_query: QueryUpdate):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -60,5 +60,5 @@ def delete_query(query_id: int):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)

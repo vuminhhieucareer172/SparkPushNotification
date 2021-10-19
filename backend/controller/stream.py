@@ -1,21 +1,23 @@
-from apscheduler.triggers.cron import CronTrigger
+import subprocess
+
 from fastapi import status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import exc
 from starlette.responses import JSONResponse
-import subprocess
 
-from backend.controller.schedule import generate_job_id, scheduler
 from backend.controller.table import create_table_streaming
+from backend.models.dbstreaming_config import Config
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
-from backend.schemas.stream import Stream
-from backend.utils.util_get_config import get_config_spark
+from backend.schemas.configuration import Configuration
+from backend.schemas.stream import Stream, JobStream
+from backend.utils.util_get_config import get_config
+from constants import constants
 from database import session
-from streaming.spark import spark, spark_sql
+from streaming.spark import spark_sql
 
 
 def check_status_spark():
-    spark_config = get_config_spark()
+    spark_config = get_config(constants.CONFIG_SPARK)
     if spark_config is None:
         return JSONResponse(content={"message": "Error database"}, status_code=status.HTTP_400_BAD_REQUEST)
     try:
@@ -23,7 +25,7 @@ def check_status_spark():
         return RedirectResponse("http://" + spark_config.value.get("master") + ":8888")
     except Exception as e:
         print(e)
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def add_stream(new_schema: Stream):
@@ -37,7 +39,7 @@ def add_stream(new_schema: Stream):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -48,26 +50,6 @@ def submit_job_spark(file: str):
     return proc
 
 
-def get_job_stream():
-    spark_properties = get_config_spark()
-    if spark_properties is None:
-        return None
-    spark_properties = spark_properties.value
-    if spark_properties.get("name_job", None) is None:
-        return JSONResponse(content={"message": "missing config for name spark job"},
-                            status_code=status.HTTP_400_BAD_REQUEST)
-    job = scheduler.get_job(job_id=generate_job_id(
-        spark_properties.get("name_job"))
-    )
-
-    schedule = {}
-    for field in CronTrigger.FIELD_NAMES:
-        field_name = CronTrigger.FIELD_NAMES.index(field)
-        schedule[field] = str(job.trigger.fields[field_name])
-    return JSONResponse(content=dict(app_name=spark.appName, schedule=schedule),
-                        status_code=status.HTTP_200_OK)
-
-
 def stop_job_streaming():
     spark_sql.stop()
     return JSONResponse(content={"message": "stopped"}, status_code=status.HTTP_200_OK)
@@ -76,3 +58,23 @@ def stop_job_streaming():
 def start_job_streaming():
     job = submit_job_spark(file="job_streaming_example")
     return JSONResponse(content={"message": "started", "process_id": job.pid}, status_code=status.HTTP_200_OK)
+
+
+def update_job_streaming(schema: JobStream):
+    try:
+        job_streaming = session.query(Config).filter(Config.id == constants.CONFIG_JOB_STREAMING).scalar()
+        if job_streaming is not None:
+            job_streaming.value = dict(name_job=schema.name_job,
+                                       schedule=schema.schedule)
+        else:
+            config_schema = Configuration(name=constants.CONFIG_JOB_STREAMING,
+                                          value=dict(name_job=schema.name_job,
+                                                     schedule=schema.schedule)
+                                          )
+            session.add(Config.from_json(config_schema))
+        session.commit()
+    except exc.SQLAlchemyError as e:
+        print(e)
+        session.rollback()
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
+    return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)

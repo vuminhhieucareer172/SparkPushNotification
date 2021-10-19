@@ -43,5 +43,5 @@ def delete_config(config_id: int):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)

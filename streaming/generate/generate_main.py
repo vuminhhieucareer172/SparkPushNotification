@@ -2,7 +2,7 @@ from sqlalchemy import inspect
 
 from backend.controller.query import get_query
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
-from backend.utils.util_get_config import get_config_spark, get_config_kafka
+from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import PREFIX_DB_TABLE_STREAMING, GENERATE_STREAMING_SUCCESSFUL
 from database import session, engine
@@ -14,10 +14,10 @@ async def generate_job_stream(app_name: str, file_job_name: str, path_job_folder
     data = get_query()
     if data is None:
         return "No query in database"
-    spark_config = get_config_spark()
+    spark_config = get_config(constants.CONFIG_SPARK)
     if spark_config is None:
         return "No config spark in database"
-    kafka_config = get_config_kafka()
+    kafka_config = get_config(constants.CONFIG_KAFKA)
     if kafka_config is None:
         return "No config kafka in database"
 

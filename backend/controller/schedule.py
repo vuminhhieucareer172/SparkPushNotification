@@ -4,17 +4,40 @@ import os
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
-from unidecode import unidecode
+from starlette import status
+from starlette.responses import JSONResponse
 
 from backend.controller.stream import submit_job_spark
-from backend.utils.util_get_config import get_config_spark
-from constants.constants import GENERATE_STREAMING_SUCCESSFUL
+from backend.utils.util_generate import generate_job_id
+from backend.utils.util_get_config import get_config
+from constants import constants
+from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_SPARK, CONFIG_JOB_STREAMING
 from streaming.generate.generate_main import generate_job_stream
 from streaming.spark import spark
 
 scheduler = BackgroundScheduler({
     'apscheduler.job_defaults.max_instances': '10'
 })
+
+
+def get_job_stream():
+    spark_properties = get_config(constants.CONFIG_SPARK)
+    if spark_properties is None:
+        return None
+    spark_properties = spark_properties.value
+    if spark_properties.get("name_job", None) is None:
+        return JSONResponse(content={"message": "missing config for name spark job"},
+                            status_code=status.HTTP_400_BAD_REQUEST)
+    job = scheduler.get_job(job_id=generate_job_id(
+        spark_properties.get("name_job"))
+    )
+
+    schedule = {}
+    for field in CronTrigger.FIELD_NAMES:
+        field_name = CronTrigger.FIELD_NAMES.index(field)
+        schedule[field] = str(job.trigger.fields[field_name])
+    return JSONResponse(content=dict(app_name=spark.appName, schedule=schedule),
+                        status_code=status.HTTP_200_OK)
 
 
 def job_exec(job_id: str, job_name: str):
@@ -25,24 +48,23 @@ def job_exec(job_id: str, job_name: str):
     logging.info(f"submitting job in process: {process.pid}")
 
 
-def generate_job_id(name: str):
-    res = unidecode(name).lower().strip()
-    return '_'.join(res.split())
-
-
 def init_scheduler():
-    spark_properties = get_config_spark()
-    if spark_properties is None:
-        return "missing spark config"
-    spark_properties = spark_properties.value
+    job_streaming_properties = get_config(CONFIG_JOB_STREAMING)
+    if job_streaming_properties is None:
+        return "missing job streaming config"
+
+    job_streaming_properties = job_streaming_properties.value
     try:
         load_dotenv()
-
-        job_name = spark_properties.get("name_job", None)
+        job_name = job_streaming_properties.get("name_job", None)
         if job_name is None:
             return "missing config for name spark job"
-        job_id = generate_job_id(spark_properties.get("name_job"))
-        schedule = os.getenv("STREAMING_SCHEDULE")
+        job_id = generate_job_id(job_name)
+
+        schedule = job_streaming_properties.get("schedule", None)
+        if schedule is None:
+            return "missing schedule for spark job"
+
         job = scheduler.get_job(job_id=job_id)
         if job is not None:
             scheduler.remove_job(job_id=job_id)

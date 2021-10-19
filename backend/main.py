@@ -7,12 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller import stream, database_connection, query, configuration
+from backend.controller import stream, database_connection, query, configuration, schedule
 from backend.controller.schedule import init_scheduler, scheduler
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
-from backend.schemas.stream import Stream
+from backend.schemas.stream import Stream, JobStream
 from database import db
 
 load_dotenv()
@@ -94,12 +94,17 @@ def delete_query(config_id: int):
 
 @app.get("/job-streaming")
 def job_streaming():
-    return stream.get_job_stream()
+    return schedule.get_job_stream()
 
 
 @app.get("/start-job-streaming")
 def start_job_streaming():
     return stream.start_job_streaming()
+
+
+@app.post("/update-job-streaming")
+def update_job_streaming(new_schema_job: JobStream):
+    return stream.update_job_streaming(new_schema_job)
 
 
 @app.get("/stop-job-streaming")
