@@ -5,17 +5,6 @@ from pyspark.sql.types import StringType, StructType, IntegerType, StructField, 
 from constants.constants import KAFKA_URI, TOPIC_JOB, TOPIC_USER, CHECKPOINT_PATH
 
 
-def init_app():
-    spark = SparkSession \
-        .builder \
-        .appName("Job Alert Yourway") \
-        .getOrCreate()
-    spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
-    spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
-    spark.sparkContext.setLogLevel("ERROR")
-    return spark
-
-
 def main():
     concurrent_job = 3
     spark = SparkSession \
