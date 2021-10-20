@@ -10,6 +10,7 @@ from backend.schemas.configuration import Configuration
 from backend.schemas.stream import Stream, JobStream
 from backend.utils.util_get_config import get_config
 from constants import constants
+from constants.constants import PREFIX_DB_TABLE_STREAMING
 from database import session
 from streaming.spark import spark_sql, Spark
 
@@ -29,9 +30,9 @@ def add_stream(new_schema: Stream):
     is_create_table_success = create_table_streaming(new_schema.table)
     if is_create_table_success.status_code != status.HTTP_201_CREATED:
         return is_create_table_success
-
     try:
-        session.add(KafkaStreaming.from_json(new_schema.table.name, new_schema.topic_kafka_input))
+        session.add(KafkaStreaming.from_json(PREFIX_DB_TABLE_STREAMING + new_schema.table.name,
+                                             new_schema.topic_kafka_input))
         session.commit()
     except exc.SQLAlchemyError as e:
         print(e)
