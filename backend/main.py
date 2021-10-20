@@ -1,13 +1,13 @@
 from typing import List
-
+import json
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller import stream, database_connection, query, configuration
-from backend.schemas.configuration import Configuration, ConfigurationUpdate, ConfigurationGet
+from backend.controller import stream, database_connection, query, configuration, tables_manager
+from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream
@@ -90,6 +90,17 @@ def update_config(new_config: ConfigurationUpdate):
 @app.delete("/delete-config/{config_id}")
 def delete_config(config_id: int):
     return configuration.delete_config(config_id)
+
+
+@app.get("/tables")
+def get_tables():
+    return tables_manager.get_tables()
+    # return JSONResponse(tables_manager.get_tables(), status_code=status.HTTP_200_OK)
+
+
+@app.get("/tables/{table_name}")
+def get_tables_by_name(table_name: str):
+    return tables_manager.get_tables_by_name(table_name)
 
 
 if __name__ == '__main__':
