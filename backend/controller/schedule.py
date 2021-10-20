@@ -1,12 +1,14 @@
 import logging
 
+import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
+from psutil import NoSuchProcess
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller.stream import submit_job_spark
+from backend.controller.stream import Spark
 from backend.utils.util_generate import generate_job_id
 from backend.utils.util_get_config import get_config
 from constants import constants
@@ -17,6 +19,15 @@ from streaming.spark import spark
 scheduler = BackgroundScheduler({
     'apscheduler.job_defaults.max_instances': '10'
 })
+
+
+def is_job_stream_running(pid):
+    """ Check For the existence of a unix pid. """
+    try:
+        process = psutil.Process(pid)
+        return "org.apache.spark.deploy.SparkSubmit" in process.cmdline()
+    except NoSuchProcess:
+        return False
 
 
 def get_job_stream():
@@ -35,7 +46,8 @@ def get_job_stream():
     for field in CronTrigger.FIELD_NAMES:
         field_name = CronTrigger.FIELD_NAMES.index(field)
         schedule[field] = str(job.trigger.fields[field_name])
-    return JSONResponse(content=dict(app_name=spark.appName, schedule=schedule),
+    return JSONResponse(content=dict(app_name=spark.appName, schedule=schedule,
+                                     is_running=is_job_stream_running(Spark().get_pid())),
                         status_code=status.HTTP_200_OK)
 
 
@@ -43,7 +55,7 @@ def job_exec(job_id: str, job_name: str):
     result_generate = generate_job_stream(job_name, job_id)
     if result_generate != GENERATE_STREAMING_SUCCESSFUL:
         return result_generate
-    process = submit_job_spark(job_id)
+    process = Spark().submit_job_spark(job_id)
     logging.info(f"submitting job in process: {process.pid}")
 
 

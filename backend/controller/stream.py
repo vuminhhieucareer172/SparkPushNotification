@@ -1,5 +1,3 @@
-import subprocess
-
 from fastapi import status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import exc
@@ -13,7 +11,7 @@ from backend.schemas.stream import Stream, JobStream
 from backend.utils.util_get_config import get_config
 from constants import constants
 from database import session
-from streaming.spark import spark_sql
+from streaming.spark import spark_sql, Spark
 
 
 def check_status_spark():
@@ -42,20 +40,13 @@ def add_stream(new_schema: Stream):
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
-def submit_job_spark(file: str):
-    cmd = "nohup", "spark-submit", "--packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2", \
-          "streaming/job_stream/job/" + file + ".py"
-    proc = subprocess.Popen(cmd)
-    return proc
-
-
 def stop_job_streaming():
     spark_sql.stop()
     return JSONResponse(content={"message": "stopped"}, status_code=status.HTTP_200_OK)
 
 
 def start_job_streaming():
-    job = submit_job_spark(file="job_streaming_example")
+    job = Spark().submit_job_spark(file="job_streaming_example")
     return JSONResponse(content={"message": "started", "process_id": job.pid}, status_code=status.HTTP_200_OK)
 
 
