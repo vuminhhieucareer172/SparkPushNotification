@@ -28,7 +28,6 @@ def get_tables_by_name(table_name: str):
         for table in inspector.get_table_names():
             if table == table_name:
                 table_detail = inspector.get_columns(table)
-                # print(inspector.get_columns(table))
     except exc.SQLAlchemyError as e:
         logging.error(e)
         return []

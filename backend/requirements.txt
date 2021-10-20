@@ -11,3 +11,5 @@ requests
 itemadapter
 apscheduler
 python-dotenv
+unidecode~=1.2.0
+psutil

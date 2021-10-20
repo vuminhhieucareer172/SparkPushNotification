@@ -1,19 +1,23 @@
 from typing import List
 import json
+import os
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller import stream, database_connection, query, configuration, tables_manager
+# <<<<<<< HEAD
+# from backend.controller import stream, database_connection, query, configuration, tables_manager
+# =======
+from backend.controller import stream, database_connection, query, configuration, schedule, tables_manager
+from backend.controller.schedule import init_scheduler, scheduler
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
-from backend.schemas.stream import Stream
+from backend.schemas.stream import Stream, JobStream
 from database import db
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 app = FastAPI()
@@ -50,6 +54,16 @@ def check_status_spark():
 @app.on_event("shutdown")
 async def shutdown_event():
     db.close()
+
+
+@app.get("/query")
+def get_query():
+    return JSONResponse(query.get_query(), status_code=status.HTTP_200_OK)
+
+
+@app.get("/query/{query_id}")
+def get_query_by_id(query_id: int):
+    return JSONResponse(query.get_query_by_id(query_id), status_code=status.HTTP_200_OK)
 
 
 @app.post("/add-query")
@@ -103,5 +117,28 @@ def get_tables_by_name(table_name: str):
     return tables_manager.get_tables_by_name(table_name)
 
 
+@app.get("/job-streaming")
+def job_streaming():
+    return schedule.get_job_stream()
+
+
+@app.get("/start-job-streaming")
+def start_job_streaming():
+    return stream.start_job_streaming()
+
+
+@app.post("/update-job-streaming")
+def update_job_streaming(new_schema_job: JobStream):
+    return stream.update_job_streaming(new_schema_job)
+
+
+@app.get("/stop-job-streaming")
+def stop_job_streaming():
+    return stream.stop_job_streaming()
+
+
 if __name__ == '__main__':
+    result_scheduler = init_scheduler()
     uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
+    if scheduler.running:
+        scheduler.shutdown()
