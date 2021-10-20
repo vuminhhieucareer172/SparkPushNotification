@@ -20,7 +20,7 @@ def sqlalchemy_to_spark(sqlalchemy_type: str):
 
 
 def to_string_structure_type(columns: List[dict]) -> str:
-    res = 'schema = StructType([\n'
+    res = 'StructType([\n'
     for column in columns:
         spark_type = sqlalchemy_to_spark(str(column.get('type')))
         res += 'StructField("' + column.get('name') + '", ' + spark_type + '()),\n'

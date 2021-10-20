@@ -73,10 +73,10 @@ def main():
 """.format(table, get_schema_table(inspector, table))
 
                 r += """
-    data_{} = df.withColumn(
+    data_{} = {}.withColumn(
         "data", from_json(col("value").astype(StringType()), schema_{})
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
-""".format(table, table)
+""".format(table, table, table)
 
                 r += """
     data_{}.createOrReplaceTempView("{}")
