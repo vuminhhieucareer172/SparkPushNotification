@@ -1,32 +1,31 @@
 from sqlalchemy import inspect
 
+from backend.controller.query import get_query
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
-from backend.utils.util_get_config import get_config_spark, get_config_kafka
+from backend.utils.util_get_config import get_config
 from constants import constants
-from constants.constants import PREFIX_DB_TABLE_STREAMING
-from database import db, session, engine
+from constants.constants import PREFIX_DB_TABLE_STREAMING, GENERATE_STREAMING_SUCCESSFUL
+from database import session, engine
 from streaming.generate.generate_database_schema import get_schema_table
 
 
-def get_query():
-    return db.execute("select * from dbstreaming_query")
-
-
 def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
-                        path_executor_folder: str = 'streaming/job_stream/executor/', **kwargs):
+                        **kwargs):
     data = get_query()
-    spark_config = get_config_spark()
+    if data is None:
+        return "No query in database"
+    spark_config = get_config(constants.CONFIG_SPARK)
     if spark_config is None:
-        return None
-    kafka_config = get_config_kafka()
+        return "No config spark in database"
+    kafka_config = get_config(constants.CONFIG_KAFKA)
     if kafka_config is None:
-        return None
+        return "No config kafka in database"
 
-    with open(path_job_folder + file_job_name, 'w') as f_job:
+    with open(path_job_folder + file_job_name + ".py", 'w') as f_job:
         # import dependency
         r = """from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, udf
-from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType,
+from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType,\\
 DatetimeConverter, TimestampType, ArrayType, ShortType, BinaryType, DecimalType, DoubleType, MapType"""
 
         # init spark app with name and log level
@@ -60,6 +59,8 @@ def main():
         for table in tables:
             if table.startswith(PREFIX_DB_TABLE_STREAMING):
                 mapping_kafka_streaming = session.query(KafkaStreaming).filter_by(table_streaming=table).scalar()
+                if mapping_kafka_streaming is None:
+                    return f"table {table} has not corresponding topic kafka"
                 r += """
     {} = spark \\
         .readStream \\
@@ -72,10 +73,10 @@ def main():
 """.format(table, get_schema_table(inspector, table))
 
                 r += """
-    data_{} = df.withColumn(
+    data_{} = {}.withColumn(
         "data", from_json(col("value").astype(StringType()), schema_{})
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
-""".format(table, table)
+""".format(table, table, table)
 
                 r += """
     data_{}.createOrReplaceTempView("{}")
@@ -107,9 +108,8 @@ if __name__ == '__main__':
     main()
 """
         f_job.write(r)
+    return GENERATE_STREAMING_SUCCESSFUL
 
-    with open(path_executor_folder + file_job_name, 'w') as f_exec:
-        f_exec.write("""import os
-def run():
-    os.system("spark-submit --master {} --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 {}")
-        """.format(spark_config.value['master'], path_job_folder + file_job_name))
+
+if __name__ == '__main__':
+    print(generate_job_stream(app_name="Job Alert Yourway", file_job_name="example"))

@@ -9,7 +9,8 @@ class Config(Model):
     __tablename__ = "dbstreaming_config"
 
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
-    name = Column(Enum(constants.CONFIG_SPARK, constants.CONFIG_MAIL, constants.CONFIG_KAFKA, constants.CONFIG_ZALO),
+    name = Column(Enum(constants.CONFIG_SPARK, constants.CONFIG_MAIL, constants.CONFIG_KAFKA, constants.CONFIG_ZALO,
+                       constants.CONFIG_JOB_STREAMING),
                   nullable=False)
     value = Column(JSON, nullable=False)
 

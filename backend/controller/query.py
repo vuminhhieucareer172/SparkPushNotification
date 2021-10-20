@@ -1,9 +1,29 @@
+import logging
+
 from sqlalchemy import exc
 from starlette.responses import JSONResponse
 from starlette import status
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query, QueryUpdate
 from database import session
+
+
+def get_query():
+    try:
+        queries = session.query(UserQuery).all()
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+        return None
+    return queries
+
+
+def get_query_by_id(id_query: int):
+    try:
+        query = session.query(UserQuery).filter_by(id=id_query).scalar()
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+        return None
+    return query
 
 
 def add_query(new_query: Query):
@@ -14,12 +34,12 @@ def add_query(new_query: Query):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
 def update_query(new_query: QueryUpdate):
-    query = session.query(UserQuery).filter_by(username=new_query.id).scalar()
+    query = session.query(UserQuery).filter_by(id=new_query.id).scalar()
     try:
         query.sql = new_query.sql
         query.topic_kafka_output = new_query.topic_kafka_output
@@ -29,7 +49,7 @@ def update_query(new_query: QueryUpdate):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -40,5 +60,5 @@ def delete_query(query_id: int):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed", "detail": e}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
