@@ -1,10 +1,9 @@
-import json
 import datetime
+import json
 import time
 from dataclasses import asdict
+
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import UniqueConstraint
-from database.db import DB
 
 
 class SchemaEncoder(json.JSONEncoder):
@@ -12,7 +11,7 @@ class SchemaEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, datetime.date):
-            return time.strftime('%Y-%m-%dT%H:%M:%SZ', obj.utctimetuple())
+            return time.strftime('%Y-%m-%dT%H:%M:%SZ', obj.timetuple())
         return json.JSONEncoder.default(self, obj)
 
 
