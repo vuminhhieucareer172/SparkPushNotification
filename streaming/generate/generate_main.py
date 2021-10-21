@@ -5,7 +5,7 @@ from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import PREFIX_DB_TABLE_STREAMING, GENERATE_STREAMING_SUCCESSFUL
-from database import session, engine
+from database.db import session, engine
 from streaming.generate.generate_database_schema import get_schema_table
 
 
