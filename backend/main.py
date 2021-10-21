@@ -8,11 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-# <<<<<<< HEAD
-# from backend.controller import stream, database_connection, query, configuration, tables_manager
-# =======
-from backend.controller import stream, database_connection, query, configuration, schedule, tables_manager
-from backend.controller.schedule import init_scheduler, scheduler
+
+from backend.controller import database_connection, query, configuration, tables_manager
+# from backend.controller.schedule import init_scheduler, scheduler
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
@@ -31,9 +29,9 @@ app.add_middleware(
 )
 
 
-@app.post("/add-stream")
-async def add_stream(new_schema: Stream):
-    return stream.add_stream(new_schema)
+# @app.post("/add-stream")
+# async def add_stream(new_schema: Stream):
+#     return stream.add_stream(new_schema)
 
 
 @app.post("/test-connect-database")
@@ -46,9 +44,9 @@ def connect_database(database_information: Database):
     return database_connection.connect_database(database_information)
 
 
-@app.get("/check-status-job-on-spark")
-def check_status_spark():
-    return stream.check_status_spark()
+# @app.get("/check-status-job-on-spark")
+# def check_status_spark():
+#     return stream.check_status_spark()
 
 
 @app.on_event("shutdown")
@@ -112,29 +110,35 @@ def get_tables():
     # return JSONResponse(tables_manager.get_tables(), status_code=status.HTTP_200_OK)
 
 
-@app.get("/tables/{table_name}")
+@app.get("/tables/tables-detail/{table_name}")
 def get_tables_by_name(table_name: str):
     return tables_manager.get_tables_by_name(table_name)
 
 
-@app.get("/job-streaming")
-def job_streaming():
-    return schedule.get_job_stream()
+@app.get("/tables/table-record/{table_name}")
+def get_config(skip: int = 0, limit: int = 10):
+    return configuration.get_config(skip=skip, limit=limit)
 
 
-@app.get("/start-job-streaming")
-def start_job_streaming():
-    return stream.start_job_streaming()
 
-
-@app.post("/update-job-streaming")
-def update_job_streaming(new_schema_job: JobStream):
-    return stream.update_job_streaming(new_schema_job)
-
-
-@app.get("/stop-job-streaming")
-def stop_job_streaming():
-    return stream.stop_job_streaming()
+# @app.get("/job-streaming")
+# def job_streaming():
+#     return schedule.get_job_stream()
+#
+#
+# @app.get("/start-job-streaming")
+# def start_job_streaming():
+#     return stream.start_job_streaming()
+#
+#
+# @app.post("/update-job-streaming")
+# def update_job_streaming(new_schema_job: JobStream):
+#     return stream.update_job_streaming(new_schema_job)
+#
+#
+# @app.get("/stop-job-streaming")
+# def stop_job_streaming():
+#     return stream.stop_job_streaming()
 
 
 if __name__ == '__main__':
