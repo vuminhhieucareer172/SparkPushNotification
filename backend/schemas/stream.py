@@ -11,3 +11,7 @@ class Stream(BaseModel):
 class JobStream(BaseModel):
     name_job: str
     schedule: str
+
+
+class TopicStream(BaseModel):
+    topic_kafka_input: str

@@ -8,7 +8,9 @@ from starlette.responses import JSONResponse
 from starlette import status
 from backend.models.dbstreaming_config import Config
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
+from backend.schemas.stream import TopicStream
 from database import session, engine
+from streaming.utils.util_kafka import get_latest_message
 
 
 def get_tables():
@@ -22,6 +24,7 @@ def get_tables():
         return []
     return tables_name
 
+
 def get_tables_by_name(table_name: str):
     try:
         inspector = reflection.Inspector.from_engine(engine)
@@ -33,10 +36,31 @@ def get_tables_by_name(table_name: str):
         return []
     return table_detail
 
-# def get_tables_by_name(table_name):
-#     try:
-#         de = session.query(Config).filter_by(id=config_id).scalar()
-#     except exc.SQLAlchemyError as e:
-#         logging.error(e)
-#         return None
-#     return config_record
+
+def get_tables_column(topic: TopicStream):
+    try:
+        lastest_mess = json.loads(get_latest_message(topic=topic.topic_kafka_input))
+        table = []
+        for key_column in lastest_mess.keys():
+            type_column = ''
+            if isinstance(lastest_mess[key_column], str):
+                type_column = 'VARCHAR'
+            if isinstance(lastest_mess[key_column], int):
+                if -2147483648 <= lastest_mess[key_column] <= 2147483648:
+                    type_column = 'INTEGER'
+                else:
+                    type_column = 'LONG'
+            if isinstance(lastest_mess[key_column], float):
+                type_column = 'FLOAT'
+
+            column = {
+                "name_field": key_column,
+                "collation": "latin1_swedish_ci",
+                "type": type_column,
+                "comment": None
+            }
+            table.append(column)
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+        return []
+    return table

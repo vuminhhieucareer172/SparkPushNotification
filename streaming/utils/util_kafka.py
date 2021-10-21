@@ -1,10 +1,10 @@
 from confluent_kafka import Consumer
 
-from constants.constants import KAFKA_URI
+from constants.constants import KAFKA_URI, TOPIC_JOB
 import json
 
 
-def get_latest_message(topic: str, group_id: str) -> str:
+def get_latest_message(topic: str, group_id: str = '') -> str:
     settings = {
         "bootstrap.servers": KAFKA_URI,
         "group.id": 'group_id',
@@ -26,6 +26,6 @@ def get_latest_message(topic: str, group_id: str) -> str:
 
 
 if __name__ == '__main__':
-    data = get_latest_message('userQuery', '')
+    data = get_latest_message(TOPIC_JOB, '')
     data_json = json.loads(data)
-    print(len(data_json))
+    print(data)
