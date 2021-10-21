@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from starlette import status
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query, QueryUpdate
-from database import session
+from database.db import session
 
 
 def get_query():

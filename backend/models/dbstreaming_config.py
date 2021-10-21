@@ -2,7 +2,7 @@ from sqlalchemy import Column, Enum, INTEGER, JSON
 
 from backend.schemas.configuration import Configuration
 from constants import constants
-from database import Model
+from database.db import Model
 
 
 class Config(Model):

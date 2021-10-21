@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from backend.schemas import table
 from constants.constants import PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
     DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
-from database import meta, session
+from database.db import meta, session
 
 
 def convert_to_sqlalchemy(data_type: str):

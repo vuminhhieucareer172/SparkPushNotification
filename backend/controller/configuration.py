@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from starlette import status
 from backend.models.dbstreaming_config import Config
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
-from database import session
+from database.db import session
 
 
 def add_config(new_config: Configuration):
