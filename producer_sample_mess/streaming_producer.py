@@ -10,7 +10,7 @@ mess = {
         "date": "20/09/2032 01:55:19",
         "skill_experience": 1251,
         "benefit": 2.54646,
-        "salary": 214748364800,
+        "salary": 21474834800,
         "name": "Viện Nghiên cứu Dữ liệu lớn - VinBigdata",
         }
 
