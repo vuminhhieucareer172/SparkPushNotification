@@ -1,7 +1,8 @@
 import json
 import logging
 import time
-
+from datetime import datetime
+import datetime
 from sqlalchemy import exc
 from sqlalchemy.engine import reflection
 from starlette.responses import JSONResponse
@@ -43,6 +44,7 @@ def get_tables_column(topic: TopicStream):
         table = []
         for key_column in lastest_mess.keys():
             type_column = ''
+            print("key_column", lastest_mess[key_column])
             if isinstance(lastest_mess[key_column], str):
                 type_column = 'VARCHAR'
             if isinstance(lastest_mess[key_column], int):
@@ -52,12 +54,16 @@ def get_tables_column(topic: TopicStream):
                     type_column = 'LONG'
             if isinstance(lastest_mess[key_column], float):
                 type_column = 'FLOAT'
-
+            try:
+                date_time_obj = datetime.datetime.strptime(lastest_mess[key_column], '%d/%m/%Y %H:%M:%S')
+                if isinstance(date_time_obj, datetime.datetime):
+                    type_column = 'DATETIME'
+            except:
+                pass
             column = {
                 "name_field": key_column,
                 "collation": "latin1_swedish_ci",
                 "type": type_column,
-                "comment": None
             }
             table.append(column)
     except exc.SQLAlchemyError as e:
