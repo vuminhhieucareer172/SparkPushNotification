@@ -10,7 +10,7 @@ from starlette import status
 from backend.models.dbstreaming_config import Config
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.stream import TopicStream
-from database import session, engine
+from database.db import session, engine
 from streaming.utils.util_kafka import get_latest_message
 
 
