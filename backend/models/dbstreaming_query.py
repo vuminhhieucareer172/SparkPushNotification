@@ -1,5 +1,5 @@
 from sqlalchemy import Column, VARCHAR, INTEGER, JSON, TIMESTAMP, func
-from database import Model
+from database.db import Model
 from backend.schemas.query import Query
 
 

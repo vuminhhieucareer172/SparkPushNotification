@@ -11,7 +11,7 @@ from backend.schemas.stream import Stream, JobStream
 from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import PREFIX_DB_TABLE_STREAMING
-from database import session
+from database.db import session
 from streaming.spark import spark_sql, Spark
 
 

@@ -14,8 +14,9 @@ from backend.controller import database_connection, query, configuration, tables
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
+
 from backend.schemas.stream import Stream, JobStream, TopicStream
-from database import db
+from database.db import db
 
 load_dotenv()
 app = FastAPI()

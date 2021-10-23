@@ -1,6 +1,5 @@
 from sqlalchemy import Column, VARCHAR, INTEGER
-from backend.schemas.stream import Stream
-from database import Model
+from database.db import Model
 
 
 class KafkaStreaming(Model):

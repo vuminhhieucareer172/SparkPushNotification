@@ -4,7 +4,7 @@ from typing import Union
 from sqlalchemy import exc
 
 from backend.models.dbstreaming_config import Config
-from database import session
+from database.db import session
 
 
 def get_config(type_config: str) -> Union[Config, None]:
