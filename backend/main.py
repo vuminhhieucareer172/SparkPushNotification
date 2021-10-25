@@ -1,5 +1,3 @@
-from typing import List
-import json
 import os
 import uvicorn
 from dotenv import load_dotenv
@@ -10,7 +8,7 @@ from starlette.responses import JSONResponse
 
 
 from backend.controller import database_connection, query, configuration, tables_manager, stream, schedule
-# from backend.controller.schedule import init_scheduler, scheduler
+from backend.controller.schedule import init_scheduler, scheduler
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
@@ -147,7 +145,7 @@ def stop_job_streaming():
 
 
 if __name__ == '__main__':
-    # result_scheduler = init_scheduler()
+    result_scheduler = init_scheduler()
     uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
-    # if scheduler.running:
-    #     scheduler.shutdown()
+    if scheduler.running:
+        scheduler.shutdown()
