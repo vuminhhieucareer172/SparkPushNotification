@@ -31,12 +31,27 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "src/content/images",
+                "output": "images"
+              }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/content/css/bootstrap.min.css",
+              "src/content/css/icons.min.css",
+              "src/content/css/theme.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/content/js/jquery.min.js",
+              "src/content/js/bootstrap.bundle.min.js",
+              "src/content/js/metismenu.min.js",
+              "src/content/js/simplebar.min.js",
+              "src/content/js/theme.js",
+              "src/content/js/waves.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -110,5 +125,5 @@
       }
     }
   },
-  "defaultProject": "frontend"
+  "defaultProject": "DBstreaming"
 }
