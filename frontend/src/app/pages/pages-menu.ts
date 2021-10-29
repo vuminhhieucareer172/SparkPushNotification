@@ -13,6 +13,49 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/iot-dashboard',
   },
   {
+    title: 'Database connection',
+    icon: 'battery-outline',
+    link: '/pages/database-connection',
+  },
+  {
+    title: 'Configurations',
+    icon: 'options-2-outline',
+    link: '/pages/configurations',
+  },
+  {
+    title: 'Streaming',
+    icon: 'flash-off-outline',
+    children: [
+      {
+        title: 'Add stream',
+        link: '/pages/streaming/add-stream',
+      },
+      {
+        title: 'Manage streams',
+        link: '/pages/streaming/manage-streams',
+      },
+    ],
+  },
+  {
+    title: 'Query',
+    icon: 'list-outline',
+    children: [
+      {
+        title: 'Add query',
+        link: '/pages/query/add-query',
+      },
+      {
+        title: 'Manage queries',
+        link: '/pages/query/manage-queries',
+      },
+    ],
+  },
+  {
+    title: 'Job stream',
+    icon: 'film-outline',
+    link: '/pages/job-stream',
+  },
+  {
     title: 'FEATURES',
     group: true,
   },

@@ -5,11 +5,36 @@ import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ECommerceComponent } from './e-commerce/e-commerce.component';
 import { NotFoundComponent } from './miscellaneous/not-found/not-found.component';
+import { ConfigurationsComponent } from './configurations/configurations.component';
+import { JobStreamComponent } from './job-stream/job-stream.component';
+import { DatabaseConnectionComponent } from './database-connection/database-connection.component';
 
 const routes: Routes = [{
   path: '',
   component: PagesComponent,
   children: [
+    {
+      path: 'query',
+      loadChildren: () => import('./query/query.module')
+        .then(m => m.QueryModule),
+    },
+    {
+      path: 'streaming',
+      loadChildren: () => import('./streaming/streaming.module')
+        .then(m => m.StreamingModule),
+    },
+    {
+      path: 'configurations',
+      component: ConfigurationsComponent,
+    },
+    {
+      path: 'database-connection',
+      component: DatabaseConnectionComponent,
+    },
+    {
+      path: 'job-stream',
+      component: JobStreamComponent,
+    },
     {
       path: 'dashboard',
       component: ECommerceComponent,
