@@ -1,17 +1,61 @@
+import { ExtraOptions, RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import {
+  NbAuthComponent,
+  NbLoginComponent,
+  NbLogoutComponent,
+  NbRegisterComponent,
+  NbRequestPasswordComponent,
+  NbResetPasswordComponent,
+} from '@nebular/auth';
 
-const routes: Routes = [
-  { path: 'stream', loadChildren: () => import('./streaming/streaming.module').then(m => m.StreamingModule ) },
-  { path: 'query', loadChildren: () => import('./query/query.module').then(m => m.QueryModule ) },
-  { path: 'configurations', loadChildren: () => import('./configurations/configurations.module').then(m => m.ConfigurationsModule ) },
-  { path: 'job-stream', loadChildren: () => import('./job-stream/job-stream.module').then(m => m.JobStreamModule ) },
-  { path: 'database-connection', loadChildren: () => import('./database-connection/database-connection.module').then(m => m.DatabaseConnectionModule ) },
+export const routes: Routes = [
+  {
+    path: 'pages',
+    loadChildren: () => import('./pages/pages.module')
+      .then(m => m.PagesModule),
+  },
+  {
+    path: 'auth',
+    component: NbAuthComponent,
+    children: [
+      {
+        path: '',
+        component: NbLoginComponent,
+      },
+      {
+        path: 'login',
+        component: NbLoginComponent,
+      },
+      {
+        path: 'register',
+        component: NbRegisterComponent,
+      },
+      {
+        path: 'logout',
+        component: NbLogoutComponent,
+      },
+      {
+        path: 'request-password',
+        component: NbRequestPasswordComponent,
+      },
+      {
+        path: 'reset-password',
+        component: NbResetPasswordComponent,
+      },
+    ],
+  },
+  { path: '', redirectTo: 'pages', pathMatch: 'full' },
+  { path: '**', redirectTo: 'pages' },
 ];
 
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
+const config: ExtraOptions = {
+  useHash: false,
+};
 
-export class AppRoutingModule { }
+@NgModule({
+  imports: [RouterModule.forRoot(routes, config)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {
+}
