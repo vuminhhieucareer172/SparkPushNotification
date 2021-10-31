@@ -8,13 +8,12 @@ from psutil import NoSuchProcess
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller.stream import Spark
 from backend.utils.util_generate import generate_job_id
 from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING
 from streaming.generate.generate_main import generate_job_stream
-from streaming.spark import spark
+from streaming.spark import Spark
 
 scheduler = BackgroundScheduler({
     'apscheduler.job_defaults.max_instances': '10'
@@ -46,7 +45,7 @@ def get_job_stream():
     for field in CronTrigger.FIELD_NAMES:
         field_name = CronTrigger.FIELD_NAMES.index(field)
         schedule[field] = str(job.trigger.fields[field_name])
-    return JSONResponse(content=dict(app_name=spark.appName, schedule=schedule,
+    return JSONResponse(content=dict(app_name=Spark().get_instanct().appName, schedule=schedule,
                                      is_running=is_job_stream_running(Spark().get_pid())),
                         status_code=status.HTTP_200_OK)
 

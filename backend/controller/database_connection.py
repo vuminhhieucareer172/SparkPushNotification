@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, exc
 from starlette.responses import JSONResponse
 
 from backend.schemas import database
+from database.db import DB
 
 
 def test_connect_database(schema_database: database.Database):
@@ -35,3 +36,11 @@ def connect_database(schema_database: database.Database):
         logging.error(e)
         return JSONResponse(content=e, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content="Connect successfully", status_code=status.HTTP_202_ACCEPTED)
+
+
+def get_config_connect_database():
+    try:
+        return JSONResponse(content=DB.get_credentials(), status_code=status.HTTP_200_OK)
+    except Exception as e:
+        logging.error(e)
+        return JSONResponse(content=e, status_code=status.HTTP_400_BAD_REQUEST)

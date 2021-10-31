@@ -7,7 +7,7 @@ class KafkaStreaming(Model):
 
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
     topic_kafka = Column(VARCHAR(50), nullable=False)
-    table_streaming = Column(VARCHAR(50), nullable=False)
+    table_streaming = Column(VARCHAR(50), nullable=False, unique=True)
 
     def __init__(self, **kwargs):
         super(KafkaStreaming, self).__init__(**kwargs)

@@ -22,6 +22,7 @@ def upgrade():
         sa.Column('id', sa.INTEGER, primary_key=True, index=True, autoincrement=True),
         sa.Column('topic_kafka', sa.VARCHAR(50), nullable=False),
         sa.Column('table_streaming', sa.VARCHAR(50), nullable=False),
+        sa.UniqueConstraint('table_streaming')
     )
 
 

@@ -55,7 +55,3 @@ class Spark:
         proc = subprocess.Popen(cmd)
         self.__spark_job_pid = proc.pid
         return proc
-
-
-spark = Spark().get_instance()
-spark_sql = Spark().get_sql_context()

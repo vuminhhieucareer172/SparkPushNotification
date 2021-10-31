@@ -28,11 +28,6 @@ app.add_middleware(
 )
 
 
-@app.post("/add-stream")
-async def add_stream(new_schema: Stream):
-    return stream.add_stream(new_schema)
-
-
 @app.post("/test-connect-database")
 def test_connect_database(database_information: Database):
     return database_connection.test_connect_database(database_information)
@@ -41,6 +36,36 @@ def test_connect_database(database_information: Database):
 @app.post("/connect-database")
 def connect_database(database_information: Database):
     return database_connection.connect_database(database_information)
+
+
+@app.get("/connect-database")
+def get_config_connect_database():
+    return database_connection.get_config_connect_database()
+
+
+@app.get("/stream")
+def get_all_stream():
+    pass
+
+
+@app.get("/stream/{name: str}")
+def get_stream(name: str):
+    pass
+
+
+@app.post("/stream")
+def add_stream(new_schema: Stream):
+    return stream.add_stream(new_schema)
+
+
+@app.put("/stream")
+def update_stream(update_schema: Stream):
+    return stream.update_stream(update_schema)
+
+
+@app.delete("/stream/{name: str}")
+def delete_stream(name: str):
+    return stream.delete_stream(name)
 
 
 @app.get("/check-status-job-on-spark")
@@ -63,17 +88,17 @@ def get_query_by_id(query_id: int):
     return JSONResponse(query.get_query_by_id(query_id), status_code=status.HTTP_200_OK)
 
 
-@app.post("/add-query")
+@app.post("/query")
 def add_query(new_query: Query):
     return query.add_query(new_query)
 
 
-@app.put("/update-query")
+@app.put("/query")
 def update_query(new_query: QueryUpdate):
     return query.update_query(new_query)
 
 
-@app.delete("/delete-query/{query_id}")
+@app.delete("/query/{query_id}")
 def delete_query(query_id: int):
     return query.delete_query(query_id)
 
@@ -88,17 +113,17 @@ def get_config(config_id: int):
     return configuration.get_config_by_id(config_id)
 
 
-@app.post("/add-config")
+@app.post("/config")
 def add_config(new_config: Configuration):
     return configuration.add_config(new_config)
 
 
-@app.put("/update-config")
+@app.put("/config")
 def update_config(new_config: ConfigurationUpdate):
     return configuration.update_config(new_config)
 
 
-@app.delete("/delete-config/{config_id}")
+@app.delete("/config/{config_id}")
 def delete_config(config_id: int):
     return configuration.delete_config(config_id)
 
@@ -146,6 +171,6 @@ def stop_job_streaming():
 
 if __name__ == '__main__':
     result_scheduler = init_scheduler()
-    uvicorn.run(app, host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
+    uvicorn.run("backend.main:app", host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')), reload=bool(os.getenv('DEV_ENV')))
     if scheduler.running:
         scheduler.shutdown()
