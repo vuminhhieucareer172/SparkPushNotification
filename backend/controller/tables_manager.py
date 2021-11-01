@@ -1,23 +1,18 @@
-import json
-import logging
-import time
-from datetime import datetime
 import datetime
+import logging
+from datetime import datetime
+
 from sqlalchemy import exc
 from sqlalchemy.engine import reflection
-from starlette.responses import JSONResponse
 from starlette import status
-from backend.models.dbstreaming_config import Config
-from backend.schemas.configuration import Configuration, ConfigurationUpdate
-from backend.schemas.stream import TopicStream
-from database.db import session, engine
-from streaming.utils.util_kafka import get_latest_message
+from starlette.responses import JSONResponse
+
+from database.db import engine
+from backend.utils.util_kafka import get_latest_message
 
 
 def get_tables():
     try:
-        # tables_name = engine.execute('SHOW TABLES').fetchall()
-        # tables_name = engine.table_names()
         inspector = reflection.Inspector.from_engine(engine)
         tables_name = inspector.get_table_names()
     except exc.SQLAlchemyError as e:
@@ -38,35 +33,38 @@ def get_tables_by_name(table_name: str):
     return table_detail
 
 
-def get_tables_column(topic: TopicStream):
+def get_tables_column(topic: str):
     try:
-        lastest_mess = json.loads(get_latest_message(topic=topic.topic_kafka_input))
+        latest_mess, message = get_latest_message(topic=topic)
+        if latest_mess == {}:
+            return JSONResponse(content=message, status_code=status.HTTP_400_BAD_REQUEST)
         table = []
-        for key_column in lastest_mess.keys():
+        data = {}
+        for key_column in latest_mess.keys():
             type_column = ''
-            print("key_column", lastest_mess[key_column])
-            if isinstance(lastest_mess[key_column], str):
+            if isinstance(latest_mess[key_column], str):
                 type_column = 'VARCHAR'
-            if isinstance(lastest_mess[key_column], int):
-                if -2147483648 <= lastest_mess[key_column] <= 2147483648:
+            if isinstance(latest_mess[key_column], int):
+                if -2147483648 <= latest_mess[key_column] <= 2147483648:
                     type_column = 'INTEGER'
                 else:
                     type_column = 'LONG'
-            if isinstance(lastest_mess[key_column], float):
+            if isinstance(latest_mess[key_column], float):
                 type_column = 'FLOAT'
             try:
-                date_time_obj = datetime.datetime.strptime(lastest_mess[key_column], '%d/%m/%Y %H:%M:%S')
+                date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y %H:%M:%S')
                 if isinstance(date_time_obj, datetime.datetime):
                     type_column = 'DATETIME'
             except:
                 pass
             column = {
                 "name_field": key_column,
-                "collation": "latin1_swedish_ci",
                 "type": type_column,
             }
             table.append(column)
+        data["message_sample"] = str(latest_mess)
+        data["table"] = table
+        return JSONResponse(content=data, status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
         logging.error(e)
-        return []
-    return table
+        return JSONResponse(content={"message": "Failed", "detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)

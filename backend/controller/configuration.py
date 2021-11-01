@@ -17,9 +17,9 @@ def get_config(skip: int = 0, limit: int = 10):
     return config_record
 
 
-def get_config_by_id(config_id):
+def get_config_by_name(config_name):
     try:
-        config_record = session.query(Config).filter_by(id=config_id).scalar()
+        config_record = session.query(Config).filter_by(name=config_name).scalar()
     except exc.SQLAlchemyError as e:
         logging.error(e)
         return None

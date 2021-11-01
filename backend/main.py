@@ -1,4 +1,5 @@
 import os
+
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -6,15 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-
 from backend.controller import database_connection, query, configuration, tables_manager, stream, schedule
 from backend.controller.schedule import init_scheduler, scheduler
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
-
-from backend.schemas.stream import Stream, JobStream, TopicStream
+from backend.schemas.stream import Stream, JobStream
 from database.db import db
+from backend.utils.util_kafka import get_list_topics
 
 load_dotenv()
 app = FastAPI()
@@ -108,9 +108,9 @@ def get_config(skip: int = 0, limit: int = 10):
     return configuration.get_config(skip=skip, limit=limit)
 
 
-@app.get("/config/{config_id}")
-def get_config(config_id: int):
-    return configuration.get_config_by_id(config_id)
+@app.get("/config/{config_name}")
+def get_config(config_name: str):
+    return configuration.get_config_by_name(config_name)
 
 
 @app.post("/config")
@@ -131,7 +131,6 @@ def delete_config(config_id: int):
 @app.get("/tables")
 def get_tables():
     return tables_manager.get_tables()
-    # return JSONResponse(tables_manager.get_tables(), status_code=status.HTTP_200_OK)
 
 
 @app.get("/tables/tables-detail/{table_name}")
@@ -144,9 +143,17 @@ def get_tables_record(skip: int = 0, limit: int = 10):
     return configuration.get_config(skip=skip, limit=limit)
 
 
-@app.get("/tables/stream")
-def get_table_column(topic: TopicStream):
-    return JSONResponse(tables_manager.get_tables_column(topic=topic), status_code=status.HTTP_200_OK)
+@app.get("/kafka-topic/{topic}")
+def get_table_column(topic: str):
+    return tables_manager.get_tables_column(topic=topic)
+
+
+@app.get("/kafka-topic")
+def get_table_column():
+    status_kafka = get_list_topics()
+    if isinstance(status_kafka, str):
+        return JSONResponse(status_kafka, status_code=status.HTTP_400_BAD_REQUEST)
+    return JSONResponse(status_kafka, status_code=status.HTTP_200_OK)
 
 
 @app.get("/job-streaming")
