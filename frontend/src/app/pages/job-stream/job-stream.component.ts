@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'ngx-job-stream',
-  templateUrl: './job-stream.component.html',
-  styleUrls: ['./job-stream.component.scss']
+  template: `
+    <router-outlet></router-outlet>
+  `,
 })
 export class JobStreamComponent implements OnInit {
 

@@ -14,13 +14,15 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="inputLastName" class="label">Topic kafka:</label>
-                <input type="text" nbInput fullWidth formControlName="topic_kafka_input" id="inputLastName" placeholder="Topic kafka ...">
+                <nb-select fullWidth placeholder="Select Topic kafka" formControlName="topic_kafka_input" (selectedChange)="selecteTopic($event)">
+                  <nb-option *ngFor="let e of listTopicKafka" value="{{e}}">{{e}}</nb-option>
+                </nb-select>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label for="exampleInputEmail1" class="label">Message sample:</label>
-            <input type="email" nbInput fullWidth id="exampleInputEmail1" placeholder="Message sample ...">
+            <label for="message_sample" class="label">Message sample:</label>
+            <input type="email" nbInput fullWidth id="message_sample" value="{{messageSample}}" placeholder="Message sample ..." disabled>
           </div>
 
           <div class="table-responsive">
@@ -1470,7 +1472,7 @@
           <div style="float: right; margin-bottom: 40px; margin-top: 20px">
             <button style="margin-right: 20px;" type="submit" nbButton status="success">Reset
             </button>
-            <button style="margin-right: 10px;" type="submit" nbButton status="danger">Add
+            <button style="margin-right: 10px;" type="submit" nbButton status="info">Add
             </button>
           </div>
         </form>

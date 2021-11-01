@@ -53,7 +53,12 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Job stream',
     icon: 'film-outline',
-    link: '/pages/job-stream',
+    children: [
+      {
+        title: 'Manage',
+        link: '/pages/job-stream/manage',
+      },
+    ],
   },
   {
     title: 'FEATURES',

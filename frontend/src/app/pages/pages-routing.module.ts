@@ -33,7 +33,8 @@ const routes: Routes = [{
     },
     {
       path: 'job-stream',
-      component: JobStreamComponent,
+      loadChildren: () => import('./job-stream/job-stream.module')
+        .then(m => m.JobStreamModule),
     },
     {
       path: 'dashboard',

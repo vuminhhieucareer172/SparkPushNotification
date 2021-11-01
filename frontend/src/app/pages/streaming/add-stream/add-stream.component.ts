@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, Validators, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { SERVER_API_URL } from '../../../app.constants';
-import { DOCUMENT } from '@angular/common'; 
+import { NbComponentStatus, NbGlobalPhysicalPosition, NbGlobalPosition, NbToastrService } from '@nebular/theme';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'ngx-add-stream',
@@ -10,9 +12,24 @@ import { DOCUMENT } from '@angular/common';
   styleUrls: ['./add-stream.component.scss'],
 })
 export class AddStreamComponent implements OnInit {
+  listTopicKafka: string[];
+  messageSample: string;
+  destroyByClick = true;
+  duration = 2000;
+  hasIcon = true;
+  preventDuplicates = false;
+
   constructor(
     private http: HttpClient,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    private toastrService: NbToastrService) {
+    this.messageSample = '';
+    this.http.get(SERVER_API_URL + '/kafka-topic')
+    .subscribe(
+      res => {
+        this.listTopicKafka = Object.keys(res).map((key) => res[key]);
+      },
+    );
   }
 
   table = this.fb.group({
@@ -59,6 +76,53 @@ export class AddStreamComponent implements OnInit {
     this.fields.removeAt(index);
   }
 
+  clearTable() {
+    this.fields.clear();
+  }
+
+  selecteTopic(topic: string) {
+    return this.http.get(SERVER_API_URL + '/kafka-topic/' + topic, {observe: 'response'})
+      .subscribe(
+        res => {
+          this.messageSample = res.body['message_sample'];
+          this.clearTable();
+          res.body['table'].forEach(e => {
+            this.fields.push(this.fb.group({
+              name_field: [e['name_field'], [Validators.required]],
+              type: [e['type'], [Validators.required]],
+              primary_key: [false, [Validators.required]],
+              auto_increment: [false, [Validators.required]],
+              nullable: [false, [Validators.required]],
+              unique: [false, [Validators.required]],
+              default: ['', [Validators.required]],
+              length: [0, [Validators.required]],
+              value: ['', [Validators.required]],
+              collation: ['latin1_swedish_ci', [Validators.required]],
+              comment: ['', [Validators.required]],
+            }));
+          });
+        },(error) => {  
+          this.showToast('An unexpected error occured', error.error);
+        }, () => {});
+  }
+
+  private showToast(title: string, body: string) {
+    const config = {
+      status: 'danger',
+      destroyByClick: this.destroyByClick,
+      duration: this.duration,
+      hasIcon: this.hasIcon,
+      position: NbGlobalPhysicalPosition.TOP_RIGHT,
+      preventDuplicates: this.preventDuplicates,
+    };
+    const titleContent = title ? title : 'error';
+
+    this.toastrService.show(
+      body,
+      titleContent,
+      config);
+  }
+
   onChangeDefault(index: number) {
     if (this.fields.at(index).get('default').value == 'USER_DEFINED') {
       (<HTMLInputElement>document.getElementById('default' + index)).style.display = 'block';
@@ -73,8 +137,6 @@ export class AddStreamComponent implements OnInit {
 
   onSubmit(): void {
     const stream = this.streamForm.getRawValue();
-    console.log(stream);
-
     const res = this.http.post(SERVER_API_URL + '/stream', stream).subscribe(
       res => {
         console.log(res);

@@ -6,25 +6,27 @@ import { AddStreamComponent } from './add-stream/add-stream.component';
 import { ManageStreamsComponent } from './manage-streams/manage-streams.component';
 import { NbButtonModule, NbCardModule, NbCheckboxModule, NbInputModule, NbIconModule, NbSelectModule } from '@nebular/theme';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
-import { ReactiveFormsModule } from "@angular/forms";
+import { ReactiveFormsModule } from '@angular/forms';
+import { StreamingComponent } from './streaming.component';
 
 
 @NgModule({
   declarations: [
+    StreamingComponent,
     AddStreamComponent,
     ManageStreamsComponent,
   ],
-    imports: [
-        CommonModule,
-        StreamingRoutingModule,
-        NbCardModule,
-        NbCheckboxModule,
-        NbInputModule,
-        NbButtonModule,
-        Ng2SmartTableModule,
-        ReactiveFormsModule,
-        NbIconModule,
-        NbSelectModule
-    ],
+  imports: [
+    CommonModule,
+    StreamingRoutingModule,
+    NbCardModule,
+    NbCheckboxModule,
+    NbInputModule,
+    NbButtonModule,
+    Ng2SmartTableModule,
+    ReactiveFormsModule,
+    NbIconModule,
+    NbSelectModule
+  ],
 })
 export class StreamingModule { }

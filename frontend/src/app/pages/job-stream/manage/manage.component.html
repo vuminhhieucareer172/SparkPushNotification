@@ -1,0 +1,105 @@
+<div class="row">
+    <div class="col-md-12">
+      <nb-card class="inline-form-card">
+        <nb-card-header>Manage job stream</nb-card-header>
+        <nb-card-body>
+          <form>
+            <div class="form-group">
+              <label for="exampleInputEmail1" class="label">Job name:</label>
+              <input type="email" nbInput fullWidth id="exampleInputEmail1" placeholder="Job name ...">
+            </div>
+
+            <div class="row">
+                <div class="col-md-1">
+                    <label class="label">Status services:</label>
+                </div>
+                <div class="col-md-2">
+                    <div class="circle status service-border-error">
+                        <h4 class="service-name">Spark</h4>
+                        <h2 class="service-status service-error">Error 2</h2>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="circle status service-border-running">
+                        <h4 class="service-name">Kafka</h4>
+                        <h2 class="service-status service-running">Error 2</h2>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="circle status service-border-error">
+                        <h4 class="service-name">Mysql</h4>
+                        <h2 class="service-status service-error">Error 2</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="exampleInputEmail1" class="label">Scheduler:</label>
+                <div>
+                    <div class="row schedule">
+                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;">
+                            <input type="checkbox" checked id="checkbox" />
+                            <label for="checkbox"></label>
+                        </div>
+                        <div class="col-md-2 schedule-head">
+                            <label class="label">Quick schedule:</label>
+                        </div>
+                        <div>
+                            <a style="margin: 5px; color: white" class="btn btn-info">1 minute</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info">Hourly</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info" >Daily</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info" onclick="schedule = '@weekly'; job_string();">Weekly</a>
+                        </div>
+                    </div>
+                    <div class="row schedule">
+                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;">
+                            <input type="checkbox" checked id="checkbox" />
+                            <label for="checkbox"></label>
+                        </div>
+                        <div class="col-md-2 schedule-head">
+                            <label class="label">Manual schedule:</label>
+                        </div>
+                        <div class="col-md-9 row">
+                            <nb-select selected="" formControlName="type">
+                                <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
+                            </nb-select>
+                            <div class="col-md-1 schedule-head">
+                                day(s)
+                            </div>
+                            <nb-select selected="0" formControlName="type">
+                                <nb-option *ngFor="let e of hours" value="{{e}}">{{e}}</nb-option>
+                            </nb-select>
+                            <div class="col-md-1 schedule-head">
+                                hour(s)
+                            </div>
+                            <nb-select selected="0" formControlName="type">
+                                <nb-option *ngFor="let e of minutes" value="{{e}}">{{e}}</nb-option>
+                            </nb-select>
+                            <div class="col-md-1 schedule-head">
+                                minute(s),
+                            </div>
+                            <nb-select selected="0" formControlName="type">
+                                <nb-option *ngFor="let e of seconds" value="{{e}}">{{e}}</nb-option>
+                            </nb-select>
+                            <div class="col-md-1 schedule-head">
+                                second(s)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>  
+
+            <div style="float: right; margin-bottom: 40px; margin-top: 20px">
+                <button style="margin-right: 20px;" type="submit" nbButton status="success">Save
+                </button>
+                <button style="margin-right: 10px;" type="submit" nbButton status="info">Stop
+                </button>
+                <button style="margin-right: 10px;" type="submit" nbButton status="primary">Run
+                </button>
+            </div>
+
+          </form>
+        </nb-card-body>
+      </nb-card>
+    </div>
+</div>
