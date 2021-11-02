@@ -7,13 +7,13 @@ from sqlalchemy.engine import reflection
 from starlette import status
 from starlette.responses import JSONResponse
 
-from database.db import engine
+from database.db import DB
 from backend.utils.util_kafka import get_latest_message
 
 
-def get_tables():
+def get_tables(db: DB):
     try:
-        inspector = reflection.Inspector.from_engine(engine)
+        inspector = reflection.Inspector.from_engine(db.engine)
         tables_name = inspector.get_table_names()
     except exc.SQLAlchemyError as e:
         logging.error(e)
@@ -21,9 +21,10 @@ def get_tables():
     return tables_name
 
 
-def get_tables_by_name(table_name: str):
+def get_tables_by_name(table_name: str, db: DB):
+    table_detail = []
     try:
-        inspector = reflection.Inspector.from_engine(engine)
+        inspector = reflection.Inspector.from_engine(db.engine)
         for table in inspector.get_table_names():
             if table == table_name:
                 table_detail = inspector.get_columns(table)

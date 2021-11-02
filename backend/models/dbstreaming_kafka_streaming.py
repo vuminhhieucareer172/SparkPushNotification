@@ -1,5 +1,7 @@
 from sqlalchemy import Column, VARCHAR, INTEGER
-from database.db import Model
+from sqlalchemy.ext.declarative import declarative_base
+
+Model = declarative_base()
 
 
 class KafkaStreaming(Model):
@@ -11,17 +13,3 @@ class KafkaStreaming(Model):
 
     def __init__(self, **kwargs):
         super(KafkaStreaming, self).__init__(**kwargs)
-
-    def to_full_json(self):
-        return dict(
-            id=self.id,
-            table_streaming=self.table_streaming,
-            topic_kafka=self.topic_kafka,
-        )
-
-    @staticmethod
-    def from_json(table_streaming: str, topic_kafka: str):
-        return KafkaStreaming(
-            table_streaming=table_streaming,
-            topic_kafka=topic_kafka,
-        )

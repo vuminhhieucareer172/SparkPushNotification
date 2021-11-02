@@ -12,6 +12,7 @@ from backend.utils.util_generate import generate_job_id
 from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING
+from database.db import get_db, DB
 from streaming.generate.generate_main import generate_job_stream
 from streaming.spark import Spark
 
@@ -50,8 +51,8 @@ def get_job_stream():
                         status_code=status.HTTP_200_OK)
 
 
-def job_exec(job_id: str, job_name: str):
-    result_generate = generate_job_stream(job_name, job_id)
+def job_exec(db: DB, job_id: str, job_name: str):
+    result_generate = generate_job_stream(db, job_name, job_id)
     if result_generate != GENERATE_STREAMING_SUCCESSFUL:
         return result_generate
     process = Spark().submit_job_spark(job_id)
@@ -59,6 +60,9 @@ def job_exec(job_id: str, job_name: str):
 
 
 def init_scheduler():
+    db = get_db()
+    if db is None:
+        return "Fail to connect database"
     job_streaming_properties = get_config(CONFIG_JOB_STREAMING)
     if job_streaming_properties is None:
         return "missing job streaming config"
@@ -78,7 +82,7 @@ def init_scheduler():
         job = scheduler.get_job(job_id=job_id)
         if job is not None:
             scheduler.remove_job(job_id=job_id)
-        scheduler.add_job(job_exec, CronTrigger.from_crontab(schedule), id=job_id, args=[job_id, job_name])
+        scheduler.add_job(job_exec, CronTrigger.from_crontab(schedule), id=job_id, args=[db, job_id, job_name])
         scheduler.start()
     except Exception as e:
         logging.error(e)

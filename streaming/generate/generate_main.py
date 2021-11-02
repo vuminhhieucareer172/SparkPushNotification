@@ -5,13 +5,14 @@ from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.utils.util_get_config import get_config
 from constants import constants
 from constants.constants import PREFIX_DB_TABLE_STREAMING, GENERATE_STREAMING_SUCCESSFUL
-from database.db import session, engine
+from database.db import DB, get_session
+from database.session import SessionHandler
 from streaming.generate.generate_database_schema import get_schema_table
 
 
-def generate_job_stream(app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
+def generate_job_stream(db: DB, app_name: str, file_job_name: str, path_job_folder: str = 'streaming/job_stream/job/',
                         **kwargs):
-    data = get_query()
+    data = get_query(db)
     if data is None:
         return "No query in database"
     spark_config = get_config(constants.CONFIG_SPARK)
@@ -54,11 +55,12 @@ def main():
     spark.conf.set("{}", "{}")""".format(config, kwargs.get(config))
 
         # read from streaming tables in db
-        inspector = inspect(engine)
+        inspector = inspect(db.engine)
         tables = inspector.get_table_names()
+        query_session = SessionHandler.create(get_session(database=db), KafkaStreaming)
         for table in tables:
             if table.startswith(PREFIX_DB_TABLE_STREAMING):
-                mapping_kafka_streaming = session.query(KafkaStreaming).filter_by(table_streaming=table).scalar()
+                mapping_kafka_streaming = query_session.get_one(query_dict=dict(table_streaming=table))
                 if mapping_kafka_streaming is None:
                     return f"table {table} has not corresponding topic kafka"
                 r += """

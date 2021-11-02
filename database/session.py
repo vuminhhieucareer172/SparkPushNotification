@@ -1,9 +1,10 @@
 import datetime
 import json
 import time
-from dataclasses import asdict
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+from database.db import object_as_dict
 
 
 class SchemaEncoder(json.JSONEncoder):
@@ -41,7 +42,9 @@ class SessionHandler:
     def add_many(self, record_list):
         return self.session.add_all([self.model(**record_dict) for record_dict in record_list])
 
-    def update(self, query_dict, update_dict):
+    def update(self, update_dict, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         return self.session.query(self.model).filter_by(**query_dict).update(update_dict)
 
     def upsert(self, record_dict, set_dict, constraint):
@@ -51,27 +54,42 @@ class SessionHandler:
         )
         return self.session.execute(statement)
 
-    def get(self, id, to_json=None):
-        result = self.session.query(self.model).get(id)
-        return asdict(result) if to_json is None else self.to_json(result)
+    def get(self, _id, to_json=None):
+        result = self.session.query(self.model).get(_id)
+        return result if to_json is None else self.to_json(result)
 
-    def get_one(self, query_dict, to_json=None):
+    def get_one(self, query_dict: dict = None, to_json=None):
+        if query_dict is None:
+            query_dict = {}
         result = self.session.query(self.model).filter_by(**query_dict).first()
-        return asdict(result) if to_json is None else self.to_json(result)
+        return result if to_json is None else self.to_json(result)
 
-    def get_latest(self, query_dict, to_json=None):
+    def get_latest(self, query_dict: dict = None, to_json=None):
+        if query_dict is None:
+            query_dict = {}
         result = self.session.query(self.model).filter_by(**query_dict).order_by(self.model.updated_at.desc()).first()
-        return None if result is None else (asdict(result) if to_json is None else self.to_json(result))
+        return None if result is None else (result if to_json is None else self.to_json(result))
 
-    def get_count(self, query_dict):
+    def get_count(self, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         return self.session.query(self.model).filter_by(**query_dict).count()
 
-    def get_all(self, query_dict, to_json=None):
+    def get_from_offset(self, skip: int, limit: int, query_dict: dict = None, to_json=None):
+        if query_dict is None:
+            query_dict = {}
+        results = self.session.query(self.model).filter_by(**query_dict).offset(skip).limit(limit).all()
+        return [result if to_json is None else self.to_json(result) for result in results]
+
+    def get_all(self, query_dict: dict = None, to_json=None):
+        if query_dict is None:
+            query_dict = {}
         results = self.session.query(self.model).filter_by(**query_dict).all()
-        return [asdict(result) if to_json is None else self.to_json(result) for result in results]
+        return [result if to_json is None else self.to_json(result) for result in results]
 
     def delete(self, query_dict):
         return self.session.query(self.model).filter_by(**query_dict).delete()
 
-    def to_json(self, record_obj):
-        return json.dumps(asdict(record_obj), cls=SchemaEncoder, ensure_ascii=False)
+    @staticmethod
+    def to_json(record_obj):
+        return json.loads(json.dumps(object_as_dict(record_obj), cls=SchemaEncoder, ensure_ascii=False))

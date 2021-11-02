@@ -1,14 +1,10 @@
-import logging
 import os
 from urllib.parse import urlencode
 
 import sqlalchemy
 from dotenv import load_dotenv
-from sqlalchemy import MetaData
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
-
-load_dotenv()
 
 
 class DB:
@@ -30,12 +26,16 @@ class DB:
             DB.__instance = DB()
         return DB.__instance
 
+    def re_create_engine(self):
+        self.engine = self.create_engine()
+
     @staticmethod
     def get_credentials():
         """ Fetch credentials from either environment variables (for testing)"""
+        load_dotenv(override=True)
         return dict(
             drivername=os.getenv('DB_DRIVER'),
-            username=os.getenv('DB_USERNAME', 'postgres'),
+            username=os.getenv('DB_USERNAME', 'mysql'),
             password=os.getenv('DB_PASSWORD', 'some_password'),
             host=os.getenv('DB_HOST', 'localhost'),
             port=os.getenv('DB_PORT', 5432),
@@ -45,30 +45,48 @@ class DB:
 
     def create_engine(self):
         credentials = self.get_credentials()
-
-        return sqlalchemy.create_engine('{engine}://{user}:{password}@{host}:{port}/{database}?{query}'.format(
-            engine=credentials['drivername'],
-            user=credentials['username'],
-            password=credentials['password'],
-            host=credentials['host'],
-            port=int(credentials['port']),
-            database=credentials['database'],
-            query=urlencode(credentials['query'])
-        ),
-            pool_size=200,
-            max_overflow=0,
-            echo=bool(os.getenv('DB_DEBUG', False))
-        )
+        try:
+            return sqlalchemy.create_engine('{engine}://{user}:{password}@{host}:{port}/{database}?{query}'.format(
+                engine=credentials['drivername'],
+                user=credentials['username'],
+                password=credentials['password'],
+                host=credentials['host'],
+                port=int(credentials['port'], 0),
+                database=credentials['database'],
+                query=urlencode(credentials['query'])
+            ),
+                pool_size=200,
+                max_overflow=0,
+                echo=bool(os.getenv('DB_DEBUG', False))
+            )
+        except Exception as e:
+            print(e)
+            return None
 
     def connect(self):
         return self.engine.connect()
 
+    def close(self):
+        self.__instance.close()
 
-db = DB.create()
-engine = db.engine
-meta = MetaData(engine)
-logging.info("connected to database with config:", engine.pool.status())
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-session = SessionLocal()
-Model = declarative_base()
+def object_as_dict(obj):
+    return {c.key: getattr(obj, c.key)
+            for c in inspect(obj).mapper.column_attrs}
+
+
+def get_db():
+    db = DB.create()
+    if db.engine is None:
+        return None
+    return db
+
+
+def get_session(database: DB):
+    try:
+        engine = database.engine
+        Session = sessionmaker(bind=engine)
+        return Session()
+    except Exception as e:
+        print(e)
+        return None

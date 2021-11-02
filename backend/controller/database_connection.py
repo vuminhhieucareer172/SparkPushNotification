@@ -27,14 +27,16 @@ def connect_database(schema_database: database.Database):
     try:
         if connectable:
             dotenv_file = dotenv.find_dotenv()
-            dotenv.load_dotenv(dotenv_file)
+            dotenv.load_dotenv(dotenv_file, override=True)
             for info in schema_database:
                 dotenv.set_key(dotenv_file, info[0].upper(), str(info[1]))
+            db = DB.create()
+            db.re_create_engine()
         else:
             return JSONResponse(content="Cannot connect to database", status_code=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logging.error(e)
-        return JSONResponse(content=e, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content="Connect successfully", status_code=status.HTTP_202_ACCEPTED)
 
 

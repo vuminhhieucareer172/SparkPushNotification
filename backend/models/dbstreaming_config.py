@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Enum, INTEGER, JSON
+from sqlalchemy.ext.declarative import declarative_base
 
-from backend.schemas.configuration import Configuration
 from constants import constants
-from database.db import Model
+
+Model = declarative_base()
 
 
 class Config(Model):
@@ -16,17 +17,3 @@ class Config(Model):
 
     def __init__(self, **kwargs):
         super(Config, self).__init__(**kwargs)
-
-    def to_full_json(self):
-        return dict(
-            id=self.id,
-            name=self.name,
-            value=self.value,
-        )
-
-    @staticmethod
-    def from_json(schemas_config: Configuration):
-        return Config(
-            name=schemas_config.name,
-            value=schemas_config.value,
-        )
