@@ -5,11 +5,10 @@ Revises:
 Create Date: 2021-10-07 12:22:23.297192
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
-from sqlalchemy.dialects.mysql import LONGTEXT
 
 revision = '9bccbd127e10'
 down_revision = None

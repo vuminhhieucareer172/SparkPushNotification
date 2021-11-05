@@ -10,11 +10,18 @@ from database.db import DB
 
 
 def test_connect_database(schema_database: database.Database):
+    """
+    db_driver:{"postgresql","mysql","mssql"}
+    """
     try:
         engine = create_engine(
-            '{}://{}:{}@{}:{}/{}'.format(schema_database.db_driver, schema_database.db_username,
-                                         schema_database.db_password, schema_database.db_host, schema_database.db_port,
-                                         schema_database.db_name))
+            '{}://{}:{}@{}:{}/{}?driver={}'.format(schema_database.db_driver,
+                                                   schema_database.db_username,
+                                                   schema_database.db_password,
+                                                   schema_database.db_host,
+                                                   schema_database.db_port,
+                                                   schema_database.db_name,
+                                                   schema_database.db_driver_manager))
         engine.connect()
     except exc.OperationalError as e:
         logging.error(e)
@@ -57,6 +64,6 @@ def status_mysql():
     except Exception as e:
         logging.error(e)
         return JSONResponse(content={"status": "stopped", "message": "cannot connect to kafka with config {}".format(
-                                         DB.get_credentials()
-                                     )}, status_code=status.HTTP_400_BAD_REQUEST)
+            DB.get_credentials()
+        )}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content={"status": "running"}, status_code=status.HTTP_200_OK)

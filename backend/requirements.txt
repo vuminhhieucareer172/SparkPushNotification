@@ -13,3 +13,5 @@ apscheduler
 python-dotenv
 unidecode~=1.2.0
 psutil
+psycopg2==2.9.1
+pyodbc==4.0.32
