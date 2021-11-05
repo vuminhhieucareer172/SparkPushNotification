@@ -11,11 +11,11 @@ import { QueryComponent } from './query.component';
   declarations: [
     QueryComponent,
     AddQueryComponent,
-    ManageQueriesComponent
+    ManageQueriesComponent,
   ],
   imports: [
     CommonModule,
-    QueryRoutingModule
-  ]
+    QueryRoutingModule,
+  ],
 })
 export class QueryModule { }

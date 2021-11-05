@@ -34,7 +34,6 @@ nb-card.inline-form-card nb-card-body {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  /* border: 3px solid #00FF00; */
   margin: 10px;
 }
 
@@ -43,30 +42,30 @@ nb-card.inline-form-card nb-card-body {
 }
 
 .service-name {
-  margin: 21px 0; 
+  margin: 21px 0;
   font: 16px Lato, sans-serif;
 }
 
 .service-status {
-  color: #FFDE00;
+  color: #ffde00;
   font: 24px Lato, sans-serif;
-  margin: 19px 0
+  margin: 19px 0;
 }
 
 .service-border-error {
-  border: 3px solid #FFDE00;
+  border: 3px solid #ffde00;
 }
 
 .service-border-running {
-  border: 3px solid #00FF00;
+  border: 3px solid #00ff00;
 }
 
 .service-error {
-  color: #FFDE00;
+  color: #ffde00;
 }
 
 .service-running {
-  color: #00FF00;
+  color: #00ff00;
 }
 
 .round {
@@ -93,11 +92,11 @@ nb-card.inline-form-card nb-card-body {
   width: 20px;
 }
 
-.round label:after {
+.round label::after {
   border: 2px solid #fff;
   border-top: none;
   border-right: none;
-  content: "";
+  content: '';
   height: 5px;
   left: 4px;
   opacity: 0;
@@ -107,15 +106,19 @@ nb-card.inline-form-card nb-card-body {
   width: 10px;
 }
 
-.round input[type="checkbox"] {
+.round input[type='radio'] {
   visibility: hidden;
 }
 
-.round input[type="checkbox"]:checked + label {
+.round input[type='radio']:checked + label {
   background-color: #000000;
   border-color: #000000;
 }
 
-.round input[type="checkbox"]:checked + label:after {
+.round input[type='radio']:checked + label::after {
   opacity: 1;
+}
+
+.schedule-inactive {
+  opacity: 0.5;
 }

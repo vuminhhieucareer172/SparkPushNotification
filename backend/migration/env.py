@@ -1,8 +1,9 @@
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
+import os
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -24,6 +25,21 @@ target_metadata = None
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+
+def get_env():
+    load_dotenv(override=True)
+    return '{drivername}://{username}:{password}@{host}:{port}/{database}'.format(
+        drivername=os.getenv('DB_DRIVER'),
+        username=os.getenv('DB_USERNAME'),
+        password=os.getenv('DB_PASSWORD'),
+        host=os.getenv('DB_HOST', 'localhost'),
+        port=os.getenv('DB_PORT', 3306),
+        database=os.getenv('DB_NAME')
+    )
+
+
+config.set_main_option('sqlalchemy.url', get_env())
 
 
 def run_migrations_offline():

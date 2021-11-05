@@ -14,14 +14,14 @@ export class ManageStreamsComponent implements OnInit {
   }
 
   settings = {
-    actions: { 
-      position: 'right'
+    actions: {
+      position: 'right',
     } ,
     columns: {
       index: {
         title: '#',
         type: 'number',
-        width: '20px'
+        width: '20px',
       },
       table_name: {
         title: 'Table Name',
@@ -48,7 +48,7 @@ export class ManageStreamsComponent implements OnInit {
     },
   };
   onUserRowSelect(event): void {
-    console.log(event['data']['table_name']);
+    // console.log(event['data']['table_name']);
     this.router.navigate([event['data']['table_name']]);
   }
 

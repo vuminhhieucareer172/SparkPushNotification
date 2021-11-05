@@ -26,7 +26,7 @@ import { StreamingComponent } from './streaming.component';
     Ng2SmartTableModule,
     ReactiveFormsModule,
     NbIconModule,
-    NbSelectModule
+    NbSelectModule,
   ],
 })
 export class StreamingModule { }

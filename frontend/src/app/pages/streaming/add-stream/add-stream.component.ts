@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, Validators, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { SERVER_API_URL } from '../../../app.constants';
-import { NbComponentStatus, NbGlobalPhysicalPosition, NbGlobalPosition, NbToastrService } from '@nebular/theme';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 
 @Component({
   selector: 'ngx-add-stream',
@@ -28,7 +26,9 @@ export class AddStreamComponent implements OnInit {
     .subscribe(
       res => {
         this.listTopicKafka = Object.keys(res).map((key) => res[key]);
-      },
+      }, (error) => {
+        this.showToast('An unexpected error occured', error.message);
+      }, () => {},
     );
   }
 
@@ -48,7 +48,7 @@ export class AddStreamComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  get fields():FormArray{
+  get fields(): FormArray {
     return <FormArray> this.table.get('fields');
   }
 
@@ -71,7 +71,7 @@ export class AddStreamComponent implements OnInit {
   addColumn() {
     this.fields.push(this.createFieldTable());
   }
-  
+
   dropColumn(index: number) {
     this.fields.removeAt(index);
   }
@@ -101,7 +101,7 @@ export class AddStreamComponent implements OnInit {
               comment: ['', [Validators.required]],
             }));
           });
-        },(error) => {  
+        }, (error) => {
           this.showToast('An unexpected error occured', error.error);
         }, () => {});
   }
@@ -124,22 +124,23 @@ export class AddStreamComponent implements OnInit {
   }
 
   onChangeDefault(index: number) {
-    if (this.fields.at(index).get('default').value == 'USER_DEFINED') {
+    if (this.fields.at(index).get('default').value === 'USER_DEFINED') {
       (<HTMLInputElement>document.getElementById('default' + index)).style.display = 'block';
-      if ((<HTMLInputElement>document.getElementById('default' + index)).value != '') {
-        this.fields.at(index).get('default').setValue((<HTMLInputElement>document.getElementById('default' + index)).value);
+      if ((<HTMLInputElement>document.getElementById('default' + index)).value !== '') {
+        this.fields.at(index).get('default').setValue(
+          (<HTMLInputElement>document.getElementById('default' + index)).value);
       }
     } else {
       (<HTMLInputElement>document.getElementById('default' + index)).style.display = 'none';
     }
-    console.log(this.fields.at(index).get('default').value);
+    // console.log(this.fields.at(index).get('default').value);
   }
 
   onSubmit(): void {
     const stream = this.streamForm.getRawValue();
     const res = this.http.post(SERVER_API_URL + '/stream', stream).subscribe(
       res => {
-        console.log(res);
+        // console.log(res);
       },
     );
   }

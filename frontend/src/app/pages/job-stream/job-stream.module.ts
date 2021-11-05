@@ -8,6 +8,8 @@ import {
   NbSelectModule,
   NbListModule,
   NbInputModule,
+  NbCheckboxModule,
+  NbRadioModule,
 } from '@nebular/theme';
 import { ChartModule } from 'angular2-chartjs';
 import { JobStreamComponent } from './job-stream.component';
@@ -28,10 +30,12 @@ import { JobStreamRoutingModule } from './job-stream-routing.module';
     NbSelectModule,
     NbListModule,
     ChartModule,
+    NbCheckboxModule,
+    NbRadioModule,
   ],
   declarations: [
     JobStreamComponent,
-    ManageComponent
+    ManageComponent,
   ],
 })
 export class JobStreamModule { }

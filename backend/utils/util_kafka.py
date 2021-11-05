@@ -1,9 +1,15 @@
 import json
+import multiprocessing
 from json import JSONDecodeError
 
 from confluent_kafka import Consumer
+import time
+from confluent_kafka.admin import AdminClient
+from starlette import status
+from starlette.responses import JSONResponse
 
 from backend.utils.util_get_config import get_config
+from database.db import DB
 
 
 class Kafka:
@@ -17,6 +23,7 @@ class Kafka:
                 "This class is a singleton, use Kafka.create()")
         else:
             Kafka.__instance = self
+        print(1)
         self.consumer = self.create_consumer()
 
     @staticmethod
@@ -40,6 +47,7 @@ class Kafka:
         }
 
     def create_consumer(self):
+        print(2)
         return Consumer(self.get_credentials())
 
 
@@ -85,6 +93,31 @@ def get_latest_message(topic: str):
     except Exception as e:
         print(e)
         return {}, 'error: {}'.format(str(e))
+
+
+def status_kafka(temp, return_dict):
+    try:
+        admin_client = AdminClient(Kafka.get_credentials())
+        return_dict['status'] = admin_client.list_topics().topics
+    except Exception as e:
+        print(e)
+        return_dict['status'] = None
+
+
+def check_status(db: DB):
+    manager = multiprocessing.Manager()
+    manager_result = manager.dict()
+    p = multiprocessing.Process(target=status_kafka, args=(0, manager_result))
+    p.start()
+    time.sleep(2)
+    if p.is_alive() or manager_result.get('status', None) is None:
+        p.terminate()
+        return JSONResponse(content={"status": "stopped",
+                                     "message": "cannot connect to kafka with config {}".format(
+                                         Kafka.get_credentials()
+                                     )},
+                            status_code=status.HTTP_400_BAD_REQUEST)
+    return JSONResponse({"status": "running"}, status_code=status.HTTP_200_OK)
 
 
 if __name__ == '__main__':

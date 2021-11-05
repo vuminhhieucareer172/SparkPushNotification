@@ -46,3 +46,17 @@ def get_config_connect_database():
     except Exception as e:
         logging.error(e)
         return JSONResponse(content=e, status_code=status.HTTP_400_BAD_REQUEST)
+
+
+def status_mysql():
+    try:
+        dotenv_file = dotenv.find_dotenv()
+        dotenv.load_dotenv(dotenv_file)
+        db = DB.create()
+        db.connect()
+    except Exception as e:
+        logging.error(e)
+        return JSONResponse(content={"status": "stopped", "message": "cannot connect to kafka with config {}".format(
+                                         DB.get_credentials()
+                                     )}, status_code=status.HTTP_400_BAD_REQUEST)
+    return JSONResponse(content={"status": "running"}, status_code=status.HTTP_200_OK)

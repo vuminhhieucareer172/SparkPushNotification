@@ -14,8 +14,10 @@ from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream, JobStream
+from backend.utils import util_kafka
 from backend.utils.util_kafka import get_list_topics
 from database.db import DB
+from streaming import spark
 
 app = FastAPI()
 
@@ -71,6 +73,21 @@ def delete_stream(name: str, db=Depends(verify_database)):
 @app.get("/check-status-job-on-spark")
 def check_status_spark(db=Depends(verify_database)):
     return stream.check_status_spark(db)
+
+
+@app.get("/status-spark")
+def status_spark(db=Depends(verify_database)):
+    return spark.status_spark(db)
+
+
+@app.get("/status-kafka")
+def status_kafka(db=Depends(verify_database)):
+    return util_kafka.check_status(db)
+
+
+@app.get("/status-mysql")
+def status_mysql():
+    return database_connection.status_mysql()
 
 
 @app.get("/query")
@@ -145,10 +162,10 @@ def get_table_column(topic: str, db=Depends(verify_database)):
 
 @app.get("/kafka-topic")
 def get_table_column(db=Depends(verify_database)):
-    status_kafka = get_list_topics()
-    if isinstance(status_kafka, str):
-        return JSONResponse(status_kafka, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(status_kafka, status_code=status.HTTP_200_OK)
+    list_topic_kafka = get_list_topics()
+    if isinstance(list_topic_kafka, str):
+        return JSONResponse(list_topic_kafka, status_code=status.HTTP_400_BAD_REQUEST)
+    return JSONResponse(list_topic_kafka, status_code=status.HTTP_200_OK)
 
 
 @app.get("/job-streaming")
@@ -162,8 +179,8 @@ def start_job_streaming():
 
 
 @app.post("/update-job-streaming")
-def update_job_streaming(new_schema_job: JobStream):
-    return stream.update_job_streaming(new_schema_job)
+def update_job_streaming(new_schema_job: JobStream, db=Depends(verify_database)):
+    return stream.update_job_streaming(new_schema_job, db)
 
 
 @app.get("/stop-job-streaming")
@@ -172,7 +189,7 @@ def stop_job_streaming():
 
 
 @app.on_event("startup")
-async def shutdown_event():
+async def startup_event():
     result_scheduler = init_scheduler()
     if isinstance(result_scheduler, str):
         print(result_scheduler)
