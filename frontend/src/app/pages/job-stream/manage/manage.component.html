@@ -3,84 +3,72 @@
       <nb-card class="inline-form-card">
         <nb-card-header>Manage job stream</nb-card-header>
         <nb-card-body>
-          <form>
+          <form [formGroup]="jobForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="exampleInputEmail1" class="label">Job name:</label>
-              <input type="email" nbInput fullWidth id="exampleInputEmail1" placeholder="Job name ...">
+              <label for="job-name" class="label">Job name:</label>
+              <input type="email" nbInput fullWidth id="job-name" formControlName="name_job" placeholder="Job name ...">
             </div>
 
             <div class="row">
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label class="label">Status services:</label>
                 </div>
-                <div class="col-md-2">
-                    <div class="circle status service-border-error">
-                        <h4 class="service-name">Spark</h4>
-                        <h2 class="service-status service-error">Error 2</h2>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="circle status service-border-running">
-                        <h4 class="service-name">Kafka</h4>
-                        <h2 class="service-status service-running">Error 2</h2>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="circle status service-border-error">
-                        <h4 class="service-name">Mysql</h4>
-                        <h2 class="service-status service-error">Error 2</h2>
+                <div class="col-md-2" *ngFor="let item of objectKeys(this.status)">
+                    <div class="circle status" [ngClass]="'service-' + status[item]">
+                        <h4 class="service-name">{{item}}</h4>
+                        <h2 class="service-status">{{status[item]}}</h2>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="exampleInputEmail1" class="label">Scheduler:</label>
+                <label for="schedule" class="label">Scheduler:</label>
                 <div>
                     <div class="row schedule">
-                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelect('quick-schedule')">
+                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('quick-schedule')">
                             <input type="radio" name="schedule" id="quick-schedule" value="quick-schedule" [checked]="schedule == 'quick-schedule'"/>
                             <label for="quick-schedule"></label>
                         </div>
                         <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}"
-                            (click)="onSelect('quick-schedule')">
+                            (click)="onSelectSchedule('quick-schedule')">
                             <label for="quick-schedule" class="label">Quick schedule:</label>
                         </div>
-                        <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelect('quick-schedule')">
-                            <a style="margin: 5px; color: white" class="btn btn-info">1 minute</a>
-                            <a style="margin: 5px; color: white" class="btn btn-info">Hourly</a>
-                            <a style="margin: 5px; color: white" class="btn btn-info" >Daily</a>
-                            <a style="margin: 5px; color: white" class="btn btn-info" onclick="schedule = '@weekly'; job_string();">Weekly</a>
+                        <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                            <a style="margin: 5px; color: white" class="btn btn-info" (click)="setSchedule('* * * * *');">1 minute</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info" (click)="setSchedule('@hourly');">Hourly</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info" (click)="setSchedule('@daily');" >Daily</a>
+                            <a style="margin: 5px; color: white" class="btn btn-info" (click)="setSchedule('@weekly');">Weekly</a>
                         </div>
                     </div>
                     <div class="row schedule">
-                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelect('manual-schedule')">
+                        <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('manual-schedule')">
                             <input type="radio" name="schedule" id="manual-schedule" value="manual-schedule" [checked]="schedule == 'manual-schedule'"/>
                             <label for="manual-schedule"></label>
                         </div>
                         <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}"
-                                (click)="onSelect('manual-schedule')">
+                                (click)="onSelectSchedule('manual-schedule')">
                             <label for="manual-schedule" class="label">Manual schedule:</label>
                         </div>
-                        <div class="col-md-9 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelect('manual-schedule')">
-                            <nb-select selected="0" formControlName="type">
+                        <div class="col-md-9 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                            <nb-select selected="0">
                                 <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
                             </nb-select>
                             <div class="col-md-1 schedule-head">
                                 day(s)
                             </div>
-                            <nb-select selected="0" formControlName="type">
+                            <nb-select selected="0">
                                 <nb-option *ngFor="let e of hours" value="{{e}}">{{e}}</nb-option>
                             </nb-select>
                             <div class="col-md-1 schedule-head">
                                 hour(s)
                             </div>
-                            <nb-select selected="0" formControlName="type">
+                            <nb-select selected="0">
                                 <nb-option *ngFor="let e of minutes" value="{{e}}">{{e}}</nb-option>
                             </nb-select>
                             <div class="col-md-1 schedule-head">
                                 minute(s),
                             </div>
-                            <nb-select selected="0" formControlName="type">
+                            <nb-select selected="0">
                                 <nb-option *ngFor="let e of seconds" value="{{e}}">{{e}}</nb-option>
                             </nb-select>
                             <div class="col-md-1 schedule-head">
@@ -94,9 +82,9 @@
             <div style="float: right; margin-bottom: 40px; margin-top: 20px">
                 <button style="margin-right: 20px;" type="submit" nbButton status="success">Save
                 </button>
-                <button style="margin-right: 20px;" type="submit" nbButton status="info">Stop
+                <button style="margin-right: 20px;" (click)="stopJob()" nbButton status="info">Stop
                 </button>
-                <button style="margin-right: 20px;" type="submit" nbButton status="primary">Run
+                <button style="margin-right: 20px;" (click)="runJob()" nbButton status="primary">Run
                 </button>
             </div>
 

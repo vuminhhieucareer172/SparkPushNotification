@@ -27,7 +27,7 @@ export class AddStreamComponent implements OnInit {
       res => {
         this.listTopicKafka = Object.keys(res).map((key) => res[key]);
       }, (error) => {
-        this.showToast('An unexpected error occured', error.message);
+        this.showToast('An unexpected error occured', error.message, 'danger');
       }, () => {},
     );
   }
@@ -102,13 +102,13 @@ export class AddStreamComponent implements OnInit {
             }));
           });
         }, (error) => {
-          this.showToast('An unexpected error occured', error.error);
+          this.showToast('An unexpected error occured', error.error, 'danger');
         }, () => {});
   }
 
-  private showToast(title: string, body: string) {
+  private showToast(title: string, body: string, typeStatus: string) {
     const config = {
-      status: 'danger',
+      status: typeStatus,
       destroyByClick: this.destroyByClick,
       duration: this.duration,
       hasIcon: this.hasIcon,
@@ -136,12 +136,19 @@ export class AddStreamComponent implements OnInit {
     // console.log(this.fields.at(index).get('default').value);
   }
 
+  onReset(): void {
+    this.streamForm.reset();
+  }
+
   onSubmit(): void {
     const stream = this.streamForm.getRawValue();
-    const res = this.http.post(SERVER_API_URL + '/stream', stream).subscribe(
-      res => {
-        // console.log(res);
-      },
+    const res = this.http.post(SERVER_API_URL + '/stream', stream)
+      .subscribe(
+        res => {
+          this.showToast('Notification', 'Action completed', 'success');
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.message, 'danger');
+        }, () => {},
     );
   }
 

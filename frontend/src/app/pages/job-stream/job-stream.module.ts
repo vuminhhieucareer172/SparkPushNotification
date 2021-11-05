@@ -16,6 +16,7 @@ import { JobStreamComponent } from './job-stream.component';
 import { CommonModule } from '@angular/common';
 import { ManageComponent } from './manage/manage.component';
 import { JobStreamRoutingModule } from './job-stream-routing.module';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import { JobStreamRoutingModule } from './job-stream-routing.module';
     ChartModule,
     NbCheckboxModule,
     NbRadioModule,
+    ReactiveFormsModule,
   ],
   declarations: [
     JobStreamComponent,

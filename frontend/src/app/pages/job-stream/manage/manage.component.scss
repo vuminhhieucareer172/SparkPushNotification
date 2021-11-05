@@ -47,24 +47,23 @@ nb-card.inline-form-card nb-card-body {
 }
 
 .service-status {
-  color: #ffde00;
   font: 24px Lato, sans-serif;
   margin: 19px 0;
 }
 
-.service-border-error {
+.service-stopped {
   border: 3px solid #ffde00;
 }
 
-.service-border-running {
-  border: 3px solid #00ff00;
-}
-
-.service-error {
+.service-stopped > h2 {
   color: #ffde00;
 }
 
 .service-running {
+  border: 3px solid #00ff00;
+}
+
+.service-running > h2 {
   color: #00ff00;
 }
 
