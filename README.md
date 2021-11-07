@@ -16,9 +16,9 @@ Make sure to install enough requirements before continue. All requirements are l
 
 - Frontend:
 
-
+```
     npm install -g @angular/cli && npm install
-
+```
 
 - Backend:
 
@@ -28,8 +28,9 @@ Make sure to install enough requirements before continue. All requirements are l
 
     * Install package python:
         
-
+```
         pip3 install -r requirements.txt
+```
 
 ## Usage
 ### Start frontend
