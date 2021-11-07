@@ -6,7 +6,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ECommerceComponent } from './e-commerce/e-commerce.component';
 import { NotFoundComponent } from './miscellaneous/not-found/not-found.component';
 import { ConfigurationsComponent } from './configurations/configurations.component';
-import { JobStreamComponent } from './job-stream/job-stream.component';
 import { DatabaseConnectionComponent } from './database-connection/database-connection.component';
 
 const routes: Routes = [{
