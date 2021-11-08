@@ -1,1 +1,49 @@
-<p>add-query works!</p>
+<div class="steppers-container row">
+  <div class="col-md-12 col-lg-12 col-xxxl-12">
+    <nb-card>
+      <nb-card-body>
+        <nb-stepper #stepper>
+          <nb-step [stepControl]="firstForm" label="First step">
+            <form [formGroup]="firstForm" (ngSubmit)="onFirstSubmit()" class="step-container">
+              <p class="lorem">
+                Lorizzle ipsum dolizzle stuff fizzle, consectetuer adipiscing break it down. Nullizzle sapien velizzle,
+                my shizz pimpin', shizzle my nizzle crocodizzle shut the shizzle up, gravida vizzle, dang.
+              </p>
+              <div class="input-group">
+                <input type="text" placeholder="Enter your name" class="form-control" formControlName="firstCtrl"
+                       [ngClass]="{'form-control-danger': firstForm.invalid && (firstForm.dirty || firstForm.touched)}">
+              </div>
+              <button nbButton nbStepperNext>next</button>
+            </form>
+          </nb-step>
+          <nb-step [stepControl]="secondForm" label="Second step">
+            <form [formGroup]="secondForm" (ngSubmit)="onSecondSubmit()" class="step-container">
+
+                 <div class="kafka-input">
+                    <span>Kafka topic</span>
+                    <nb-card>
+                            <nb-select selected="1">
+                            <nb-option value="1">Option 1</nb-option>
+                            <nb-option value="2">Option 2</nb-option>
+                            </nb-select>
+                    </nb-card>
+                </div>
+              <div class="input-group">
+         
+                <input type="text" placeholder="Enter something" class="form-control" formControlName="secondCtrl"
+                       [ngClass]="{'form-control-danger': secondForm.invalid && (secondForm.dirty || secondForm.touched)}">
+              </div>
+              <button nbButton nbStepperPrevious>prev</button>
+              <button nbButton nbStepperNext>Confirm</button>
+            </form>
+          </nb-step>
+          <nb-step [stepControl]="secondForm" [hidden]="true" label="Second step">
+            <div class="step-container">
+              <h3>Wizard completed!</h3>
+              <button nbButton (click)="stepper.reset()">Try again</button>
+            </div>
+          </nb-step>
+        </nb-stepper>
+      </nb-card-body>
+    </nb-card>
+  </div>
