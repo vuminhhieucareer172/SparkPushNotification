@@ -1,4 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { NbToastrService } from '@nebular/theme';
+import { SERVER_API_URL } from '../../app.constants';
 
 @Component({
   selector: 'ngx-configurations',
@@ -7,7 +11,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigurationsComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private fb: FormBuilder,
+    private toastrService: NbToastrService
+  ) { }
 
   ngOnInit(): void {
   }

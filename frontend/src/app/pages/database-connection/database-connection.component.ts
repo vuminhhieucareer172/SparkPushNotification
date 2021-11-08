@@ -42,7 +42,7 @@ export class DatabaseConnectionComponent implements OnInit {
         this.dbForm.controls['db_name'].setValue(res['database']);
         this.dbForm.controls['db_username'].setValue(res['username']);
         this.dbForm.controls['db_password'].setValue(res['password']);
-      }
+      },
     );
   }
 

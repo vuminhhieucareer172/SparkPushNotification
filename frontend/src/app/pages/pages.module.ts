@@ -8,7 +8,7 @@ import { ECommerceModule } from './e-commerce/e-commerce.module';
 import { DatabaseConnectionModule } from './database-connection/database-connection.module';
 import { PagesRoutingModule } from './pages-routing.module';
 import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
-import { ConfigurationsComponent } from './configurations/configurations.component';
+// import { ConfigurationsComponent } from './configurations/configurations.component';
 import { DatabaseConnectionComponent } from './database-connection/database-connection.component';
 
 @NgModule({
@@ -23,7 +23,7 @@ import { DatabaseConnectionComponent } from './database-connection/database-conn
   ],
   declarations: [
     PagesComponent,
-    ConfigurationsComponent,
+    // ConfigurationsComponent,
   ],
 })
 export class PagesModule {
