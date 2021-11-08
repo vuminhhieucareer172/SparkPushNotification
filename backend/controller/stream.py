@@ -1,8 +1,10 @@
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import exc, Table, MetaData
 from starlette.responses import JSONResponse
 
+from backend.controller.schedule import scheduler
 from backend.controller.table import create_table, update_table
 from backend.models.dbstreaming_config import Config
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
@@ -10,6 +12,7 @@ from backend.schemas.configuration import Configuration
 from backend.schemas.stream import Stream, JobStream
 from backend.utils.util_get_config import get_config
 from constants import constants
+from constants.constants import ID_JOB_STREAM
 from database.db import DB, get_session
 from database.session import SessionHandler
 from streaming.spark import Spark
@@ -89,7 +92,7 @@ def delete_stream(stream_name: str, db: DB):
 
 def stop_job_streaming():
     try:
-        Spark().get_sql_context().stop()
+        Spark().get_sql_context().sparkSession.stop()
     except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
@@ -98,11 +101,11 @@ def stop_job_streaming():
 
 def start_job_streaming():
     try:
-        job = Spark().submit_job_spark(file="job_streaming_example")
+        process_id = Spark().submit_job_spark(file="job_streaming_example")
     except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(content={"message": "started", "process_id": job.pid}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"message": "started", "process_id": process_id}, status_code=status.HTTP_200_OK)
 
 
 def update_job_streaming(schema: JobStream, db: DB):
@@ -118,6 +121,9 @@ def update_job_streaming(schema: JobStream, db: DB):
                                                      schedule=schema.schedule)
                                           )
             job_streaming_session.add(config_schema.dict())
+        scheduler.modify_job(job_id=ID_JOB_STREAM, trigger=CronTrigger.from_crontab(schema.schedule))
+        if not scheduler.running:
+            scheduler.start()
         session.commit()
     except exc.SQLAlchemyError as e:
         print(e)

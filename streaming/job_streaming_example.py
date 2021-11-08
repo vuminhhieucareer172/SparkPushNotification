@@ -53,19 +53,6 @@ def main():
         .trigger(processingTime='5 minutes') \
         .option("topic", TOPIC_USER).start()
 
-    data_job.createOrReplaceTempView("job")
-    data = spark.sql("select * from job where salary > 1.0")
-    check_matching = udf(
-        lambda x: "job--10--" + str(x), StringType()
-    )
-    data = data.withColumn("value", check_matching(col("key")))
-    data.writeStream \
-        .format("kafka") \
-        .option("kafka.bootstrap.servers", KAFKA_URI) \
-        .option("checkpointLocation", CHECKPOINT_PATH + '/user2') \
-        .trigger(continuous='10 minutes') \
-        .option("topic", TOPIC_USER).start()
-
     spark.streams.awaitAnyTermination()
 
 

@@ -5,6 +5,7 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from backend.utils.util_get_config import get_config
+from backend.utils.util_process import is_process_running
 from constants.constants import CONFIG_SPARK
 from database.db import DB
 
@@ -65,13 +66,17 @@ class Spark:
         """ Return running job pid """
         return self.__spark_job_pid
 
-    def submit_job_spark(self, file: str):
+    @staticmethod
+    def submit_job_spark(file: str):
         """ Submit a job from file python to spark cluster """
+        if Spark.__spark_job_pid is not None and \
+                is_process_running(Spark.__spark_job_pid, detail="org.apache.spark:spark-sql-kafka-0-10_2.12"):
+            return Spark.__spark_job_pid
         cmd = "nohup", "spark-submit", "--packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2", \
               "streaming/job_stream/job/" + file + ".py"
         proc = subprocess.Popen(cmd)
-        self.__spark_job_pid = proc.pid
-        return proc
+        Spark.__spark_job_pid = proc.pid
+        return proc.pid
 
 
 def status_spark(db: DB):
