@@ -1,15 +1,90 @@
 <div class="row">
-    <div class="col-xl-12">
-        <nb-card class="inline-form-card">
-            <!-- <nb-card-header>Inline form</nb-card-header>
-            <nb-card-body>
-              <form class="form-inline">
-                <input type="text" nbInput fullWidth placeholder="Jane Doe">
-                <input type="text" nbInput fullWidth placeholder="Email">
-                <nb-checkbox>Remember me</nb-checkbox>
-                <button type="submit" nbButton status="primary">Submit</button>
-              </form>
-            </nb-card-body> -->
-        </nb-card>
-    </div>
+  <div class="col-md-6">
+    <nb-card>
+      <nb-card-header>Add kafka config</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="kafkaForm" (ngSubmit)="onSubmitKafka()">
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
+            <div class="col-sm-9">
+              <input type="email" nbInput fullWidth id="inputEmail1" placeholder="Bootstrap-server..." />
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+              <button style="float: right" type="submit" nbButton status="info">
+                Add kafka
+              </button>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-6">
+    <nb-card>
+      <nb-card-header>Add spark config</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="sparkForm" (ngSubmit)="onSubmitSpark()">
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Spark master:</label>
+            <div class="col-sm-9">
+              <input type="email" nbInput fullWidth id="inputEmail1" placeholder="Spark master..." />
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+              <button style="float: right" type="submit" nbButton status="info">
+                Add spark
+              </button>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-12">
+    <nb-card class="inline-form-card">
+      <nb-card-header>Add email</nb-card-header>
+      <nb-card-body>
+        <form class="form-inline" [formGroup]="emailForm" (ngSubmit)="onSubmitEmail()">
+          <div class="row">
+            <div class="col-sm-5">
+              <div class="form-group">
+                <label for="inputFirstName" class="label">Account name:</label>
+                <input type="text" nbInput fullWidth placeholder="Account name" />
+              </div>
+            </div>
+            <div class="col-sm-5">
+              <div class="form-group">
+                <label for="inputFirstName" class="label">Password:</label>
+                <input type="text" nbInput fullWidth placeholder="Password" />
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="form-group">
+                <button style="float: right" type="submit" nbButton status="info">
+                  Add email
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-12">
+    <nb-card>
+      <nb-card-header> Config </nb-card-header>
+
+      <nb-card-body>
+        <ng2-smart-table [settings]="settings" [source]="source" (deleteConfirm)="onDeleteConfirm($event)">
+        </ng2-smart-table>
+      </nb-card-body>
+    </nb-card>
+  </div>
 </div>
