@@ -23,7 +23,6 @@ class Kafka:
                 "This class is a singleton, use Kafka.create()")
         else:
             Kafka.__instance = self
-        print(1)
         self.consumer = self.create_consumer()
 
     @staticmethod
@@ -37,7 +36,7 @@ class Kafka:
         """ Fetch credentials from either environment variables (for testing)"""
         kafka_config = get_config('kafka')
         if kafka_config is None or kafka_config.value.get('bootstrap.servers', None) is None:
-            return None
+            return {}
         return {
             "bootstrap.servers": kafka_config.value['bootstrap.servers'],
             "group.id": 'group_id',
@@ -47,8 +46,11 @@ class Kafka:
         }
 
     def create_consumer(self):
-        print(2)
-        return Consumer(self.get_credentials())
+        try:
+            return Consumer(self.get_credentials())
+        except Exception as e:
+            print(e)
+            return None
 
 
 def get_list_topics():

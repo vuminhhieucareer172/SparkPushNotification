@@ -14,20 +14,21 @@ def get_config(db: DB, skip: int = 0, limit: int = 10):
     try:
         session = get_session(database=db)
         config_session = SessionHandler.create(session, Config)
-        return config_session.get_from_offset(skip, limit, to_json=True)
+        return JSONResponse(config_session.get_from_offset(skip, limit, to_json=True), status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
-        logging.error(e)
-        return None
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def get_config_by_name(config_name: str, db: DB):
     try:
         session = get_session(database=db)
         config_session = SessionHandler.create(session, Config)
-        return config_session.get_one(query_dict=dict(name=config_name), to_json=True)
+        return JSONResponse(config_session.get_one(query_dict=dict(name=config_name), to_json=True),
+                            status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
-        logging.error(e)
-        return None
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def add_config(new_config: Configuration, db: DB):
@@ -56,7 +57,7 @@ def update_config(new_config: ConfigurationUpdate, db: DB):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
 
 
@@ -69,5 +70,5 @@ def delete_config(config_id: int, db: DB):
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)

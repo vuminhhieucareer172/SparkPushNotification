@@ -1,15 +1,18 @@
+import datetime
 import logging
+from typing import List
 
 import sqlalchemy
 from fastapi import status
-from sqlalchemy import exc, Column, Table, text, inspect
+from sqlalchemy import exc, Column, Table, text, inspect, MetaData
 from sqlalchemy.engine import Inspector
 from starlette.responses import JSONResponse
-
+from constants import constants
 from backend.schemas import table
+from backend.utils.util_kafka import get_latest_message
 from constants.constants import PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
     DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
-from database.db import DB
+from database.db import DB, get_session
 
 
 def convert_to_sqlalchemy(data_type: str):
@@ -61,9 +64,10 @@ def add_column_to_table(table_instance: Table, new_columns: list):
     return table_instance
 
 
-def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STREAMING) -> JSONResponse:
+def create_table(new_schema: table.Table, db: DB, table_prefix_name=PREFIX_DB_TABLE_STREAMING) -> JSONResponse:
+    session = get_session(database=db)
     try:
-        new_table = Table(table_prefix_name + new_schema.name, meta, mysql_engine=new_schema.engine,
+        new_table = Table(table_prefix_name + new_schema.name, MetaData(db.engine), mysql_engine=new_schema.engine,
                           mysql_collate=new_schema.collate)
         new_table = add_column_to_table(table_instance=new_table, new_columns=new_schema.fields)
         new_table.create(checkfirst=True)
@@ -76,15 +80,17 @@ def create_table(new_schema: table.Table, table_prefix_name=PREFIX_DB_TABLE_STRE
     return JSONResponse(content="Table is created", status_code=status.HTTP_201_CREATED)
 
 
-def update_table(new_schema: table.Table) -> JSONResponse:
+def update_table(new_schema: table.Table, db: DB) -> JSONResponse:
     """
     support only drop columns
+    :param db:
     :param new_schema:
     :return:
     """
+    session = get_session(database=db)
     try:
-        inspector: Inspector = inspect(engine)
-        new_table = Table(new_schema.name, meta, autoload=True)
+        inspector: Inspector = inspect(db.engine)
+        new_table = Table(new_schema.name, MetaData(db.engine), autoload=True)
         columns: list = inspector.get_columns(new_schema.name)
         for column in columns:
             for field in new_schema.fields:
@@ -103,3 +109,80 @@ def update_table(new_schema: table.Table) -> JSONResponse:
         session.rollback()
         return JSONResponse(content="Failed with error {}".format(e), status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content="Table is created", status_code=status.HTTP_200_OK)
+
+
+def get_schema_from_kafka_topic(topic: str):
+    try:
+        latest_mess, message = get_latest_message(topic=topic)
+        if latest_mess == {}:
+            return JSONResponse(content=message, status_code=status.HTTP_400_BAD_REQUEST)
+        list_column = []
+        data = {}
+        for key_column in latest_mess.keys():
+            type_column = ''
+            if isinstance(latest_mess[key_column], str):
+                type_column = 'VARCHAR'
+            if isinstance(latest_mess[key_column], int):
+                if -2147483648 <= latest_mess[key_column] <= 2147483648:
+                    type_column = 'INTEGER'
+                else:
+                    type_column = 'LONG'
+            if isinstance(latest_mess[key_column], float):
+                type_column = 'FLOAT'
+            date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y %H:%M:%S')
+            if isinstance(date_time_obj, datetime.datetime):
+                type_column = 'DATETIME'
+            column = {
+                "name_field": key_column,
+                "type": type_column,
+            }
+            list_column.append(column)
+        data["message_sample"] = str(latest_mess)
+        data["table"] = list_column
+        return JSONResponse(content=data, status_code=status.HTTP_200_OK)
+    except exc.SQLAlchemyError as e:
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
+
+
+def get_info_table(table_name: str, db: DB):
+    table_info = dict(name=table_name, collate='', engine='InnoDB', fields=[])
+    try:
+        inspector: Inspector = inspect(db.engine)
+
+        # get table option
+        table_option = inspector.get_table_options(table_name=table_name)
+        table_info['collate'] = table_option.get('mysql_default charset')
+        table_info['engine'] = table_option.get('mysql_engine')
+
+        # get constraints
+        list_primary_key = inspector.get_pk_constraint(table_name=table_name).get('constrained_columns', [])
+        unique_constraints = inspector.get_unique_constraints(table_name=table_name)
+        list_unique_column = list(map(lambda x: x.get('column_names')[0], unique_constraints))
+
+        # get columns
+        list_columns: List[dict] = inspector.get_columns(table_name=table_name)
+        for column in list_columns:
+            new_column = dict(name_field=column.get('name'), type='VARCHAR', length=None, value=None, primary_key=False,
+                              nullable=column.get('nullable', True), unique=False, default=column.get('default'),
+                              auto_increment=column.get('autoincrement', False),
+                              collation=None, comment=column.get('comment'))
+            if column.get('name') in list_primary_key:
+                new_column['primary_key'] = True
+            if column.get('name') in list_unique_column:
+                new_column['unique'] = True
+
+            for key in constants.DATA_TYPE_SQLALCHEMY.keys():
+                if isinstance(column.get('type'), constants.DATA_TYPE_SQLALCHEMY[key]):
+                    new_column['type'] = key
+                    if constants.DATA_TYPE_SQLALCHEMY[key] in constants.DATATYPE_STRING:
+                        new_column['length'] = column.get('type').__dict__.get('length', None)
+                        new_column['collation'] = column.get('type').__dict__.get('collation', None)
+                    elif constants.DATA_TYPE_SQLALCHEMY[key] in constants.DATATYPE_NUMERIC:
+                        new_column['length'] = column.get('type').__dict__.get('display_width', None)
+
+            table_info.get('fields').append(new_column)
+        return table_info
+    except Exception as e:
+        print(e)
+        raise e

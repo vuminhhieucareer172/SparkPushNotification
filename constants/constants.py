@@ -80,5 +80,6 @@ CONFIG_KAFKA = 'kafka'
 CONFIG_MAIL = 'mail'
 CONFIG_ZALO = 'zalo'
 
-
 GENERATE_STREAMING_SUCCESSFUL = "successful"
+
+ID_JOB_STREAM = 'dbstreaming'

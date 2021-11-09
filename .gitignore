@@ -4,8 +4,10 @@ example/
 .DS_Store
 *.out
 test.py
+
 backend/test.txt
 backend/test_schedule.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
