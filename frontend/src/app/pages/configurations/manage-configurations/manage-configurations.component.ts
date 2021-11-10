@@ -9,7 +9,7 @@ import { SERVER_API_URL } from '../../../app.constants';
 @Component({
   selector: 'ngx-manage-configurations',
   templateUrl: './manage-configurations.component.html',
-  styleUrls: ['./manage-configurations.component.scss']
+  styleUrls: ['./manage-configurations.component.scss'],
 })
 export class ManageConfigurationsComponent implements OnInit {
   source: LocalDataSource = new LocalDataSource();
@@ -18,26 +18,12 @@ export class ManageConfigurationsComponent implements OnInit {
     private http: HttpClient,
     private fb: FormBuilder,
     private toastrService: NbToastrService,
-    private router: Router,
-  ) { 
+    private router: Router) {
     this.http.get(SERVER_API_URL + '/config').toPromise().then(
-      res=>{
+      res => {
         this.listConfig = res as string[];
-        console.log(this.listConfig);
-      }
-    )
-
-    // this.http.get(SERVER_API_URL + '/config').toPromise().then(
-    //   res=>{
-    //     console.log(res);
-
-        // this.listConfig = res as string[];
-        // console.log(this.listConfig);
-      // }
-    // )
-    // this.http.get(SERVER_API_URL + '/config').subscribe(response => {
-    //   this.listConfig = response
-    //   });
+      },
+    );
   }
 
   ngOnInit(): void {
@@ -46,7 +32,7 @@ export class ManageConfigurationsComponent implements OnInit {
   settings = {
     actions: {
       position: 'right',
-    } ,
+    },
     columns: {
       id: {
         title: 'ID',
@@ -58,8 +44,7 @@ export class ManageConfigurationsComponent implements OnInit {
       },
       value: {
         title: 'Value',
-        valuePrepareFunction: (value) => { return JSON.stringify(value)},
-        // type: 'number',
+        valuePrepareFunction: (value) => JSON.stringify(value),
       },
     },
     add: {

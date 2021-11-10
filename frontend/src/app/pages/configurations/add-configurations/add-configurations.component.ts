@@ -9,7 +9,7 @@ import { SERVER_API_URL } from '../../../app.constants';
 @Component({
   selector: 'ngx-add-configurations',
   templateUrl: './add-configurations.component.html',
-  styleUrls: ['./add-configurations.component.scss']
+  styleUrls: ['./add-configurations.component.scss'],
 })
 export class AddConfigurationsComponent implements OnInit {
   destroyByClick = true;
@@ -24,7 +24,6 @@ export class AddConfigurationsComponent implements OnInit {
     private fb: FormBuilder,
     private toastrService: NbToastrService,
     private router: Router,
-    
   ) {
       // const data = this.http.get(SERVER_API_URL + '/config');
       // this.source.load(data);
@@ -67,7 +66,7 @@ export class AddConfigurationsComponent implements OnInit {
   onSubmitKafka(): void {
     const addKafka = this.kafkaForm.getRawValue();
     addKafka['value'] = {'bootstrap.servers': addKafka.server + ':' + addKafka.port};
-    addKafka['name'] = 'kafka'
+    addKafka['name'] = 'kafka';
     delete addKafka.server;
     delete addKafka.port;
     const res = this.http.post(SERVER_API_URL + '/config', addKafka)
@@ -96,11 +95,11 @@ export class AddConfigurationsComponent implements OnInit {
 
   onSubmitEmail(): void {
     const addMail = this.emailForm.getRawValue();
-    addMail['value'] = {'username': addMail.username, 'password':addMail.password}
+    addMail['value'] = {'username': addMail.username, 'password': addMail.password};
     delete addMail.username;
     delete addMail.password;
     addMail['name'] = 'mail';
-    console.log(Object.getOwnPropertyNames(addMail))
+    // console.log(Object.getOwnPropertyNames(addMail))
     const res = this.http.post(SERVER_API_URL + '/config', addMail)
     .subscribe(
       res => {

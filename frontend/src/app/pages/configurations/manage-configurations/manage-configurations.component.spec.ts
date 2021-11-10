@@ -8,7 +8,7 @@ describe('ManageConfigurationsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ManageConfigurationsComponent ]
+      declarations: [ ManageConfigurationsComponent ],
     })
     .compileComponents();
   });
