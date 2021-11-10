@@ -7,9 +7,18 @@
           <div class="form-group row">
             <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
             <div class="col-sm-9">
-              <input type="email" nbInput fullWidth id="inputEmail1" placeholder="Bootstrap-server..." />
+              <input type="email" formControlName="server" nbInput fullWidth id="inputEmail1"
+                placeholder="Bootstrap-server..." />
             </div>
           </div>
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Port:</label>
+            <div class="col-sm-9">
+              <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1"
+                placeholder="Port..." />
+            </div>
+          </div>
+
           <div class="form-group row">
             <div class="offset-sm-3 col-sm-9">
               <button style="float: right" type="submit" nbButton status="info">
@@ -30,7 +39,8 @@
           <div class="form-group row">
             <label for="inputEmail1" class="label col-sm-3 col-form-label">Spark master:</label>
             <div class="col-sm-9">
-              <input type="email" nbInput fullWidth id="inputEmail1" placeholder="Spark master..." />
+              <input type="email" nbInput formControlName="value" fullWidth id="inputEmail1"
+                placeholder="Spark master..." />
             </div>
           </div>
           <div class="form-group row">
@@ -54,13 +64,13 @@
             <div class="col-sm-5">
               <div class="form-group">
                 <label for="inputFirstName" class="label">Account name:</label>
-                <input type="text" nbInput fullWidth placeholder="Account name" />
+                <input type="text" formControlName="username" nbInput fullWidth placeholder="Account name" />
               </div>
             </div>
             <div class="col-sm-5">
               <div class="form-group">
                 <label for="inputFirstName" class="label">Password:</label>
-                <input type="text" nbInput fullWidth placeholder="Password" />
+                <input type="password" formControlName="password" nbInput fullWidth placeholder="Password" />
               </div>
             </div>
             <div class="col-sm-2">
@@ -71,7 +81,6 @@
               </div>
             </div>
           </div>
-
         </form>
       </nb-card-body>
     </nb-card>
