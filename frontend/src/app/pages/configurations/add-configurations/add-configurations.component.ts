@@ -82,7 +82,7 @@ export class AddConfigurationsComponent implements OnInit {
 
   onSubmitSpark(): void {
     const addSpark = this.sparkForm.getRawValue();
-    console.log(addSpark)
+    // console.log(addSpark)
     // addSpark['name'] = 'spark';
     // addSpark.value = {'master': addSpark.value};
     // const res = this.http.post(SERVER_API_URL + '/config', addSpark)
