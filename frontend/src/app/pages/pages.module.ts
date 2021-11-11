@@ -22,7 +22,7 @@ import { DatabaseConnectionComponent } from './database-connection/database-conn
     ECommerceModule,
     MiscellaneousModule,
     DatabaseConnectionModule,
-    ConfigurationsModule,
+    // ConfigurationsModule,
   ],
   declarations: [
     PagesComponent,

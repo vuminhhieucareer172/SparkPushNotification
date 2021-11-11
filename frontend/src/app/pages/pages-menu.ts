@@ -20,7 +20,16 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Configurations',
     icon: 'options-2-outline',
-    link: '/pages/configurations',
+    children: [
+      {
+        title: 'Add config',
+        link: '/pages/configurations/add-config',
+      },
+      {
+        title: 'Manage configs',
+        link: '/pages/configurations/manage-config',
+      },
+    ],
   },
   {
     title: 'Streaming',

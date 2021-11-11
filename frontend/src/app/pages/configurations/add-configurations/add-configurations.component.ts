@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 import { LocalDataSource } from 'ng2-smart-table';
@@ -77,20 +77,23 @@ export class AddConfigurationsComponent implements OnInit {
         this.showToast('An unexpected error occured', error.message, 'danger');
       }, () => {},
     );
+    this.kafkaForm.reset();
   }
 
   onSubmitSpark(): void {
     const addSpark = this.sparkForm.getRawValue();
-    addSpark['name'] = 'spark';
-    addSpark.value = {'master': addSpark.value};
-    const res = this.http.post(SERVER_API_URL + '/config', addSpark)
-    .subscribe(
-      res => {
-        this.showToast('Notification', 'Action completed', 'success');
-      }, (error) => {
-        this.showToast('An unexpected error occured', error.message, 'danger');
-      }, () => {},
-    );
+    console.log(addSpark)
+    // addSpark['name'] = 'spark';
+    // addSpark.value = {'master': addSpark.value};
+    // const res = this.http.post(SERVER_API_URL + '/config', addSpark)
+    // .subscribe(
+    //   res => {
+    //     this.showToast('Notification', 'Action completed', 'success');
+    //   }, (error) => {
+    //     this.showToast('An unexpected error occured', error.message, 'danger');
+    //   }, () => {},
+    // );
+    // this.sparkForm.reset();
   }
 
   onSubmitEmail(): void {
@@ -108,8 +111,52 @@ export class AddConfigurationsComponent implements OnInit {
         this.showToast('An unexpected error occured', error.message, 'danger');
       }, () => {},
     );
+    this.emailForm.reset();
   }
 
+  table = this.fb.group({
+    name: new FormControl('', (Validators.required)),
+    charset: ['', [Validators.required]],
+    collate: ['', [Validators.required]],
+    engine: ['InnoDB', [Validators.required]],
+    fields: this.fb.array([this.createFieldTable()]),
+  });
+
+  get fields(): FormArray {
+    return <FormArray> this.table.get('fields');
+  }
+
+  createFieldTable(): FormGroup {
+    return this.fb.group({
+      name_field: [null, [Validators.required]],
+      type: [null, [Validators.required]],
+      primary_key: [false, [Validators.required]],
+      auto_increment: [false, [Validators.required]],
+      nullable: [false, [Validators.required]],
+      unique: [false, [Validators.required]],
+      default: ['', [Validators.required]],
+      length: [0, [Validators.required]],
+      value: ['', [Validators.required]],
+      collation: ['latin1_swedish_ci', [Validators.required]],
+      comment: ['', [Validators.required]],
+    });
+  }
+
+  onReset(): void {
+    this.sparkForm.reset();
+  }
+
+  addColumn() {
+    this.fields.push(this.createFieldTable());
+  }
+
+  dropColumn(index: number) {
+    this.fields.removeAt(index);
+  }
+
+  clearTable() {
+    this.fields.clear();
+  }
 
 
 

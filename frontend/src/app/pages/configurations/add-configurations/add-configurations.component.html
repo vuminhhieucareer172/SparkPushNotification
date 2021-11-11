@@ -1,89 +1,172 @@
 <div class="row">
-    <div class="col-md-6">
-      <nb-card>
-        <nb-card-header>Add kafka config</nb-card-header>
-        <nb-card-body>
-          <form [formGroup]="kafkaForm" (ngSubmit)="onSubmitKafka()">
-            <div class="form-group row">
-              <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
-              <div class="col-sm-9">
-                <input type="email" formControlName="server" nbInput fullWidth id="inputEmail1"
-                  placeholder="Bootstrap-server..." />
-              </div>
+  <div class="col-md-6">
+    <nb-card>
+      <nb-card-header>Add kafka config</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="kafkaForm" (ngSubmit)="onSubmitKafka()">
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
+            <div class="col-sm-9">
+              <input type="email" formControlName="server" nbInput fullWidth id="inputEmail1"
+                placeholder="Bootstrap-server..." />
             </div>
-            <div class="form-group row">
-              <label for="inputEmail1" class="label col-sm-3 col-form-label">Port:</label>
-              <div class="col-sm-9">
-                <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1"
-                  placeholder="Port..." />
-              </div>
+          </div>
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Port:</label>
+            <div class="col-sm-9">
+              <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1" placeholder="Port..." />
             </div>
-  
-            <div class="form-group row">
-              <div class="offset-sm-3 col-sm-9">
-                <button style="float: right" type="submit" nbButton status="info">
-                  Add kafka
-                </button>
-              </div>
-            </div>
-          </form>
-        </nb-card-body>
-      </nb-card>
-    </div>
-  
-    <div class="col-md-6">
-      <nb-card>
-        <nb-card-header>Add mail account</nb-card-header>
-        <nb-card-body>
-          <form [formGroup]="emailForm" (ngSubmit)="onSubmitEmail()">
-            <div class="form-group row">
-              <label for="inputEmail1" class="label col-sm-3 col-form-label">Email name:</label>
-              <div class="col-sm-9">
-                <input type="email" formControlName="username" nbInput fullWidth id="inputEmail1"
-                  placeholder="Email name..." />
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="inputEmail1" class="label col-sm-3 col-form-label">Password:</label>
-              <div class="col-sm-9">
-                <input type="password" formControlName="password" nbInput fullWidth id="inputEmail1"
-                  placeholder="Password..." />
-              </div>
-            </div>
-  
-            <div class="form-group row">
-              <div class="offset-sm-3 col-sm-9">
-                <button style="float: right" type="submit" nbButton status="info">
-                  Add account
-                </button>
-              </div>
-            </div>
-          </form>
-        </nb-card-body>
-      </nb-card>
-    </div>
+          </div>
 
-    <div class="col-md-12">
-      <nb-card>
-        <nb-card-header>Add spark config</nb-card-header>
-        <nb-card-body>
-          <form [formGroup]="sparkForm" (ngSubmit)="onSubmitSpark()">
-            <div class="form-group row">
-              <label for="inputEmail1" class="label col-sm-3 col-form-label">Spark master:</label>
-              <div class="col-sm-9">
-                <input type="email" nbInput formControlName="value" fullWidth id="inputEmail1"
-                  placeholder="Spark master..." />
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+              <button style="float: right" type="submit" nbButton status="info">
+                Add kafka
+              </button>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-6">
+    <nb-card>
+      <nb-card-header>Add mail account</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="emailForm" (ngSubmit)="onSubmitEmail()">
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Email name:</label>
+            <div class="col-sm-9">
+              <input type="email" formControlName="username" nbInput fullWidth id="inputEmail1"
+                placeholder="Email name..." />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="inputEmail1" class="label col-sm-3 col-form-label">Password:</label>
+            <div class="col-sm-9">
+              <input type="password" formControlName="password" nbInput fullWidth id="inputEmail1"
+                placeholder="Password..." />
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+              <button style="float: right" type="submit" nbButton status="info">
+                Add account
+              </button>
+            </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <div class="col-md-12">
+    <nb-card class="inline-form-card">
+      <nb-card-header>Add spark config</nb-card-header>
+      <nb-card-body>
+        <form [formGroup]="sparkForm" (ngSubmit)="onSubmitSpark()">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="inputFirstName" class="label">Spark master:</label>
+                <input type="text" nbInput fullWidth formControlName="master" id="inputFirstName"
+                  placeholder="Spark master ...">
               </div>
             </div>
-            <div class="form-group row">
-              <div class="offset-sm-3 col-sm-9">
-                <button style="float: right" type="submit" nbButton status="info">
-                  Add spark
-                </button>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="inputLastName" class="label">IP:</label>
+                <input type="text" nbInput fullWidth formControlName="ip" id="inputFirstName" placeholder="Ip ...">
               </div>
             </div>
-          </form>
-        </nb-card-body>
-      </nb-card>
-    </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table mb-0" [formGroup]="table">
+              <thead class="thead-light">
+                <tr>
+                  <th>Config</th>
+                  <th>Value</th>
+                  <th>Drop</th>
+                </tr>
+              </thead>
+              <tbody formArrayName="fields" *ngFor="let t of fields.controls; let i = index">
+                <tr [formGroupName]="i">
+                  <td>
+                    <nb-select fullWidth placeholder="Select Config" formControlName="collation">
+                      <nb-option-group label="application" title="Application Properties">
+                        <nb-option value="spark.driver.cores"
+                          title="Number of cores to use for the driver process, only in cluster mode.">
+                          spark.driver.cores</nb-option>
+                        <nb-option value="spark.driver.maxResultSize"
+                          title="Limit of total size of serialized results of all partitions for each Spark action (e.g. collect) in bytes. Should be at least 1M, or 0 for unlimited. Jobs will be aborted if the total size is above this limit. Having a high limit may cause out-of-memory errors in driver (depends on spark.driver.memory and memory overhead of objects in JVM). Setting a proper limit can protect the driver from out-of-memory errors. ">
+                          spark.driver.maxResultSize
+                        </nb-option>
+                        <nb-option value="spark.driver.memory"
+                          title='Amount of memory to use for the driver process, i.e. where SparkContext is initialized, in the same format as JVM memory strings with a size unit suffix ("k", "m", "g" or "t") (e.g. 512m, 2g).
+                        Note: In client mode, this config must not be set through the SparkConf directly in your application, because the driver JVM has already started at that point. Instead, please set this through the --driver-memory command line option or in your default properties file. '>
+                          spark.driver.memory
+                        </nb-option>
+                        <nb-option value="spark.executor.memory"
+                          title='Amount of memory to use per executor process, in the same format as JVM memory strings with a size unit suffix ("k", "m", "g" or "t") (e.g. 512m, 2g). '>
+                          spark.executor.memory
+                        </nb-option>
+                        <nb-option value="spark.local.dir"
+                          title='Directory to use for "scratch" space in Spark, including map output files and RDDs that get stored on disk. This should be on a fast, local disk in your system. It can also be a comma-separated list of multiple directories on different disks'>
+                          spark.local.dir</nb-option>
+                      </nb-option-group>
+                      <nb-option-group label="UI" title="Spark UI">
+                        <nb-option value="spark.eventLog.enabled"
+                          title="Whether to log Spark events, useful for reconstructing the Web UI after the application has finished. ">
+                          spark.eventLog.enabled</nb-option>
+                        <nb-option value="spark.eventLog.overwrite" title=" Whether to overwrite any existing files.">
+                          spark.eventLog.overwrite
+                        </nb-option>
+                      </nb-option-group>
+                      <nb-option-group label="Execution" title="Execution Behavior">
+                        <nb-option value="spark.executor.cores" title="The number of cores to use on each executor.">
+                          spark.executor.cores</nb-option>
+                        <nb-option value="spark.default.parallelism"
+                          title="Default number of partitions in RDDs returned by transformations like join, reduceByKey, and parallelize when not set by user. ">
+                          spark.default.parallelism
+                        </nb-option>
+                        <nb-option value="spark.executor.heartbeatInterval"
+                          title="Interval between each executor's heartbeats to the driver. Heartbeats let the driver know that the executor is still alive and update it with metrics for in-progress tasks. spark.executor.heartbeatInterval should be significantly less than spark.network.timeout ">
+                          spark.executor.heartbeatInterval
+                        </nb-option>
+                      </nb-option-group>
+                    </nb-select>
+                  </td>
+                  <td>
+                    <input type="text" formControlName="length" style="border: none" placeholder="..." />
+                  </td>
+
+                  <td style="padding: 0 0 0 10px;">
+                    <button type="button" id="drop-column" class="btn btn-sm font-size-20" (click)="dropColumn(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-left:10px">
+              <button (click)="addColumn()" id="add-column" class="btn btn-sm" type="button">
+                <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                <span class="" style="color: #276FCE; font-size: 16px;">More config</span>
+              </button>
+            </div>
+          </div>
+          <div style="float: right; margin-bottom: 40px; margin-top: 20px">
+            <button style="margin-right: 20px;" (click)="onReset()" nbButton status="success">Reset
+            </button>
+            <button style="margin-right: 10px;" type="submit" nbButton status="info">Add spark
+            </button>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+
 </div>

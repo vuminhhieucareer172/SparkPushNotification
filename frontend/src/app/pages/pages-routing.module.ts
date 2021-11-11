@@ -24,7 +24,9 @@ const routes: Routes = [{
     },
     {
       path: 'configurations',
-      component: ConfigurationsComponent,
+      loadChildren: () => import('./configurations/configurations.module')
+        .then(m => m.ConfigurationsModule),
+      // component: ConfigurationsComponent,
     },
     {
       path: 'database-connection',
