@@ -5,33 +5,97 @@
         <nb-stepper #stepper>
           <nb-step [stepControl]="firstForm" label="First step">
             <form [formGroup]="firstForm" (ngSubmit)="onFirstSubmit()" class="step-container">
-              <p class="lorem">
-                Lorizzle ipsum dolizzle stuff fizzle, consectetuer adipiscing break it down. Nullizzle sapien velizzle,
-                my shizz pimpin', shizzle my nizzle crocodizzle shut the shizzle up, gravida vizzle, dang.
-              </p>
-              <div class="input-group">
-                <input type="text" placeholder="Enter your name" class="form-control" formControlName="firstCtrl"
-                       [ngClass]="{'form-control-danger': firstForm.invalid && (firstForm.dirty || firstForm.touched)}">
+              <div class="form-group">
+                <label for="schedule" class="label">Scheduler:</label>
+                <div>
+                  <div class="row schedule">
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('quick-schedule')">
+                      <input type="radio" name="schedule" id="quick-schedule" value="quick-schedule" [checked]="schedule == 'quick-schedule' " formControlName="quick_schedule" />
+                      <label for="quick-schedule"></label>
+                    </div>
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                      <label for="quick-schedule" class="label">Quick schedule:</label>
+                    </div>
+                  </div>
+
+                  <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                    <textarea rows="5" nbInput fullWidth shape="round" placeholder="Text Area"></textarea>
+                  </div>
+                  <div class="row schedule">
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('manual-schedule')">
+                      <input type="radio" name="schedule" id="manual-schedule" value="manual-schedule" [checked]="schedule == 'manual-schedule'" formControlName="manual_schedule" />
+                      <label for="manual-schedule"></label>
+                    </div>
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                      <label for="manual-schedule" class="label">User Interface:</label>
+                    </div>
+                    <div class="col-md-9 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')"></div>
+                  </div>
+                  <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                    <label for="table" class="label">Table:</label>
+                  </div>
+                          <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                      <label for="table" class="label">Table:</label>
+                    </div>
+                    <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                      <label for="table" class="label">Table:</label>
+                    </div>
+                    <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                      <label for="table" class="label">Table:</label>
+                    </div>
+                    <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                      <label for="table" class="label">Table:</label>
+                    </div>
+                </div>
               </div>
+
               <button nbButton nbStepperNext>next</button>
             </form>
           </nb-step>
+          <!-- CONFIG -->
           <nb-step [stepControl]="secondForm" label="Second step">
             <form [formGroup]="secondForm" (ngSubmit)="onSecondSubmit()" class="step-container">
-
-                 <div class="kafka-input">
-                    <span>Kafka topic</span>
-                    <nb-card>
-                            <nb-select selected="1">
-                            <nb-option value="1">Option 1</nb-option>
-                            <nb-option value="2">Option 2</nb-option>
-                            </nb-select>
-                    </nb-card>
+              <div class="kafka-input">
+                <label for="kafka-topic" class="label">Kafka Topic:</label>
+                <nb-card>
+                  <nb-select selected="1">
+                    <nb-option value="1">Option 1</nb-option>
+                    <nb-option value="2">Option 2</nb-option>
+                  </nb-select>
+                </nb-card>
+              </div>
+              <div class="form-group">
+                <label for="schedule" class="label">Scheduler:</label>
+                <div>
+                  <div class="row schedule">
+                    <div class="col-md-12 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                      <nb-select selected="0">
+                        <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
+                      </nb-select>
+                      <div class="col-md-1 schedule-head">
+                        day(s)
+                      </div>
+                      <nb-select selected="0">
+                        <nb-option *ngFor="let e of hours" value="{{e}}">{{e}}</nb-option>
+                      </nb-select>
+                      <div class="col-md-1 schedule-head">
+                        hour(s)
+                      </div>
+                      <nb-select selected="0">
+                        <nb-option *ngFor="let e of minutes" value="{{e}}">{{e}}</nb-option>
+                      </nb-select>
+                      <div class="col-md-1 schedule-head">
+                        minute(s)
+                      </div>
+                      <nb-select selected="0">
+                        <nb-option *ngFor="let e of seconds" value="{{e}}">{{e}}</nb-option>
+                      </nb-select>
+                      <div class="col-md-1 schedule-head">
+                        second(s)
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              <div class="input-group">
-         
-                <input type="text" placeholder="Enter something" class="form-control" formControlName="secondCtrl"
-                       [ngClass]="{'form-control-danger': secondForm.invalid && (secondForm.dirty || secondForm.touched)}">
               </div>
               <button nbButton nbStepperPrevious>prev</button>
               <button nbButton nbStepperNext>Confirm</button>
@@ -47,3 +111,4 @@
       </nb-card-body>
     </nb-card>
   </div>
+</div>
