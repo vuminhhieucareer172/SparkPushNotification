@@ -42,7 +42,7 @@ import { NbIconModule, NbInputModule, NbTreeGridModule } from '@nebular/theme';
     Ng2SmartTableModule,
     NbIconModule,
     NbInputModule,
-    NbTreeGridModule
+    NbTreeGridModule,
   ],
 })
 export class QueryModule { }
