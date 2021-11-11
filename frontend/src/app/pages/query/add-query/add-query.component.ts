@@ -48,10 +48,8 @@ export class AddQueryComponent  implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.firstForm = this.fb.group({
-    });  
-    this.secondForm = this.fb.group({
-    });
+    this.firstForm = this.fb.group({});  
+    this.secondForm = this.fb.group({});
   }
 
   onFirstSubmit() {
