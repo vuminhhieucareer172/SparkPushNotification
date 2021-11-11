@@ -12,7 +12,7 @@ import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 })
 export class DatabaseConnectionComponent implements OnInit {
   destroyByClick = true;
-  duration = 2000;
+  duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
 
@@ -42,7 +42,7 @@ export class DatabaseConnectionComponent implements OnInit {
         this.dbForm.controls['db_name'].setValue(res['database']);
         this.dbForm.controls['db_username'].setValue(res['username']);
         this.dbForm.controls['db_password'].setValue(res['password']);
-      }
+      },
     );
   }
 
@@ -69,24 +69,24 @@ export class DatabaseConnectionComponent implements OnInit {
 
   onTestSubmit(): void {
     const stream = this.dbForm.getRawValue();
-    this.http.post(SERVER_API_URL + '/test-connect-database', stream)
+    this.http.post(SERVER_API_URL + '/test-connect-database', stream, {observe: 'response'})
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
         }, (error) => {
-          this.showToast('An unexpected error occured', error.message, 'danger');
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => {},
     );
   }
 
   onSubmit(): void {
     const stream = this.dbForm.getRawValue();
-    this.http.post(SERVER_API_URL + '/connect-database', stream)
+    this.http.post(SERVER_API_URL + '/connect-database', stream, {observe: 'response'})
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
         }, (error) => {
-          this.showToast('An unexpected error occured', error.message, 'danger');
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => {},
     );
   }

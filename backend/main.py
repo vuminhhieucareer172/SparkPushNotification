@@ -13,7 +13,7 @@ from backend.middleware.database import verify_database
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
-from backend.schemas.stream import Stream, JobStream
+from backend.schemas.stream import Stream, JobStream, KafkaTopic
 from backend.utils import util_kafka
 from backend.utils.util_kafka import get_list_topics
 from database.db import DB
@@ -32,7 +32,10 @@ app.add_middleware(
 
 @app.post("/test-connect-database")
 def test_connect_database(database_information: Database):
-    return database_connection.test_connect_database(database_information)
+    is_connectable = database_connection.test_connect_database(database_information)
+    if is_connectable:
+        return JSONResponse(content={"message": "Connect successfully"}, status_code=status.HTTP_202_ACCEPTED)
+    return JSONResponse(content={"message": "cannot to connect db"}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @app.post("/connect-database")
@@ -56,16 +59,16 @@ def get_stream(stream_name: str, db=Depends(verify_database)):
 
 
 @app.get("/stream/record/{stream_name}")
-def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10, db=Depends(verify_database)):
+def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10000, db=Depends(verify_database)):
     return stream.get_record_by_stream_name(stream_name, db, skip, limit)
 
 
-@app.post("/stream")
+@app.post("/add-stream")
 def add_stream(new_schema: Stream, db=Depends(verify_database)):
     return stream.add_stream(new_schema, db)
 
 
-@app.put("/stream")
+@app.put("/update-stream")
 def update_stream(update_schema: Stream, db=Depends(verify_database)):
     return stream.update_stream(update_schema, db)
 
@@ -156,6 +159,11 @@ def get_list_kafka_topics(db=Depends(verify_database)):
     if isinstance(list_topic_kafka, str):
         return JSONResponse(list_topic_kafka, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(list_topic_kafka, status_code=status.HTTP_200_OK)
+
+
+@app.post("/kafka-topic/create")
+def create_kafka_topic(schema_topic: KafkaTopic, db=Depends(verify_database)):
+    return util_kafka.create_topic(schema_topic)
 
 
 @app.get("/job-streaming")

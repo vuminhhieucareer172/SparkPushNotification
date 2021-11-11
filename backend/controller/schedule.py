@@ -1,5 +1,6 @@
 import logging
 
+import apscheduler.job
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
@@ -29,14 +30,15 @@ def get_job_stream():
             return JSONResponse(content={"message": "missing config for name spark job"},
                                 status_code=status.HTTP_400_BAD_REQUEST)
         job = scheduler.get_job(job_id=ID_JOB_STREAM)
-
-        schedule = {}
-        for field in CronTrigger.FIELD_NAMES:
-            field_name = CronTrigger.FIELD_NAMES.index(field)
-            schedule[field] = str(job.trigger.fields[field_name])
-        return JSONResponse(content=dict(app_name=Spark().get_instance().appName, schedule=schedule,
-                                         is_running=is_process_running(Spark().get_pid(),
-                                                                       "org.apache.spark.deploy.SparkSubmit")),
+        dict_crontab = job.trigger.fields
+        schedule = "{} {} {} {} {}".format(dict_crontab[CronTrigger.FIELD_NAMES.index("minute")],
+                                           dict_crontab[CronTrigger.FIELD_NAMES.index("hour")],
+                                           dict_crontab[CronTrigger.FIELD_NAMES.index("day")],
+                                           dict_crontab[CronTrigger.FIELD_NAMES.index("month")],
+                                           dict_crontab[CronTrigger.FIELD_NAMES.index("day_of_week")])
+        return JSONResponse(content=dict(app_name=ID_JOB_STREAM, schedule=schedule, port=Spark().get_pid(),
+                                         status="running" if is_process_running(Spark().get_pid(),
+                                                                                "org.apache.spark.deploy.SparkSubmit") else "stopped"),
                             status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)

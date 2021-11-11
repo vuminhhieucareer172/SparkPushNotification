@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 from enum import Enum
@@ -10,12 +10,12 @@ class Field(BaseModel):
     length: int = None
     value: str = None
     primary_key: bool = False
-    nullable: bool = True
+    not_null: bool = False
     unique: bool = False
     default: str = None
     auto_increment: bool = False
-    collation: str = 'latin1_swedish_ci'
-    comment: str = None
+    collation: Optional[str] = 'latin1_swedish_ci'
+    comment: Optional[str] = None
 
 
 class Engine(str, Enum):

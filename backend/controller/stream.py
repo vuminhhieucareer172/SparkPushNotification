@@ -47,12 +47,12 @@ def get_all_stream(db: DB):
             object_stream_kafka = stream_session.get_one(query_dict=dict(table_streaming=stream))
             if object_stream_kafka is None:
                 stream_object = {
-                    'table': stream,
+                    'table_name': stream,
                     'topic_kafka': ''
                 }
             else:
                 stream_object = {
-                    'table': stream,
+                    'table_name': stream,
                     'topic_kafka': object_stream_kafka.topic_kafka
                 }
             list_topic_stream.append(stream_object)
@@ -81,7 +81,7 @@ def get_stream_by_name(stream_name: str, db: DB):
     return JSONResponse(json_result, status_code=status.HTTP_200_OK)
 
 
-def get_record_by_stream_name(table_stream: str, db: DB, skip: int = 0, limit: int = 10):
+def get_record_by_stream_name(table_stream: str, db: DB, skip: int = 0, limit: int = 10000):
     session = get_session(database=db)
     try:
         if not table_stream.startswith(PREFIX_DB_TABLE_STREAMING):
@@ -99,6 +99,10 @@ def get_record_by_stream_name(table_stream: str, db: DB, skip: int = 0, limit: i
 
 def add_stream(new_schema: Stream, db: DB):
     session = get_session(database=db)
+    if not new_schema.table.name.startswith(PREFIX_DB_TABLE_STREAMING):
+        return JSONResponse(
+            content={"message": "Invalid name stream, stream name must be start with 'dbstreaming_streaming_'"},
+            status_code=status.HTTP_400_BAD_REQUEST)
     is_create_table_success = table.create_table(new_schema.table, db)
     if is_create_table_success.status_code != status.HTTP_201_CREATED:
         return is_create_table_success

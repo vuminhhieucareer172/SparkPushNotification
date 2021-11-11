@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
 import { ManageComponent } from './manage/manage.component';
 import { JobStreamRoutingModule } from './job-stream-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CronJobsModule } from 'ngx-cron-jobs';
 
 @NgModule({
   imports: [
@@ -34,6 +35,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     NbCheckboxModule,
     NbRadioModule,
     ReactiveFormsModule,
+    CronJobsModule,
   ],
   declarations: [
     JobStreamComponent,
