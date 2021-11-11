@@ -100,7 +100,7 @@ export class ManageConfigurationsComponent implements OnInit {
     if (window.confirm('Are you sure you want to delete this config?')) {
       this.http.delete(SERVER_API_URL + '/config/' + event.data.id).subscribe(
         res => {
-          if (res['message'] == 'Successful'){
+          if (res['message'] === 'Successful') {
             event.confirm.resolve();
           }
         }, (error) => {
