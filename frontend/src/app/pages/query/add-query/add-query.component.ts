@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators,FormControl,FormArray } from '@angular/forms';
 import {  NbToastrService } from '@nebular/theme';
 import { HttpClient } from '@angular/common/http';
 
@@ -35,6 +35,13 @@ export class AddQueryComponent  implements OnInit, OnDestroy {
     schedule: ['', [Validators.required]],
   });
 
+  table = this.fb.group({
+    name: new FormControl('', (Validators.required)),
+    charset: ['', [Validators.required]],
+    collate: ['', [Validators.required]],
+    engine: ['InnoDB', [Validators.required]],
+    fields: this.fb.array([this.createFieldTable()]),
+  });
 
   constructor(
     private http: HttpClient,
@@ -71,4 +78,33 @@ export class AddQueryComponent  implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.alive = false;
   }
+
+  get fields(): FormArray {
+    return <FormArray> this.table.get('fields');
+  }
+
+  createFieldTable(): FormGroup {
+    return this.fb.group({
+      name_field: [null, [Validators.required]],
+      type: [null, [Validators.required]],
+      primary_key: [false, [Validators.required]],
+      auto_increment: [false, [Validators.required]],
+      nullable: [false, [Validators.required]],
+      unique: [false, [Validators.required]],
+      default: ['', [Validators.required]],
+      length: [0, [Validators.required]],
+      value: ['', [Validators.required]],
+      collation: ['latin1_swedish_ci', [Validators.required]],
+      comment: ['', [Validators.required]],
+    });
+  }
+
+  addColumn() {
+    this.fields.push(this.createFieldTable());
+  }
+
+  dropColumn(index: number) {
+    this.fields.removeAt(index);
+  }
+
 }
