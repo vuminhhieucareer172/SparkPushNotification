@@ -1,5 +1,3 @@
-import logging
-
 import dotenv
 from fastapi import status
 from sqlalchemy import create_engine, exc
@@ -24,7 +22,7 @@ def test_connect_database(schema_database: database.Database):
                                                    schema_database.db_driver_manager))
         engine.connect()
     except exc.OperationalError as e:
-        logging.error(e)
+        print(e)
         return False
     return True
 
@@ -40,18 +38,18 @@ def connect_database(schema_database: database.Database):
             db = DB.create()
             db.re_create_engine()
         else:
-            return JSONResponse(content="Cannot connect to database", status_code=status.HTTP_400_BAD_REQUEST)
+            return JSONResponse(content={"message": "Cannot connect to database"}, status_code=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logging.error(e)
+        print(e)
         return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(content="Connect successfully", status_code=status.HTTP_202_ACCEPTED)
+    return JSONResponse(content={"message": "Connect successfully"}, status_code=status.HTTP_202_ACCEPTED)
 
 
 def get_config_connect_database():
     try:
         return JSONResponse(content=DB.get_credentials(), status_code=status.HTTP_200_OK)
     except Exception as e:
-        logging.error(e)
+        print(e)
         return JSONResponse(content=e, status_code=status.HTTP_400_BAD_REQUEST)
 
 
@@ -62,7 +60,7 @@ def status_mysql():
         db = DB.create()
         db.connect()
     except Exception as e:
-        logging.error(e)
+        print(e)
         return JSONResponse(content={"status": "stopped", "message": "cannot connect to kafka with config {}".format(
             DB.get_credentials()
         )}, status_code=status.HTTP_400_BAD_REQUEST)

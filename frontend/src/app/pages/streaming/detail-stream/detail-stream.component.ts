@@ -1,36 +1,64 @@
-import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, Validators, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, Validators, FormArray, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { SERVER_API_URL } from '../../../app.constants';
-import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-add-stream',
-  templateUrl: './add-stream.component.html',
-  styleUrls: ['./add-stream.component.scss'],
+  selector: 'ngx-detail-stream',
+  templateUrl: './detail-stream.component.html',
+  styleUrls: ['./detail-stream.component.scss'],
 })
-export class AddStreamComponent implements OnInit {
+export class DetailStreamComponent implements OnInit {
   listTopicKafka: string[];
   messageSample: string;
   destroyByClick = true;
   duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
+  streamName: string;
   createTopic: boolean = false;
 
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
+    private router: Router,
+    private route: ActivatedRoute,
     private toastrService: NbToastrService) {
-    this.messageSample = '';
-    this.http.get(SERVER_API_URL + '/kafka-topic', {observe: 'response'})
-    .subscribe(
-      res => {
-        this.listTopicKafka = Object.keys(res.body).map((key) => res.body[key]);
-      }, (error) => {
-        this.showToast('An unexpected error occured', error.error.message, 'danger');
-      }, () => {},
-    );
+      this.route.params.subscribe(
+        param => {
+          this.streamName = param.streamName;
+        },
+      );
+      this.messageSample = '';
+      this.http.get(SERVER_API_URL + '/kafka-topic', {observe: 'response'})
+      .subscribe(
+        res => {
+          this.listTopicKafka = Object.keys(res.body).map((key) => res.body[key]);
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
+        }, () => {},
+      );
+      this.http.get(SERVER_API_URL + '/stream/' + this.streamName, {observe: 'response'})
+      .subscribe(
+        res => {
+          if (res.body['table']['collate'] === '') {
+            res.body['table']['collate'] = 'latin1_swedish_ci';
+          }
+          this.streamForm.controls['topic_kafka_input'].setValue(res.body['topic_kafka_input']);
+          this.table.controls['name'].setValue(res.body['table']['name']);
+          this.table.controls['engine'].setValue(res.body['table']['engine']);
+          this.table.controls['collate'].setValue(res.body['table']['collate']);
+          res.body['table']['fields'].forEach(e => {
+            this.fields.push(this.createFieldTable(e['name_field'], e['type'], e['primary_key'], e['auto_increment'],
+              e['not_null'], e['unique'], e['default'], e['length'], e['value'], e['collation'], e['comment'],
+            ));
+          });
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
+        }, () => {},
+      );
   }
 
   table = this.fb.group({
@@ -38,7 +66,7 @@ export class AddStreamComponent implements OnInit {
     charset: ['', [Validators.required]],
     collate: ['latin1_swedish_ci', [Validators.required]],
     engine: ['InnoDB', [Validators.required]],
-    fields: this.fb.array([this.createFieldTable()]),
+    fields: this.fb.array([]),
   });
 
   streamForm = this.fb.group({
@@ -125,20 +153,24 @@ export class AddStreamComponent implements OnInit {
       config);
   }
 
+  onViewRecord(): void {
+    this.router.navigate(['/pages/streaming/detail/' + this.streamName + '/record']);
+  }
+
   onReset(): void {
     this.streamForm.reset();
   }
 
   onSubmit(): void {
     const stream = this.streamForm.getRawValue();
-    this.http.post(SERVER_API_URL + '/add-stream', stream, {observe: 'response'})
+    this.http.put(SERVER_API_URL + '/update-stream', stream, {observe: 'response'})
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
+          this.router.navigate(['/pages/streaming/manage-streams']);
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => {},
     );
   }
-
 }
