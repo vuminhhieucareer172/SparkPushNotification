@@ -13,13 +13,9 @@ import {
 } from '@nebular/theme';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
-
 import { ThemeModule } from '../../@theme/theme.module';
 import { ConfigurationsComponent } from './configurations.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AddConfigurationsComponent } from './add-configurations/add-configurations.component';
-import { ConfigurationsRoutingModule } from './configurations-routing.module';
-import { ManageConfigurationsComponent } from './manage-configurations/manage-configurations.component';
 
 @NgModule({
   imports: [
@@ -39,12 +35,9 @@ import { ManageConfigurationsComponent } from './manage-configurations/manage-co
     NbInputModule,
     ReactiveFormsModule,
     Ng2SmartTableModule,
-    ConfigurationsRoutingModule,
   ],
   declarations: [
     ConfigurationsComponent,
-    AddConfigurationsComponent,
-    ManageConfigurationsComponent,
   ],
 })
 export class ConfigurationsModule { }

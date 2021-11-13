@@ -5,8 +5,8 @@ import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ECommerceComponent } from './e-commerce/e-commerce.component';
 import { NotFoundComponent } from './miscellaneous/not-found/not-found.component';
-import { ConfigurationsComponent } from './configurations/configurations.component';
 import { DatabaseConnectionComponent } from './database-connection/database-connection.component';
+import { ConfigurationsComponent } from './configurations/configurations.component';
 
 const routes: Routes = [{
   path: '',
@@ -24,9 +24,7 @@ const routes: Routes = [{
     },
     {
       path: 'configurations',
-      loadChildren: () => import('./configurations/configurations.module')
-        .then(m => m.ConfigurationsModule),
-      // component: ConfigurationsComponent,
+      component: ConfigurationsComponent,
     },
     {
       path: 'database-connection',

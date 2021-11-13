@@ -18,18 +18,9 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/database-connection',
   },
   {
-    title: 'Configurations',
+    title: 'Configurations1',
     icon: 'options-2-outline',
-    children: [
-      {
-        title: 'Add config',
-        link: '/pages/configurations/add-config',
-      },
-      {
-        title: 'Manage configs',
-        link: '/pages/configurations/manage-config',
-      },
-    ],
+    link: '/pages/configurations',
   },
   {
     title: 'Streaming',
