@@ -133,19 +133,9 @@ def get_config(config_name: str, db=Depends(verify_database)):
     return configuration.get_config_by_name(config_name, db)
 
 
-@app.post("/config")
-def add_config(new_config: Configuration, db=Depends(verify_database)):
-    return configuration.add_config(new_config, db)
-
-
 @app.put("/config")
 def update_config(new_config: ConfigurationUpdate, db=Depends(verify_database)):
     return configuration.update_config(new_config, db)
-
-
-@app.delete("/config/{config_id}")
-def delete_config(config_id: int, db=Depends(verify_database)):
-    return configuration.delete_config(config_id, db)
 
 
 @app.get("/kafka-topic/{topic}")
