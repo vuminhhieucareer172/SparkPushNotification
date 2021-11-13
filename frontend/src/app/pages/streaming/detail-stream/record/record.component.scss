@@ -4,27 +4,27 @@
   }
 }
 
-:host /deep/ ng2-st-tbody-edit-delete { 
+:host /deep/ ng2-st-tbody-edit-delete {
   display: flex !important;
   height: 0 !important;
 }
 
-:host /deep/ ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom { 
+:host /deep/ ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom {
   display: inline-block;
   width: 100px;
   text-align: center;
   font-size: 1em;
-} 
+}
 
 :host /deep/ ng2-st-tbody-custom {
   display: flex !important;
 }
 
 
-:host /deep/ ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:hover { 
+:host /deep/ ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:hover {
   color: #5dcfe3;
 }
 
-:host /deep/ ng2-smart-table .ng2-smart-actions{ 
+:host /deep/ ng2-smart-table .ng2-smart-actions{
   width: 200px !important;
 }
