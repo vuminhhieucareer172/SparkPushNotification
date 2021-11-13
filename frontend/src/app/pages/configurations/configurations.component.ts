@@ -9,7 +9,7 @@ import { SERVER_API_URL } from '../../app.constants';
 @Component({
   selector: 'ngx-configurations',
   templateUrl: './configurations.component.html',
-  styleUrls: ['./configurations.component.scss']
+  styleUrls: ['./configurations.component.scss'],
 })
 export class ConfigurationsComponent implements OnInit {
 
@@ -24,7 +24,7 @@ export class ConfigurationsComponent implements OnInit {
     private http: HttpClient,
     private fb: FormBuilder,
     private toastrService: NbToastrService,
-    private router: Router,) {
+    private router: Router) {
     this.http.get(SERVER_API_URL + '/config/kafka', { observe: 'response' })
       .subscribe(
         res => {
@@ -53,11 +53,11 @@ export class ConfigurationsComponent implements OnInit {
     this.http.get(SERVER_API_URL + '/config/spark', { observe: 'response' })
       .subscribe(
         res => {
-          let more_config = [];
+          const more_config = [];
           this.sparkForm.controls['master'].setValue(res.body['value']['master']);
           this.sparkForm.controls['ip'].setValue(res.body['value']['ip']);
           Object.entries(res.body['value']['more.config']).forEach(
-            ([key, value]) => more_config.push({ 'optionConfig': key, 'valueConfig': value })
+            ([key, value]) => more_config.push({ 'optionConfig': key, 'valueConfig': value }),
           );
           more_config.forEach(e => {
             this.fields.push(this.createFieldTable(e['optionConfig'], e['valueConfig']));
@@ -111,18 +111,16 @@ export class ConfigurationsComponent implements OnInit {
 
   onSubmitSpark(): void {
     const addSpark = this.sparkForm.getRawValue();
-    console.log(addSpark);
-    let json_result = {};
-    let result = {};
-    let more_config = {};
+    const json_result = {};
+    const result = {};
+    const more_config = {};
     json_result['name'] = 'spark';
-    result["master"] = addSpark.master;
-    result["ip"] = addSpark.ip;
-
-    for (var objectConfig of addSpark.fields) {
+    result['master'] = addSpark.master;
+    result['ip'] = addSpark.ip;
+    for (const objectConfig of addSpark.fields) {
       more_config[objectConfig['optionConfig']] = objectConfig['valueConfig'];
-    };
-    result['more.config'] = more_config
+    }
+    result['more.config'] = more_config;
     json_result['value'] = result;
     this.http.put(SERVER_API_URL + '/config', json_result, { observe: 'response' })
       .subscribe(
