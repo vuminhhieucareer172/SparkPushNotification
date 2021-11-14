@@ -18,7 +18,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/database-connection',
   },
   {
-    title: 'Configurations1',
+    title: 'Configurations',
     icon: 'options-2-outline',
     link: '/pages/configurations',
   },

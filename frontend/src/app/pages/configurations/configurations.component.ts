@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 import { LocalDataSource } from 'ng2-smart-table';
@@ -93,10 +93,20 @@ export class ConfigurationsComponent implements OnInit {
   }
 
   sparkForm = this.fb.group({
-    master: ['', [Validators.required]],
-    ip: ['', [Validators.required]],
+    master: ['', [Validators.required, this.isMasterSpark]],
+    ip: ['', [
+      Validators.required,
+      Validators.pattern("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")]],
     fields: this.fb.array([]),
   });
+
+  isMasterSpark(control: FormControl): { [key: string]: boolean } | null {
+    console.log(control)
+    // if (control.value.length > 1 && !validUrl.isHttpUri(control.value)) {
+    //   return { validURL: true };
+    // }
+    return null;
+  }
 
   get fields(): FormArray {
     return <FormArray>this.sparkForm.get('fields');
@@ -134,7 +144,7 @@ export class ConfigurationsComponent implements OnInit {
 
   kafkaForm = this.fb.group({
     server: ['', [Validators.required]],
-    port: ['', [Validators.required]],
+    port: ['', [Validators.required, Validators.pattern("^[0-9]*$")]],
   });
 
   onSubmitKafka(): void {
@@ -155,15 +165,15 @@ export class ConfigurationsComponent implements OnInit {
 
   emailForm = this.fb.group({
     hostname: ['', [Validators.required]],
-    port: ['', [Validators.required]],
+    port: ['', [Validators.required, Validators.pattern("^[0-9]*$")]],
     username: ['', [Validators.required]],
     password: ['', [Validators.required]],
-    mailname: ['', [Validators.required]],
+    mailname: ['', [Validators.required, <any>Validators.email]],
   });
 
   onSubmitEmail(): void {
     const addMail = this.emailForm.getRawValue();
-    addMail['value'] = {'hostname': addMail.hostname, 'port': addMail.port, 'username': addMail.username, 'password': addMail.password, 'mailname': addMail.mailname };
+    addMail['value'] = { 'hostname': addMail.hostname, 'port': addMail.port, 'username': addMail.username, 'password': addMail.password, 'mailname': addMail.mailname };
     delete addMail.username;
     delete addMail.password;
     delete addMail.hostname;

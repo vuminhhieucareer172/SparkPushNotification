@@ -1,99 +1,131 @@
 <div class="row">
-    <div class="col-md-12">
-      <nb-card>
-        <nb-card-header>Add kafka config</nb-card-header>
-        <nb-card-body>
-          <form class="row" [formGroup]="kafkaForm" (ngSubmit)="onSubmitKafka()">
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
-                <div class="col-sm-9">
-                  <input type="email" formControlName="server" nbInput fullWidth id="inputEmail1"
-                    placeholder="Bootstrap-server..." />
+  <div class="col-md-12">
+    <nb-card>
+      <nb-card-header>Add kafka config</nb-card-header>
+      <nb-card-body>
+        <form class="row" [formGroup]="kafkaForm" (ngSubmit)="onSubmitKafka()">
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" class="label col-sm-3 col-form-label">Kafka bootstrap-server:</label>
+              <div class="col-sm-9">
+                <input required type="email" formControlName="server" nbInput fullWidth id="inputEmail1"
+                  placeholder="Bootstrap-server..." />
+                <div *ngIf="kafkaForm.get('server').touched && kafkaForm.get('server').errors?.required">
+                  <span class="helper-text">Bootstrap-server is required</span>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" style="text-align: right;" class="label col-sm-3 col-form-label">Port:</label>
-                <div class="col-sm-9">
-                  <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1" placeholder="Port..." />
+          </div>
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" style="text-align: right;" class="label col-sm-3 col-form-label">Port:</label>
+              <div class="col-sm-9">
+                <input required type="email" formControlName="port" nbInput fullWidth id="inputEmail1"
+                  placeholder="Port..." />
+                <div *ngIf="kafkaForm.get('port').touched && kafkaForm.get('port').errors?.required">
+                  <span class="helper-text">Port is required</span>
+                </div>
+                <div *ngIf="kafkaForm.get('port').touched && kafkaForm.get('port').errors?.pattern">
+                  <span class="helper-text">Port need to be a number</span>
                 </div>
               </div>
             </div>
-            <div class="form-group offset-sm-3 col-sm-9 row">
-              <div class="offset-sm-3 col-sm-9" style="padding-right: 0;">
-                <button style="float: right" type="submit" nbButton status="info">
-                  Update kafka
-                </button>
-              </div>
+          </div>
+          <div class="form-group offset-sm-3 col-sm-9 row">
+            <div class="offset-sm-3 col-sm-9" style="padding-right: 0;">
+              <button [disabled]="!kafkaForm.valid" style="float: right" type="submit" nbButton status="info">
+                Update kafka
+              </button>
             </div>
-          </form>
-        </nb-card-body>
-      </nb-card>
-    </div>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
 
-    <div class="col-md-12">
-      <nb-card>
-        <nb-card-header>Add mail account</nb-card-header>
-        <nb-card-body>
-          <form class="row" [formGroup]="emailForm" (ngSubmit)="onSubmitEmail()">
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" class="label col-sm-3 col-form-label">Hostname:</label>
-                <div class="col-sm-9">
-                  <input type="email" formControlName="hostname" nbInput fullWidth id="inputEmail1"
-                    placeholder="Hostname..." />
+  <div class="col-md-12">
+    <nb-card>
+      <nb-card-header>Add mail account</nb-card-header>
+      <nb-card-body>
+        <form class="row" [formGroup]="emailForm" (ngSubmit)="onSubmitEmail()">
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" class="label col-sm-3 col-form-label">Hostname:</label>
+              <div class="col-sm-9">
+                <input type="email" formControlName="hostname" nbInput fullWidth id="inputEmail1"
+                  placeholder="Hostname..." />
+                <div *ngIf="emailForm.get('hostname').touched && emailForm.get('hostname').errors?.required">
+                  <span class="helper-text">Hostname is required</span>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" style="text-align: right;" class="label col-sm-3 col-form-label">Port:</label>
-                <div class="col-sm-9">
-                  <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1" placeholder="Port..." />
+          </div>
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" style="text-align: right;" class="label col-sm-3 col-form-label">Port:</label>
+              <div class="col-sm-9">
+                <input type="email" formControlName="port" nbInput fullWidth id="inputEmail1" placeholder="Port..." />
+                <div *ngIf="emailForm.get('port').touched && emailForm.get('port').errors?.pattern">
+                  <span class="helper-text">Please enter a valid number</span>
+                </div>
+                <div *ngIf="emailForm.get('port').touched && emailForm.get('port').errors?.required">
+                  <span class="helper-text">Port is required</span>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" class="label col-sm-3 col-form-label">Username:</label>
-                <div class="col-sm-9">
-                  <input type="email" formControlName="username" nbInput fullWidth id="inputEmail1"
-                    placeholder="Username..." />
+          </div>
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" class="label col-sm-3 col-form-label">Username:</label>
+              <div class="col-sm-9">
+                <input type="email" formControlName="username" nbInput fullWidth id="inputEmail1"
+                  placeholder="Username..." />
+                <div *ngIf="emailForm.get('username').touched && emailForm.get('username').errors?.required">
+                  <span class="helper-text">Username is required</span>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-6">
-              <div class="row">
-                <label for="inputEmail1" style="text-align: right;"
-                  class="label col-sm-3 col-form-label">Password:</label>
-                <div class="col-sm-9">
-                  <input formControlName="password" [type]="show ? 'text' : 'password'" nbInput fullWidth id="inputEmail1"
-                    placeholder="Password..." />
+          </div>
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" style="text-align: right;"
+                class="label col-sm-3 col-form-label">Password:</label>
+              <div class="col-sm-9">
+                <input formControlName="password" [type]="show ? 'text' : 'password'" nbInput fullWidth id="inputEmail1"
+                  placeholder="Password..." />
+                <div *ngIf="emailForm.get('password').touched && emailForm.get('password').errors?.required">
+                  <span class="helper-text">Password is required</span>
                 </div>
               </div>
             </div>
-            <div class="form-group col-md-12 row">
-              <label for="inputEmail1" class="label col-sm-2 col-form-label">Mail name:</label>
-              <div class="col-sm-10">
-                <input type="email" formControlName="mailname" nbInput fullWidth id="inputEmail1"
-                  placeholder="Email name..." />
+          </div>
+          <div class="form-group col-md-12 row">
+            <label for="inputEmail1" class="label col-sm-2 col-form-label">Mail name:</label>
+            <div class="col-sm-10">
+              <input type="email" name="email" [email]="true" formControlName="mailname" nbInput fullWidth
+                id="inputEmail1" placeholder="Email name..." />
+              <div *ngIf="emailForm.get('mailname').touched && emailForm.get('mailname').errors?.email">
+                <span class="helper-text">The email name is invalid</span>
+              </div>
+              <div *ngIf="emailForm.get('mailname').touched && emailForm.get('mailname').errors?.required">
+                <span class="helper-text">The email name is required</span>
               </div>
             </div>
-            <div class="form-group offset-sm-3 col-sm-9 row">
-              <div class="offset-sm-3 col-sm-9" style="padding-right: 0;">
-                <button style="float: right" type="submit" nbButton status="info">
-                  Update mail
-                </button>
-                <button style="margin-right: 20px;float: right" (click)="password()" type="button" nbButton
-                  status="success">
-                  {{show ?'Hide password' : 'Show password'}}
-                </button>
-              </div>
+
+          </div>
+          <div class="form-group offset-sm-3 col-sm-9 row">
+            <div class="offset-sm-3 col-sm-9" style="padding-right: 0;">
+              <button [disabled]="!emailForm.valid" style="float: right" type="submit" nbButton status="info">
+                Update mail
+              </button>
+              <button style="margin-right: 20px;float: right" (click)="password()" type="button" nbButton
+                status="success">
+                {{show ?'Hide password' : 'Show password'}}
+              </button>
             </div>
-    </form>
-    </nb-card-body>
+          </div>
+        </form>
+      </nb-card-body>
     </nb-card>
   </div>
 
@@ -108,19 +140,27 @@
                 <label for="inputFirstName" class="label">Spark master:</label>
                 <input type="text" nbInput fullWidth formControlName="master" id="inputFirstName"
                   placeholder="Spark master ...">
+                <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.required">
+                  <span class="helper-text">Spark master is required</span>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
                 <label for="inputLastName" class="label">IP:</label>
-                <input type="text" minlength="7" maxlength="15" size="15"
-                  pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" nbInput fullWidth
-                  formControlName="ip" id="inputFirstName" placeholder="xxx.xxx.xxx.xxx">
+                <input type="ipaddress" minlength="4" maxlength="12" required
+                  pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  nbInput fullWidth formControlName="ip" id="inputFirstName" placeholder="xxx.xxx.xxx.xxx">
+                <div *ngIf="sparkForm.get('ip').touched && sparkForm.get('ip').errors?.pattern">
+                  <span class="helper-text">The Ip address is invalid</span>
+                </div>
+                <div *ngIf="sparkForm.get('ip').touched && sparkForm.get('ip').errors?.required">
+                  <span class="helper-text">The Ip address is required</span>
+                </div>
               </div>
             </div>
           </div>
           <div class="table-responsive">
-            <!-- <table class="table mb-0" [formGroup]="table"> -->
             <table class="table mb-0">
               <thead class="thead-light">
                 <tr>
@@ -196,7 +236,8 @@
             </div>
           </div>
           <div style="float: right; margin-bottom: 40px; margin-top: 20px">
-            <button style="margin-right: 10px;" type="submit" nbButton status="info">Update spark
+            <button [disabled]="!sparkForm.valid" style="margin-right: 10px;" type="submit" nbButton
+              status="info">Update spark
             </button>
           </div>
         </form>
@@ -205,4 +246,4 @@
   </div>
 
 
-  </div>
+</div>
