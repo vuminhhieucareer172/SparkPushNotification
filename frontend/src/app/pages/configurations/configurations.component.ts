@@ -96,15 +96,14 @@ export class ConfigurationsComponent implements OnInit {
     master: ['', [Validators.required, this.isMasterSpark]],
     ip: ['', [
       Validators.required,
-      Validators.pattern("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")]],
+      Validators.pattern('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')]],
     fields: this.fb.array([]),
   });
 
   isMasterSpark(control: FormControl): { [key: string]: boolean } | null {
-    console.log(control)
-    // if (control.value.length > 1 && !validUrl.isHttpUri(control.value)) {
-    //   return { validURL: true };
-    // }
+    if (!control.value.startsWith('spark://')) {
+      return { validMaster: true };
+    }
     return null;
   }
 
@@ -144,7 +143,7 @@ export class ConfigurationsComponent implements OnInit {
 
   kafkaForm = this.fb.group({
     server: ['', [Validators.required]],
-    port: ['', [Validators.required, Validators.pattern("^[0-9]*$")]],
+    port: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
   });
 
   onSubmitKafka(): void {
@@ -165,7 +164,7 @@ export class ConfigurationsComponent implements OnInit {
 
   emailForm = this.fb.group({
     hostname: ['', [Validators.required]],
-    port: ['', [Validators.required, Validators.pattern("^[0-9]*$")]],
+    port: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
     username: ['', [Validators.required]],
     password: ['', [Validators.required]],
     mailname: ['', [Validators.required, <any>Validators.email]],

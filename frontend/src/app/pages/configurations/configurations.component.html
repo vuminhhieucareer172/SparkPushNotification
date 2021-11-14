@@ -143,6 +143,9 @@
                 <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.required">
                   <span class="helper-text">Spark master is required</span>
                 </div>
+                <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.validMaster">
+                  <span class="helper-text">Spark master is invalid</span>
+                </div>
               </div>
             </div>
             <div class="col-sm-6">
