@@ -785,12 +785,6 @@
                 </tr>
               </tbody>
             </table>
-          <div style="margin-left:10px">
-            <button (click)="addColumn()" id="add-column" class="btn btn-sm" type="button">
-              <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
-              <span class="" style="color: #276FCE; font-size: 16px;">Add column</span>
-            </button>
-          </div>
           </div>
           <div class="row" style="margin-top: 30px" [formGroup]="table">
             <div class="col-sm-4">
@@ -1479,8 +1473,9 @@
           </div>
 
           <div style="float: right; margin-bottom: 40px; margin-top: 20px">
+            <button style="margin-right: 20px;" (click)="onViewRecord()" nbButton status="warning">View records</button>
             <button style="margin-right: 20px;" (click)="onReset()" nbButton status="success" type="button">Reset</button>
-            <button style="margin-right: 10px;" type="submit" nbButton status="info">Add</button>
+            <button style="margin-right: 10px;" type="submit" nbButton status="info">Save</button>
           </div>
         </form>
 

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
-import { Observable } from 'rxjs/Rx';
 import { SERVER_API_URL } from '../../../app.constants';
 
 @Component({
@@ -10,44 +10,53 @@ import { SERVER_API_URL } from '../../../app.constants';
   templateUrl: './manage.component.html',
   styleUrls: ['./manage.component.scss'],
 })
-export class ManageComponent implements OnInit, OnDestroy {
-  hours: any[];
-  minutes: number[];
-  seconds: number[];
-  days: any[];
+export class ManageComponent implements OnInit {
   schedule: string;
   status = {
     mysql: 'stopped',
     spark: 'stopped',
     kafka: 'stopped',
   };
+  statusJob: string = 'stopped';
+  portJob: number = null;
   destroyByClick = true;
-  duration = 2000;
+  duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
 
   jobForm = this.fb.group({
-    name_job: ['', (Validators.required)],
+    name_job: ['dbstreaming', (Validators.required)],
     schedule: ['', [Validators.required]],
   });
-  private alive: boolean;
   objectKeys = Object.keys;
 
   constructor(
+    private router: Router,
     private http: HttpClient,
     private fb: FormBuilder,
     private toastrService: NbToastrService) {
-    this.alive = true;
-    this.minutes = Array.from(Array(60), (_, i) => i);
-    this.seconds = Array.from(Array(60), (_, i) => i);
-    this.hours = Array.from(Array(24), (_, i) => i);
-    this.days = Array.from(Array(30), (_, i) => i);
+    this.portJob = null;
   }
 
   ngOnInit(): void {
     for (let i = 0; i < Object.keys(this.status).length; i++) {
       this.getStatus(Object.keys(this.status)[i]);
     }
+    this.http.get(SERVER_API_URL + '/job-streaming', {observe: 'response'})
+      .subscribe(
+        res => {
+          this.statusJob = res.body['status'];
+          this.setSchedule(res.body['schedule']);
+          this.onSelectSchedule('manual-schedule');
+          this.portJob = res.body['port'];
+        }, (error) => {
+          this.statusJob = 'stopped';
+        }, () => {},
+      );
+  }
+
+  navigateSparkUI(): void {
+    window.open('http://localhost:4040', '_blank').focus();
   }
 
   onSelectSchedule(value: string): void {
@@ -59,39 +68,34 @@ export class ManageComponent implements OnInit, OnDestroy {
   }
 
   getStatus(service: string): void {
-    Observable.interval(5000)
-      .startWith(0)
-      .takeWhile(() => this.alive)
-      .subscribe((x) => {
-        this.http.get(SERVER_API_URL + '/status-' + service)
-        .subscribe(
-          res => {
-            this.status[service] = res['status'];
-          }, (error) => {
-            this.status[service] = 'stopped';
-          }, () => {},
-        );
-    });
+    this.http.get(SERVER_API_URL + '/status-' + service, {observe: 'response'})
+    .subscribe(
+      res => {
+        this.status[service] = res.body['status'];
+      }, (error) => {
+        this.status[service] = 'stopped';
+      }, () => {},
+    );
   }
 
   stopJob(): void {
-    this.http.get(SERVER_API_URL + '/stop-job-streaming')
+    this.http.get(SERVER_API_URL + '/stop-job-streaming', {observe: 'response'})
     .subscribe(
       res => {
         this.showToast('Notification', 'Action completed', 'success');
       }, (error) => {
-        this.showToast('An unexpected error occured', error.message, 'danger');
+        this.showToast('An unexpected error occured', error.error.message, 'danger');
       }, () => {},
     );
   }
 
   runJob(): void {
-    this.http.get(SERVER_API_URL + '/start-job-streaming')
+    this.http.get(SERVER_API_URL + '/start-job-streaming', {observe: 'response'})
     .subscribe(
       res => {
         this.showToast('Notification', 'Action completed', 'success');
       }, (error) => {
-        this.showToast('An unexpected error occured', error.message, 'danger');
+        this.showToast('An unexpected error occured', error.error.message, 'danger');
       }, () => {},
     );
   }
@@ -115,17 +119,13 @@ export class ManageComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     const jobInfo = this.jobForm.getRawValue();
-    const res = this.http.post(SERVER_API_URL + '/update-job-streaming', jobInfo)
+    this.http.post(SERVER_API_URL + '/update-job-streaming', jobInfo, {observe: 'response'})
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
         }, (error) => {
-          this.showToast('An unexpected error occured', error.message, 'danger');
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => {},
     );
-  }
-
-  ngOnDestroy(): void {
-    this.alive = false;
   }
 }

@@ -32,10 +32,6 @@
     ],
     "interface-over-type-literal": true,
     "label-position": true,
-    "max-line-length": [
-      true,
-      120
-    ],
     "member-access": false,
     "no-arg": true,
     "no-console": [

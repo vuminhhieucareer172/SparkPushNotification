@@ -8,6 +8,9 @@ import { NbButtonModule, NbCardModule, NbCheckboxModule, NbInputModule, NbIconMo
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StreamingComponent } from './streaming.component';
+import { DetailStreamComponent } from './detail-stream/detail-stream.component';
+import { RecordComponent } from './detail-stream/record/record.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -15,6 +18,8 @@ import { StreamingComponent } from './streaming.component';
     StreamingComponent,
     AddStreamComponent,
     ManageStreamsComponent,
+    DetailStreamComponent,
+    RecordComponent,
   ],
   imports: [
     CommonModule,
@@ -27,6 +32,7 @@ import { StreamingComponent } from './streaming.component';
     ReactiveFormsModule,
     NbIconModule,
     NbSelectModule,
+    FormsModule,
   ],
 })
 export class StreamingModule { }

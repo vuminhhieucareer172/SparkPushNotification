@@ -4,10 +4,11 @@ from json import JSONDecodeError
 
 from confluent_kafka import Consumer
 import time
-from confluent_kafka.admin import AdminClient
+from confluent_kafka.admin import AdminClient, NewTopic
 from starlette import status
 from starlette.responses import JSONResponse
 
+from backend.schemas.stream import KafkaTopic
 from backend.utils.util_get_config import get_config
 from database.db import DB
 
@@ -23,7 +24,6 @@ class Kafka:
                 "This class is a singleton, use Kafka.create()")
         else:
             Kafka.__instance = self
-        print(1)
         self.consumer = self.create_consumer()
 
     @staticmethod
@@ -37,7 +37,7 @@ class Kafka:
         """ Fetch credentials from either environment variables (for testing)"""
         kafka_config = get_config('kafka')
         if kafka_config is None or kafka_config.value.get('bootstrap.servers', None) is None:
-            return None
+            return {}
         return {
             "bootstrap.servers": kafka_config.value['bootstrap.servers'],
             "group.id": 'group_id',
@@ -47,21 +47,28 @@ class Kafka:
         }
 
     def create_consumer(self):
-        print(2)
-        return Consumer(self.get_credentials())
+        try:
+            return Consumer(self.get_credentials())
+        except Exception as e:
+            print(e)
+            return None
 
 
 def get_list_topics():
     kafka = Kafka.create()
-    if kafka.consumer is None:
-        return 'Fail to connect kafka'
-    if not kafka.consumer.list_topics().topics:
-        return 'Not found any topic'
-    dict_key = kafka.consumer.list_topics().topics.keys()
-    list_topic = []
-    for topic in dict_key:
-        list_topic.append(topic)
-    return list_topic
+    try:
+        if kafka.consumer is None:
+            return 'Fail to connect kafka'
+        if not kafka.consumer.list_topics().topics:
+            return 'Not found any topic'
+        dict_key = kafka.consumer.list_topics().topics.keys()
+        list_topic = []
+        for topic in dict_key:
+            list_topic.append(topic)
+        return list_topic
+    except Exception as e:
+        print(e)
+        return "Error: {}".format(str(e))
 
 
 def get_latest_message(topic: str):
@@ -118,6 +125,18 @@ def check_status(db: DB):
                                      )},
                             status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse({"status": "running"}, status_code=status.HTTP_200_OK)
+
+
+def create_topic(schema_topic: KafkaTopic):
+    try:
+        admin_client = AdminClient(Kafka.get_credentials())
+        future: dict = admin_client.create_topics([NewTopic(schema_topic.topic_name, 1, 1)], operation_timeout=1)
+        for topic, f in future.items():
+            f.result()
+        return JSONResponse({"status": "created"}, status_code=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 if __name__ == '__main__':

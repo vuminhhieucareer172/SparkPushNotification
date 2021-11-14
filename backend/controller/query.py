@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy import exc
 from starlette import status
 from starlette.responses import JSONResponse
@@ -14,20 +12,21 @@ def get_query(db: DB, skip: int = 0, limit: int = 10):
     session = get_session(database=db)
     try:
         query_session = SessionHandler.create(session, UserQuery)
-        return query_session.get_from_offset(skip, limit, to_json=True)
+        return JSONResponse(query_session.get_from_offset(skip, limit, to_json=True), status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
-        logging.error(e)
-        return None
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def get_query_by_id(id_query: int, db: DB):
     session = get_session(database=db)
     try:
         query_session = SessionHandler.create(session, UserQuery)
-        return query_session.get_one(query_dict=dict(id=id_query), to_json=True)
+        return JSONResponse(query_session.get_one(query_dict=dict(id=id_query), to_json=True),
+                            status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
-        logging.error(e)
-        return None
+        print(e)
+        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def add_query(new_query: Query, db: DB):

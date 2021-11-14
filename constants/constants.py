@@ -67,6 +67,8 @@ DATATYPE_STRING = [sqlalchemy.VARCHAR, sqlalchemy.TEXT, sqlalchemy.CHAR, sqlalch
                    sqlalchemy.BLOB, sqlalchemy.CLOB, sqlalchemy.Unicode]
 DATATYPE_NUMERIC = [sqlalchemy.INTEGER, sqlalchemy.BIGINT, sqlalchemy.SMALLINT, sqlalchemy.BOOLEAN, sqlalchemy.FLOAT,
                     sqlalchemy.DECIMAL, sqlalchemy.REAL]
+DATATYPE_NUMERIC_NOT_REQUIRE_ARGUMENTS = [sqlalchemy.INTEGER, sqlalchemy.BIGINT, sqlalchemy.SMALLINT, sqlalchemy.BOOLEAN, sqlalchemy.FLOAT,
+                    sqlalchemy.DECIMAL, sqlalchemy.REAL]
 DATATYPE_DATE_AND_TIME = [sqlalchemy.DATETIME, sqlalchemy.TIMESTAMP, sqlalchemy.DATE, sqlalchemy.TIME]
 DATATYPE_SPECIAL = [sqlalchemy.ARRAY, sqlalchemy.Enum, sqlalchemy.JSON]
 
@@ -80,5 +82,6 @@ CONFIG_KAFKA = 'kafka'
 CONFIG_MAIL = 'mail'
 CONFIG_ZALO = 'zalo'
 
-
 GENERATE_STREAMING_SUCCESSFUL = "successful"
+
+ID_JOB_STREAM = 'dbstreaming'

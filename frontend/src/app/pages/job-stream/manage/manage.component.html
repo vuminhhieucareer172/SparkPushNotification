@@ -6,17 +6,36 @@
           <form [formGroup]="jobForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
               <label for="job-name" class="label">Job name:</label>
-              <input type="email" nbInput fullWidth id="job-name" formControlName="name_job" placeholder="Job name ...">
+              <input type="text" nbInput fullWidth id="job-name" formControlName="name_job" disabled>
             </div>
 
             <div class="row">
                 <div class="col-md-2">
                     <label class="label">Status services:</label>
                 </div>
-                <div class="col-md-2" *ngFor="let item of objectKeys(this.status)">
-                    <div class="circle status" [ngClass]="'service-' + status[item]">
-                        <h4 class="service-name">{{item}}</h4>
-                        <h2 class="service-status">{{status[item]}}</h2>
+                <div class="col-md-2">
+                    <div class="circle status" [ngClass]="'service-' + statusJob">
+                        <h4 class="service-name">Job streaming</h4>
+                        <h2 class="service-status">{{ statusJob }}</h2>
+                        <p style="font-size: 14px;" *ngIf="statusJob === 'running' &&portJob !== null" class="service-status">{{ portJob }}</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="circle status" [ngClass]="'service-' + status['mysql']">
+                        <h4 class="service-name">Mysql</h4>
+                        <h2 class="service-status">{{ status['mysql'] }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-2" (click)="navigateSparkUI()">
+                    <div class="circle status" [ngClass]="'service-' + status['spark']">
+                        <h4 class="service-name">Spark</h4>
+                        <h2 class="service-status">{{ status['spark'] }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="circle status" [ngClass]="'service-' + status['kafka']">
+                        <h4 class="service-name">Kafka</h4>
+                        <h2 class="service-status">{{ status['kafka'] }}</h2>
                     </div>
                 </div>
             </div>
@@ -49,43 +68,17 @@
                                 (click)="onSelectSchedule('manual-schedule')">
                             <label for="manual-schedule" class="label">Manual schedule:</label>
                         </div>
-                        <div class="col-md-9 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
-                            <nb-select selected="0">
-                                <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
-                            </nb-select>
-                            <div class="col-md-1 schedule-head">
-                                day(s)
-                            </div>
-                            <nb-select selected="0">
-                                <nb-option *ngFor="let e of hours" value="{{e}}">{{e}}</nb-option>
-                            </nb-select>
-                            <div class="col-md-1 schedule-head">
-                                hour(s)
-                            </div>
-                            <nb-select selected="0">
-                                <nb-option *ngFor="let e of minutes" value="{{e}}">{{e}}</nb-option>
-                            </nb-select>
-                            <div class="col-md-1 schedule-head">
-                                minute(s),
-                            </div>
-                            <nb-select selected="0">
-                                <nb-option *ngFor="let e of seconds" value="{{e}}">{{e}}</nb-option>
-                            </nb-select>
-                            <div class="col-md-1 schedule-head">
-                                second(s)
-                            </div>
+                        <div class="col-md-9" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                            <cron-jobs formControlName="schedule"></cron-jobs>
                         </div>
                     </div>
                 </div>
-              </div>  
+            </div>  
 
             <div style="float: right; margin-bottom: 40px; margin-top: 20px">
-                <button style="margin-right: 20px;" type="submit" nbButton status="success">Save
-                </button>
-                <button style="margin-right: 20px;" (click)="stopJob()" nbButton status="info">Stop
-                </button>
-                <button style="margin-right: 20px;" (click)="runJob()" nbButton status="primary">Run
-                </button>
+                <button style="margin-right: 20px;" type="submit" nbButton status="success">Save</button>
+                <button style="margin-right: 20px;" (click)="stopJob()" type="button" nbButton status="info">Stop</button>
+                <button style="margin-right: 20px;" (click)="runJob()" type="button" nbButton status="primary">Run</button>
             </div>
 
           </form>

@@ -7,13 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller import database_connection, query, configuration, tables_manager, stream, schedule
+from backend.controller import database_connection, query, configuration, table, stream, schedule
 from backend.controller.schedule import init_scheduler, scheduler
 from backend.middleware.database import verify_database
 from backend.schemas.configuration import Configuration, ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
-from backend.schemas.stream import Stream, JobStream
+from backend.schemas.stream import Stream, JobStream, KafkaTopic
 from backend.utils import util_kafka
 from backend.utils.util_kafka import get_list_topics
 from database.db import DB
@@ -32,7 +32,10 @@ app.add_middleware(
 
 @app.post("/test-connect-database")
 def test_connect_database(database_information: Database):
-    return database_connection.test_connect_database(database_information)
+    is_connectable = database_connection.test_connect_database(database_information)
+    if is_connectable:
+        return JSONResponse(content={"message": "Connect successfully"}, status_code=status.HTTP_202_ACCEPTED)
+    return JSONResponse(content={"message": "cannot to connect db"}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @app.post("/connect-database")
@@ -47,25 +50,30 @@ def get_config_connect_database():
 
 @app.get("/stream")
 def get_all_stream(db=Depends(verify_database)):
-    pass
+    return stream.get_all_stream(db)
 
 
-@app.get("/stream/{name: str}")
-def get_stream(name: str, db=Depends(verify_database)):
-    pass
+@app.get("/stream/{stream_name}")
+def get_stream(stream_name: str, db=Depends(verify_database)):
+    return stream.get_stream_by_name(stream_name, db)
 
 
-@app.post("/stream")
+@app.get("/stream/record/{stream_name}")
+def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10000, db=Depends(verify_database)):
+    return stream.get_record_by_stream_name(stream_name, db, skip, limit)
+
+
+@app.post("/add-stream")
 def add_stream(new_schema: Stream, db=Depends(verify_database)):
     return stream.add_stream(new_schema, db)
 
 
-@app.put("/stream")
+@app.put("/update-stream")
 def update_stream(update_schema: Stream, db=Depends(verify_database)):
     return stream.update_stream(update_schema, db)
 
 
-@app.delete("/stream/{name: str}")
+@app.delete("/stream/{name}")
 def delete_stream(name: str, db=Depends(verify_database)):
     return stream.delete_stream(name, db)
 
@@ -92,12 +100,12 @@ def status_mysql():
 
 @app.get("/query")
 def get_query(skip: int = 0, limit: int = 10, db=Depends(verify_database)):
-    return JSONResponse(query.get_query(db, skip, limit), status_code=status.HTTP_200_OK)
+    return query.get_query(db, skip, limit)
 
 
 @app.get("/query/{query_id}")
 def get_query_by_id(query_id: int, db=Depends(verify_database)):
-    return JSONResponse(query.get_query_by_id(query_id, db), status_code=status.HTTP_200_OK)
+    return query.get_query_by_id(query_id, db)
 
 
 @app.post("/query")
@@ -140,32 +148,22 @@ def delete_config(config_id: int, db=Depends(verify_database)):
     return configuration.delete_config(config_id, db)
 
 
-@app.get("/tables")
-def get_tables(db=Depends(verify_database)):
-    return tables_manager.get_tables(db)
-
-
-@app.get("/tables/tables-detail/{table_name}")
-def get_tables_by_name(table_name: str, db=Depends(verify_database)):
-    return tables_manager.get_tables_by_name(table_name, db)
-
-
-@app.get("/tables/table-record/{table_name}")
-def get_tables_record(skip: int = 0, limit: int = 10, db=Depends(verify_database)):
-    return configuration.get_config(db, skip=skip, limit=limit)
-
-
 @app.get("/kafka-topic/{topic}")
-def get_table_column(topic: str, db=Depends(verify_database)):
-    return tables_manager.get_tables_column(topic=topic)
+def get_schema_from_kafka_topic(topic: str, db=Depends(verify_database)):
+    return table.get_schema_from_kafka_topic(topic=topic)
 
 
 @app.get("/kafka-topic")
-def get_table_column(db=Depends(verify_database)):
+def get_list_kafka_topics(db=Depends(verify_database)):
     list_topic_kafka = get_list_topics()
     if isinstance(list_topic_kafka, str):
         return JSONResponse(list_topic_kafka, status_code=status.HTTP_400_BAD_REQUEST)
     return JSONResponse(list_topic_kafka, status_code=status.HTTP_200_OK)
+
+
+@app.post("/kafka-topic/create")
+def create_kafka_topic(schema_topic: KafkaTopic, db=Depends(verify_database)):
+    return util_kafka.create_topic(schema_topic)
 
 
 @app.get("/job-streaming")

@@ -5,7 +5,8 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from backend.utils.util_get_config import get_config
-from constants.constants import CONFIG_SPARK
+from backend.utils.util_process import is_process_running
+from constants.constants import CONFIG_SPARK, ID_JOB_STREAM
 from database.db import DB
 
 
@@ -17,7 +18,7 @@ class Spark:
 
         def __init__(self):
             print("starting spark")
-            app_name = "DB streaming"
+            app_name = ID_JOB_STREAM
             master = "local[10]"
             job_streaming_properties = get_config(CONFIG_SPARK)
             if job_streaming_properties is None:
@@ -29,7 +30,7 @@ class Spark:
                 self.sql_context = SQLContext(self.sc)
             else:
                 try:
-                    self.conf = SparkConf().setAppName(job_streaming_properties.value.get('name_job', app_name))
+                    self.conf = SparkConf().setAppName(app_name)
                     self.sc = SparkContext(master=job_streaming_properties.value.get('master', master), conf=self.conf)\
                         .getOrCreate()
                     self.sql_context = SQLContext(self.sc)
@@ -65,13 +66,17 @@ class Spark:
         """ Return running job pid """
         return self.__spark_job_pid
 
-    def submit_job_spark(self, file: str):
+    @staticmethod
+    def submit_job_spark(file: str):
         """ Submit a job from file python to spark cluster """
+        if Spark.__spark_job_pid is not None and \
+                is_process_running(Spark.__spark_job_pid, detail="org.apache.spark:spark-sql-kafka-0-10_2.12"):
+            return Spark.__spark_job_pid
         cmd = "nohup", "spark-submit", "--packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2", \
               "streaming/job_stream/job/" + file + ".py"
         proc = subprocess.Popen(cmd)
-        self.__spark_job_pid = proc.pid
-        return proc
+        Spark.__spark_job_pid = proc.pid
+        return proc.pid
 
 
 def status_spark(db: DB):
@@ -79,9 +84,9 @@ def status_spark(db: DB):
         spark_instance = Spark().get_instance()
         is_stopped = spark_instance._jsc.sc().isStopped()
         if not is_stopped:
-            return JSONResponse(content={"message": "running"}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"status": "running"}, status_code=status.HTTP_200_OK)
         else:
-            return JSONResponse(content={"message": "stopped"}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"status": "stopped"}, status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
-        return JSONResponse(content={"message": "stopped"}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"status": "stopped"}, status_code=status.HTTP_400_BAD_REQUEST)
