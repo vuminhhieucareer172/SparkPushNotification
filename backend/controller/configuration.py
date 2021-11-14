@@ -24,36 +24,28 @@ def get_config_by_name(config_name: str, db: DB):
     try:
         session = get_session(database=db)
         config_session = SessionHandler.create(session, Config)
-        return JSONResponse(config_session.get_one(query_dict=dict(name=config_name), to_json=True),
+        config_record = config_session.get_one(query_dict=dict(name=config_name))
+        if config_record is not None:
+            config_record = config_session.to_json(config_record)
+        return JSONResponse(config_record,
                             status_code=status.HTTP_200_OK)
     except exc.SQLAlchemyError as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
-def add_config(new_config: Configuration, db: DB):
-    session = get_session(database=db)
-    try:
-        config_session = SessionHandler.create(session, Config)
-        config_session.add(new_config.dict())
-        session.commit()
-    except exc.SQLAlchemyError as e:
-        print(e)
-        session.rollback()
-        return JSONResponse(content={"message": "Failed"}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
-
-
 def update_config(new_config: ConfigurationUpdate, db: DB):
     session = get_session(database=db)
     try:
         config_session = SessionHandler.create(session, Config)
-        config_record = config_session.get(_id=new_config.id)
+        config_record = config_session.get_one(query_dict=dict(name=new_config.name))
         if config_record is None:
-            return JSONResponse(content={"message": "Not found config"}, status_code=status.HTTP_404_NOT_FOUND)
-        config_record.name = new_config.name
-        config_record.value = new_config.value
-        session.commit()
+            config_session.add(new_config.dict())
+            session.commit()
+        else:
+            config_record.name = new_config.name
+            config_record.value = new_config.value
+            session.commit()
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
@@ -61,14 +53,3 @@ def update_config(new_config: ConfigurationUpdate, db: DB):
     return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
 
 
-def delete_config(config_id: int, db: DB):
-    session = get_session(database=db)
-    try:
-        config_session = SessionHandler.create(session, Config)
-        config_session.delete(dict(id=config_id))
-        session.commit()
-    except exc.SQLAlchemyError as e:
-        print(e)
-        session.rollback()
-        return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)

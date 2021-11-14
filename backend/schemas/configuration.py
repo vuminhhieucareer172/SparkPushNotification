@@ -10,7 +10,7 @@ class Configuration(BaseModel):
 
 
 class ConfigurationUpdate(BaseModel):
-    id: int
+    id: int = 0
     name: str
     value: dict
 
