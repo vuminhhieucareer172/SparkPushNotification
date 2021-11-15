@@ -1,1 +1,200 @@
-<p>add-query works!</p>
+<div class="steppers-container row">
+  <div class="col-md-12 col-lg-12 col-xxxl-12">
+    <nb-card>
+      <nb-card-body>
+        <nb-stepper #stepper>
+          <nb-step [stepControl]="firstForm" label="First step">
+            <form [formGroup]="firstForm" (ngSubmit)="onFirstSubmit()" class="step-container">
+              <div class="form-group">
+                <label for="schedule" class="label">Scheduler:</label>
+                <div>
+                  <div class="row schedule">
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('quick-schedule')">
+                      <input type="radio" name="schedule" id="quick-schedule" value="quick-schedule" [checked]="schedule == 'quick-schedule' " formControlName="quick_schedule" />
+                      <label for="quick-schedule"></label>
+                    </div>
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                      <label for="quick-schedule" class="label">Quick schedule:</label>
+                    </div>
+                  </div>
+
+                  <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                    <textarea rows="5" nbInput fullWidth shape="round" placeholder="Text Area"></textarea>
+                  </div>
+
+                  <!--FORM NGUOI DUNG TUONG TAC DE QUERY-->
+                  <div class="row schedule">
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('manual-schedule')">
+                      <input type="radio" name="schedule" id="manual-schedule" value="manual-schedule" [checked]="schedule == 'manual-schedule'" formControlName="manual_schedule" />
+                      <label for="manual-schedule"></label>
+                    </div>
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                      <label for="manual-schedule" class="label">User Interface:</label>
+                    </div>
+                    <div [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                      <!--BANG NAO-->
+
+                      <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                        <div>
+                          <label for="table" class="label">Table query:</label>
+                          <p><strong>(FROM)</strong></p>
+                        </div>
+                        <nb-select selected="1" style="margin: 10px 20px 0 30px;">
+                          <nb-option value="1">Option 1</nb-option>
+                          <nb-option value="2">Option 2</nb-option>
+                        </nb-select>
+                      </div>
+                      <hr />
+                      <!--DIEU KIEN TRUONG-->
+                      <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                        <div>
+                          <label for="table-responsive" class="label">Table query:</label>
+                          <p><strong>(FROM)</strong></p>
+                        </div>
+                        <div style="margin: 10px 10px 0 10px;">
+                          <table class="table mb-0" [formGroup]="table">
+                            <thead class="thead-light">
+                              <tr>
+                                <th>Field</th>
+                                <th>Operator</th>
+                                <th>Value</th>
+                                <th>Drop</th>
+                              </tr>
+                            </thead>
+                            <tbody formArrayName="fields" *ngFor="let t of fields.controls; let i = index">
+                              <tr [formGroupName]="i">
+                                <td scope="row">
+                                  <nb-select placeholder="Select type column" formControlName="type">
+                                    <nb-option value="1">Option 1</nb-option>
+                                    <nb-option value="2">Option 2</nb-option>
+                                  </nb-select>
+                                </td>
+                                <td>
+                                  <input type="text" fullWidth style="border: none;" formControlName="name_field" id="{{'name_field' + i}}" placeholder="Name column" />
+                                </td>
+                                <td>
+                                  <nb-select fullWidth placeholder="Select type column" formControlName="type">
+                                    <nb-option value="1">Option 1</nb-option>
+                                    <nb-option value="2">Option 2</nb-option>
+                                  </nb-select>
+                                </td>
+                                <td style="padding: 0 0 0 10px;">
+                                  <button type="button" id="drop-column" class="btn btn-sm font-size-20" (click)="dropColumn(i)">
+                                    <i class="fas fa-trash"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div style="margin-left: 10px;">
+                            <button (click)="addColumn()" id="add-column" class="btn btn-sm" type="button">
+                              <i style="color: #276fce; margin: 5px;" class="fas fa-plus"></i>
+                              <span class="" style="color: #276fce; font-size: 16px;">Add column</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button nbButton nbStepperNext outline>next</button>
+            </form>
+          </nb-step>
+
+          <!-- CONFIG -->
+          <nb-step [stepControl]="secondForm" label="Second step">
+            <form [formGroup]="secondForm" (ngSubmit)="onSecondSubmit()" class="step-container">
+              <div class="form-group">
+                <div class="row schedule">
+                  <label for="kafka-topic" class="label">Kafka Topic:</label>
+                  <nb-card style="margin: 0px 20px 0 30px;">
+                    <nb-select selected="1">
+                      <nb-option value="1">Option 1</nb-option>
+                      <nb-option value="2">Option 2</nb-option>
+                    </nb-select>
+                  </nb-card>
+                </div>
+              </div>
+              <hr />
+              <div class="form-group">
+                <div class="row schedule">
+                  <label for="table-responsive" class="label">Notification Scheduler</label>
+                  <div class="col-md-12 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
+                    <nb-select selected="0">
+                      <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
+                    </nb-select>
+                    <div class="col-md- schedule-head">
+                      day(s)
+                    </div>
+                    <nb-select selected="0">
+                      <nb-option *ngFor="let e of hours" value="{{e}}">{{e}}</nb-option>
+                    </nb-select>
+                    <div class="col-md-1 schedule-head">
+                      hour(s)
+                    </div>
+                    <nb-select selected="0">
+                      <nb-option *ngFor="let e of minutes" value="{{e}}">{{e}}</nb-option>
+                    </nb-select>
+                    <div class="col-md-1.5 schedule-head">
+                      minute(s)
+                    </div>
+                    <nb-select selected="0">
+                      <nb-option *ngFor="let e of seconds" value="{{e}}">{{e}}</nb-option>
+                    </nb-select>
+                    <div class="col-md-1 schedule-head">
+                      second(s)
+                    </div>
+                  </div>
+                </div>
+                <hr />
+                <div class="row schedule">
+                  <div>
+                    <label for="table-responsive" class="label">Contact (Optional):</label>
+                  </div>
+                  <div>
+                    <tbody formArrayName="fields" *ngFor="let t of fields.controls; let i = index">
+                      <tr [formGroupName]="i">
+                        <td scope="row" style="padding: 0 0 0 10px;">
+                          <nb-select placeholder="Select type column" formControlName="type">
+                            <nb-option value="1">Option 1</nb-option>
+                            <nb-option value="2">Option 2</nb-option>
+                          </nb-select>
+                        </td>
+                        <td style="padding: 0 0 0 10px;">
+                          <input type="text" fullWidth style="border: none;" formControlName="name_field" id="{{'name_field' + i}}" placeholder="Name column" />
+                        </td>
+
+                        <td style="padding: 0 0 0 10px;">
+                          <button type="button" id="drop-column" class="btn btn-sm font-size-20" (click)="dropColumn(i)">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <div style="margin-left: 10px;">
+                      <button (click)="addColumn()" id="add-column" class="btn btn-sm" type="button">
+                        <i style="color: #276fce; margin: 5px;" class="fas fa-plus"></i>
+                        <span class="" style="color: #276fce; font-size: 16px;">Add method</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button nbButton nbStepperPrevious outline>prev</button>
+              <button nbButton nbStepperNext outline>Confirm</button>
+            </form>
+          </nb-step>
+          <nb-step [stepControl]="secondForm" [hidden]="true" label="Second step">
+            <div class="step-container">
+              <h3>Wizard completed!</h3>
+              <button nbButton (click)="stepper.reset()">Try again</button>
+            </div>
+          </nb-step>
+        </nb-stepper>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
