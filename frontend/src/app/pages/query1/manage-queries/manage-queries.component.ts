@@ -9,7 +9,7 @@ import { SERVER_API_URL } from '../../../app.constants';
 @Component({
   selector: 'ngx-manage-queries',
   templateUrl: './manage-queries.component.html',
-  styleUrls: ['./manage-queries.component.scss']
+  styleUrls: ['./manage-queries.component.scss'],
 })
 export class ManageQueriesComponent implements OnInit {
 

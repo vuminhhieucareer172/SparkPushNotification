@@ -8,7 +8,7 @@ describe('ManageQueriesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ManageQueriesComponent ]
+      declarations: [ ManageQueriesComponent ],
     })
     .compileComponents();
   });
