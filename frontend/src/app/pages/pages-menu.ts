@@ -51,6 +51,20 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Query1',
+    icon: 'list-outline',
+    children: [
+      {
+        title: 'Add query',
+        link: '/pages/query1/add-query',
+      },
+      {
+        title: 'Manage queries',
+        link: '/pages/query1/manage-queries',
+      },
+    ],
+  },
+  {
     title: 'Job stream',
     icon: 'film-outline',
     children: [
