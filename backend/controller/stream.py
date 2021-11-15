@@ -3,12 +3,12 @@ import json
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import status
 from fastapi.responses import RedirectResponse
-from sqlalchemy import exc, Table, MetaData, text, inspect
+from sqlalchemy import exc, Table, MetaData, inspect
 from sqlalchemy.engine import Inspector
 from starlette.responses import JSONResponse
 
-from backend.controller.schedule import scheduler
 from backend.controller import table
+from backend.controller.schedule import scheduler, init_scheduler
 from backend.models.dbstreaming_config import Config
 from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.schemas.configuration import Configuration
@@ -173,11 +173,11 @@ def stop_job_streaming():
 
 def start_job_streaming():
     try:
-        process_id = Spark().submit_job_spark(file="job_streaming_example")
+        result = init_scheduler()
+        return JSONResponse(content={"message": result}, status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(content={"message": "started", "process_id": process_id}, status_code=status.HTTP_200_OK)
 
 
 def update_job_streaming(schema: JobStream, db: DB):

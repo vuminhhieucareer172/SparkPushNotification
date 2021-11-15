@@ -11,8 +11,8 @@ class Config(Model):
 
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
     name = Column(Enum(constants.CONFIG_SPARK, constants.CONFIG_MAIL, constants.CONFIG_KAFKA, constants.CONFIG_ZALO,
-                       constants.CONFIG_JOB_STREAMING),
-                  nullable=False)
+                       constants.CONFIG_JOB_STREAMING, constants.CONFIG_TELEGRAM),
+                  nullable=False, unique=True)
     value = Column(JSON, nullable=False)
 
     def __init__(self, **kwargs):
