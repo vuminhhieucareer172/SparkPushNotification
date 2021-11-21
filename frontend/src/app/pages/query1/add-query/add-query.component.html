@@ -1,29 +1,367 @@
-<nb-card class="col-md-12 col-lg-12 col-xxxl-12">
-    <nb-card-body>
-      <nb-stepper orientation="horizontal">
-        <nb-step [label]="labelOne">
-          <ng-template #labelOne>First step</ng-template>
-          <h3>Step content #1</h3>
-          <button nbButton disabled nbStepperNext>prev</button>
-          <button nbButton nbStepperNext>next</button>
-        </nb-step>
-        <nb-step [label]="labelTwo">
-          <ng-template #labelTwo>Second step</ng-template>
-          <h3>Step content #2</h3>
-          <button nbButton nbStepperPrevious>prev</button>
-          <button nbButton nbStepperNext>next</button>
-        </nb-step>
-        <nb-step label="Third step">
-          <h3>Step content #3</h3>
-          <button nbButton nbStepperPrevious>prev</button>
-          <button nbButton nbStepperNext>next</button>
-        </nb-step>
-        <nb-step [label]="labelFour">
-          <ng-template #labelFour>Fourth step</ng-template>
-          <h3>Step content #4</h3>
-          <button nbButton nbStepperPrevious>prev</button>
-          <button nbButton disabled nbStepperNext>next</button>
-        </nb-step>
-      </nb-stepper>
-    </nb-card-body>
-  </nb-card>
+<div class="row">
+    <div class="col-md-12 col-lg-12 col-xxxl-12">
+        <nb-card>
+            <nb-card-body>
+                <nb-stepper orientation="horizontal">
+                    <nb-step [label]="labelOne">
+                        <ng-template #labelOne>First step</ng-template>
+                        <div class="form-group">
+                            <label for="schedule" class="label"></label>
+                            <form [formGroup]="manualInputForm" (ngSubmit)="onSubmitManual()">
+                                <div class="row schedule">
+                                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;"
+                                        (click)="onSelectSchedule('manual-input')">
+                                        <input type="radio" name="schedule" id="manual-input" value="manual-input"
+                                            [checked]="schedule == 'manual-input'" />
+                                        <label for="manual-input"></label>
+                                    </div>
+                                    <div class="col-md-6 schedule-head"
+                                        [ngClass]="{'schedule-inactive': schedule != 'manual-input'}"
+                                        (click)="onSelectSchedule('manual-input')">
+                                        <label for="manual-input" class="label">Manual input:</label>
+                                    </div>
+                                    <div class="col-md-12" [ngClass]="{'schedule-inactive': schedule != 'manual-input'}"
+                                        (click)="onSelectSchedule('manual-input')">
+                                        <textarea rows="5" formControlName="manualText" nbInput fullWidth shape="round"
+                                            placeholder="Text Area"></textarea>
+                                    </div>
+                                    <!-- <button nbButton type="submit">submit</button> -->
+                                </div>
+                            </form>
+
+                            <form [formGroup]="quickInputForm" (ngSubmit)="onSubmitQuick()">
+                                <div class="row schedule">
+                                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;"
+                                        (click)="onSelectSchedule('quick-input')">
+                                        <input type="radio" name="schedule" id="quick-input" value="quick-input"
+                                            [checked]="schedule == 'quick-input'" />
+                                        <label for="quick-input"></label>
+                                    </div>
+                                    <div class="col-md-2 schedule-head"
+                                        [ngClass]="{'schedule-inactive': schedule != 'quick-input'}"
+                                        (click)="onSelectSchedule('quick-input')">
+                                        <label for="quick-input" class="label">Select input:</label>
+                                    </div>
+                                    <div class="col-md-12" [ngClass]="{'schedule-inactive': schedule != 'quick-input'}"
+                                        (click)="onSelectSchedule('quick-input')">
+                                        <!-- TABLE QUERY -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table" class="label">Table query:</label>
+                                                <p><strong>(FROM)</strong></p>
+                                            </div>
+                                            <div formArrayName="fieldsTableQuery">
+                                                <div *ngFor="let t of fieldsTableQuery.controls; let i = index"
+                                                    [formGroupName]="i" class="row">
+                                                    <div style="margin-bottom: 10px;">
+                                                        <nb-select fullWidth style="margin: 0 20px 0 30px;"
+                                                            (selectedChange)="selecteTableStream($event)"
+                                                            placeholder="Select table query"
+                                                            formControlName="tableQuery">
+                                                            <nb-option *ngFor="let e of listTableQuery" value="{{e}}">
+                                                                {{e}}
+                                                            </nb-option>
+                                                        </nb-select>
+                                                    </div>
+                                                    <div style="padding-left: 50px;">
+                                                        <button type="button" id="drop-column"
+                                                            class="btn btn-sm font-size-20" (click)="dropTableQuery(i)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="padding-left: 100px;">
+                                                <button (click)="addTableQuery()" id="add-column" class="btn btn-sm"
+                                                    type="button">
+                                                    <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                    <span class="" style="color: #276FCE; font-size: 16px;">More
+                                                        table</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- TABLE QUERY -->
+
+                                        <hr />
+
+                                        <!-- QUERY FIELDS -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table" class="label">Query fields:</label>
+                                                <p><strong>(SELECT)</strong></p>
+                                            </div>
+                                            <div formArrayName="fieldsQueryField">
+                                                <div *ngFor="let t of fieldsQueryField.controls; let i = index"
+                                                    [formGroupName]="i" class="row">
+                                                    <div style="margin-bottom: 10px;">
+                                                        <nb-select fullWidth style="margin: 0 20px 0 30px;"
+                                                            placeholder="Select query field"
+                                                            formControlName="queryField">
+                                                            <nb-option value="*">All fields (*)</nb-option>
+                                                            <nb-option *ngFor="let e of listQueryField" value="{{e}}">
+                                                                {{e}}
+                                                            </nb-option>
+                                                        </nb-select>
+                                                    </div>
+                                                    <div style="padding-left: 50px;">
+                                                        <button type="button" id="drop-column"
+                                                            class="btn btn-sm font-size-20" (click)="dropQueryField(i)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="padding-left: 100px;">
+                                                <button (click)="addQueryField()" id="add-column" class="btn btn-sm"
+                                                    type="button">
+                                                    <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                    <span class="" style="color: #276FCE; font-size: 16px;">More
+                                                        query field</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- QUERY FIELDS -->
+
+                                        <hr />
+
+                                        <!-- QUERY CONDITIONS -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table-responsive" class="label">Query conditions:</label>
+                                                <p><strong>(WHERE)</strong></p>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th>Field</th>
+                                                            <th>Operator</th>
+                                                            <th>Value</th>
+                                                            <th>Drop</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody formArrayName="fieldsConditions"
+                                                        *ngFor="let t of fieldsConditions.controls; let i = index">
+                                                        <tr [formGroupName]="i">
+                                                            <td style="width: auto;">
+                                                                <nb-select style="max-width: none;"
+                                                                    placeholder="Select query field"
+                                                                    formControlName="field">
+                                                                    <nb-option style="width: auto;"
+                                                                        *ngFor="let e of listQueryField" value="{{e}}">
+                                                                        {{e}}
+                                                                    </nb-option>
+                                                                </nb-select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" formControlName="operator"
+                                                                    style="border: none" placeholder="..." />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" formControlName="value"
+                                                                    style="border: none" placeholder="..." />
+                                                            </td>
+                                                            <td style="padding: 0 0 0 10px;">
+                                                                <button type="button" id="drop-column"
+                                                                    class="btn btn-sm font-size-20"
+                                                                    (click)="dropConditions(i)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div style="margin-left:10px">
+                                                    <button (click)="addConditions()" id="add-column" class="btn btn-sm"
+                                                        type="button">
+                                                        <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                        <span class="" style="color: #276FCE; font-size: 16px;">Add
+                                                            conditions</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- QUERY CONDITIONS -->
+
+                                        <hr />
+
+                                        <!-- GROUP -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table" class="label">Group:</label>
+                                                <p><strong>(GROUP BY)</strong></p>
+                                            </div>
+                                            <div formArrayName="fieldsGroup">
+                                                <div *ngFor="let t of fieldsGroup.controls; let i = index"
+                                                    [formGroupName]="i" class="row">
+                                                    <div style="margin-bottom: 10px;">
+                                                        <nb-select fullWidth style="margin: 0 20px 0 30px;"
+                                                            placeholder="Select group by" formControlName="groupField">
+                                                            <nb-option *ngFor="let e of listQueryField" value="{{e}}">
+                                                                {{e}}
+                                                            </nb-option>
+                                                        </nb-select>
+                                                    </div>
+                                                    <div style="padding-left: 50px;">
+                                                        <button type="button" id="drop-column"
+                                                            class="btn btn-sm font-size-20" (click)="dropGroup(i)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="padding-left: 100px;">
+                                                <button (click)="addGroup()" id="add-column" class="btn btn-sm"
+                                                    type="button">
+                                                    <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                    <span class="" style="color: #276FCE; font-size: 16px;">More
+                                                        group by</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- GROUP -->
+
+                                        <hr />
+
+                                        <!-- HAVING -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table-responsive" class="label">Having conditions:</label>
+                                                <p><strong>(HAVING)</strong></p>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table mb-0">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th>Field</th>
+                                                            <th>Operator</th>
+                                                            <th>Value</th>
+                                                            <th>Drop</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody formArrayName="fieldsHavingConditions"
+                                                        *ngFor="let t of fieldsHavingConditions.controls; let i = index">
+                                                        <tr [formGroupName]="i">
+                                                            <td style="width: auto;">
+                                                                <nb-select style="max-width: none;"
+                                                                    placeholder="Select having field"
+                                                                    formControlName="field">
+                                                                    <nb-option style="width: auto;"
+                                                                        *ngFor="let e of listQueryField" value="{{e}}">
+                                                                        {{e}}
+                                                                    </nb-option>
+                                                                </nb-select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" formControlName="operator"
+                                                                    style="border: none" placeholder="..." />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" formControlName="value"
+                                                                    style="border: none" placeholder="..." />
+                                                            </td>
+                                                            <td style="padding: 0 0 0 10px;">
+                                                                <button type="button" id="drop-column"
+                                                                    class="btn btn-sm font-size-20"
+                                                                    (click)="dropHavingConditions(i)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div style="margin-left:10px">
+                                                    <button (click)="addHavingConditions()" id="add-column"
+                                                        class="btn btn-sm" type="button">
+                                                        <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                        <span class="" style="color: #276FCE; font-size: 16px;">Add
+                                                            conditions</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- HAVING -->
+
+                                        <hr />
+
+                                        <!-- ORDER -->
+                                        <div class="row schedule" style="margin: 10px 20px 0 30px;">
+                                            <div>
+                                                <label for="table" class="label">Order:</label>
+                                                <p><strong>(ORDER BY)</strong></p>
+                                            </div>
+                                            <div formArrayName="fieldsOrder">
+                                                <div *ngFor="let t of fieldsOrder.controls; let i = index"
+                                                    [formGroupName]="i" class="row">
+                                                    <div style="margin-bottom: 10px;">
+                                                        <nb-select fullWidth style="margin: 0 20px 0 30px;"
+                                                            placeholder="Select group by" formControlName="orderField">
+                                                            <nb-option *ngFor="let e of listQueryField" value="{{e}}">
+                                                                {{e}}
+                                                            </nb-option>
+                                                        </nb-select>
+                                                    </div>
+                                                    <div style="padding-left: 50px;">
+                                                        <button type="button" id="drop-column"
+                                                            class="btn btn-sm font-size-20" (click)="dropOrder(i)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="padding-left: 100px;">
+                                                <button (click)="addOrder()" id="add-column" class="btn btn-sm"
+                                                    type="button">
+                                                    <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
+                                                    <span class="" style="color: #276FCE; font-size: 16px;">More
+                                                        group by</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- ORDER -->
+                                    </div>
+                                </div>
+                                <!-- <button nbButton type="submit">submit</button> -->
+                            </form>
+                            <div style="margin-top: 30px;">
+                                <button style="float: right;" nbButton nbStepperNext>next</button>
+                            </div>
+                        </div>
+                    </nb-step>
+
+                    <nb-step [label]="labelTwo">
+                        <ng-template #labelTwo>Second step</ng-template>
+                        <label for="schedule" class="label"></label>
+                        <form class="row" [formGroup]="scheduleAndContact" (ngSubmit)="onScheduleAndContact()">
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="inputEmail1" class="label col-sm-3 col-form-label">Topic kafka
+                                        output:</label>
+                                    <div class="col-sm-9">
+                                        <input required type="email" nbInput fullWidth id="inputEmail1"
+                                            placeholder="Bootstrap-server..." />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="inputEmail1" class="label col-sm-3 col-form-label">Notification
+                                        schedule:</label>
+                                    <div class="col-sm-9">
+                                        <input required type="email" nbInput fullWidth id="inputEmail1"
+                                            placeholder="Bootstrap-server..." />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div style="margin-top: 30px;">
+                            <button style="float: right;" nbButton nbStepperPrevious>back</button>
+                        </div>
+                    </nb-step>
+                </nb-stepper>
+            </nb-card-body>
+        </nb-card>
+    </div>
+</div>
