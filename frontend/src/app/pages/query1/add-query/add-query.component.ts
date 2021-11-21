@@ -65,9 +65,9 @@ export class AddQueryComponent implements OnInit {
     // if (this.input_check == 'manual_input') {
     //   return false
     // }
-    if (this.input_check == '') {
-      return true
-    }
+    // if (this.input_check == '') {
+    //   return true
+    // }
   }
 
   onSelectSchedule(value: string): void {
@@ -80,7 +80,7 @@ export class AddQueryComponent implements OnInit {
 
   onSubmitManual(): void {
     const manualValue = this.manualInputForm.getRawValue();
-    console.log(manualValue)
+    // console.log(manualValue)
   }
 
   createFieldTableQuery(tableQuery: string = null): FormGroup {
@@ -218,7 +218,7 @@ export class AddQueryComponent implements OnInit {
 
   onSubmitQuick(): void {
     const quickValue = this.quickInputForm.getRawValue();
-    console.log(quickValue)
+    // console.log(quickValue)
   }
 
   scheduleAndContact = this.fb.group({
@@ -227,7 +227,7 @@ export class AddQueryComponent implements OnInit {
 
   onScheduleAndContact(): void {
     const quickValue = this.scheduleAndContact.getRawValue();
-    console.log(quickValue)
+    // console.log(quickValue)
   }
 
   onSelectInputCheck(value: string): void {
