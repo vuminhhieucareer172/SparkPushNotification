@@ -21,7 +21,7 @@ export class AddQueryComponent implements OnInit {
   listQueryField = [];
   listTopicKafka = [];
   topicValid = false;
-  methodSelected = ''
+  methodSelected = '';
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
@@ -86,8 +86,7 @@ export class AddQueryComponent implements OnInit {
     this.schedule = value;
     if (this.schedule == 'manual-input') {
       this.quickInputForm.reset();
-    }
-    else if (this.schedule == 'quick-input') {
+    } else if (this.schedule == 'quick-input') {
       this.manualInputForm.reset();
     }
   }
@@ -99,8 +98,7 @@ export class AddQueryComponent implements OnInit {
   isSelectQuery(control: FormControl): { [key: string]: boolean } | null {
     if (control.value == null) {
       return { validMaster: true };
-    }
-    else if (!control.value.toLowerCase().startsWith('select')) {
+    } else if (!control.value.toLowerCase().startsWith('select')) {
       return { validMaster: true };
     }
     return null;
@@ -261,8 +259,7 @@ export class AddQueryComponent implements OnInit {
   isValidTopic(inputValue): void {
     if (this.listTopicKafka.includes(inputValue)) {
       this.topicValid = true;
-    }
-    else {
+    } else {
       this.topicValid = false;
     }
   }
@@ -272,9 +269,9 @@ export class AddQueryComponent implements OnInit {
     const quickValue2 = this.quickInputForm.getRawValue();
     const quickValue3 = this.manualInputForm.getRawValue();
 
-    console.log(quickValue1)
-    console.log(quickValue2)
-    console.log(quickValue3)
+    // console.log(quickValue1)
+    // console.log(quickValue2)
+    // console.log(quickValue3)
 
   }
 
@@ -288,7 +285,7 @@ export class AddQueryComponent implements OnInit {
       if (manualInput.manualText.toLowerCase().includes('from')) {
         json_result['sql'] = manualInput.manualText;
       }
-      json_result['topic_kafka_output'] = scheduleAndContact.topicOutput
+      json_result['topic_kafka_output'] = scheduleAndContact.topicOutput;
       if (scheduleAndContact.selectSchedule == 'minute') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60;
       }
@@ -298,9 +295,9 @@ export class AddQueryComponent implements OnInit {
       else if (scheduleAndContact.selectSchedule == 'day') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
       }
-      contact['method'] = scheduleAndContact.selectMethod
-      contact['value'] = scheduleAndContact.inputMethod
-      json_result['contact'] = contact
+      contact['method'] = scheduleAndContact.selectMethod;
+      contact['value'] = scheduleAndContact.inputMethod;
+      json_result['contact'] = contact;
       this.http.post(SERVER_API_URL + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
@@ -311,8 +308,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-    }
-    else if (this.schedule == 'quick-input') {
+    } else if (this.schedule == 'quick-input') {
       const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
       const quickInput = this.quickInputForm.getRawValue();
       // console.log('quick')

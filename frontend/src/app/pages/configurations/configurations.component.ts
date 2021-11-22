@@ -101,7 +101,7 @@ export class ConfigurationsComponent implements OnInit {
   });
 
   isMasterSpark(control: FormControl): { [key: string]: boolean } | null {
-    console.log(control.value)
+    // console.log(control.value)
     if (control.value == null) {
       return { validMaster: true };
     }
