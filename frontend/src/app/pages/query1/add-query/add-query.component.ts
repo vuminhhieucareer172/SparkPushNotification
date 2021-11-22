@@ -19,7 +19,9 @@ export class AddQueryComponent implements OnInit {
   schedule: string;
   listTableQuery = [];
   listQueryField = [];
-
+  listTopicKafka = [];
+  topicValid = false;
+  methodSelected = ''
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
@@ -30,6 +32,16 @@ export class AddQueryComponent implements OnInit {
         res => {
           for (const table of Object(res.body)) {
             this.listTableQuery.push(table['table_name']);
+          }
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
+        }, () => { },
+      );
+    this.http.get(SERVER_API_URL + '/kafka-topic', { observe: 'response' })
+      .subscribe(
+        res => {
+          for (const topic of Object(res.body)) {
+            this.listTopicKafka.push(topic);
           }
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
@@ -72,11 +84,28 @@ export class AddQueryComponent implements OnInit {
 
   onSelectSchedule(value: string): void {
     this.schedule = value;
+    if (this.schedule == 'manual-input') {
+      this.quickInputForm.reset();
+    }
+    else if (this.schedule == 'quick-input') {
+      this.manualInputForm.reset();
+    }
   }
 
   manualInputForm = this.fb.group({
-    manualText: ['', [Validators.required]],
+    manualText: ['', [Validators.required, this.isSelectQuery]],
   });
+
+  isSelectQuery(control: FormControl): { [key: string]: boolean } | null {
+    if (control.value == null) {
+      return { validMaster: true };
+    }
+    else if (!control.value.toLowerCase().startsWith('select')) {
+      return { validMaster: true };
+    }
+    return null;
+  }
+
 
   onSubmitManual(): void {
     const manualValue = this.manualInputForm.getRawValue();
@@ -133,7 +162,7 @@ export class AddQueryComponent implements OnInit {
   });
 
   selecteTableStream(stream: string): void {
-    this.http.get(SERVER_API_URL + '/stream/' + stream, {observe: 'response'})
+    this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
       .subscribe(
         res => {
           for (const name_field of res.body['table']['fields']) {
@@ -141,7 +170,7 @@ export class AddQueryComponent implements OnInit {
           }
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'warning');
-        }, () => {});
+        }, () => { });
   }
 
   get fieldsTableQuery(): FormArray {
@@ -221,13 +250,78 @@ export class AddQueryComponent implements OnInit {
     // console.log(quickValue)
   }
 
-  scheduleAndContact = this.fb.group({
-    // manualText: ['', [Validators.required]],
+  scheduleAndContactForm = this.fb.group({
+    topicOutput: ['', [Validators.required]],
+    selectSchedule: ['minute', [Validators.required]],
+    inputTime: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
+    selectMethod: ['', [Validators.required]],
+    inputMethod: ['', [Validators.required, <any>Validators.email, Validators.pattern('^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$')]],
   });
 
+  isValidTopic(inputValue): void {
+    if (this.listTopicKafka.includes(inputValue)) {
+      this.topicValid = true;
+    }
+    else {
+      this.topicValid = false;
+    }
+  }
+
   onScheduleAndContact(): void {
-    const quickValue = this.scheduleAndContact.getRawValue();
-    // console.log(quickValue)
+    const quickValue1 = this.scheduleAndContactForm.getRawValue();
+    const quickValue2 = this.quickInputForm.getRawValue();
+    const quickValue3 = this.manualInputForm.getRawValue();
+
+    console.log(quickValue1)
+    console.log(quickValue2)
+    console.log(quickValue3)
+
+  }
+
+  onSubmitAll(): void {
+    if (this.schedule == 'manual-input') {
+      const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
+      const manualInput = this.manualInputForm.getRawValue();
+      const json_result = {};
+      const contact = {};
+
+      if (manualInput.manualText.toLowerCase().includes('from')) {
+        json_result['sql'] = manualInput.manualText;
+      }
+      json_result['topic_kafka_output'] = scheduleAndContact.topicOutput
+      if (scheduleAndContact.selectSchedule == 'minute') {
+        json_result['time_trigger'] = scheduleAndContact.inputTime * 60;
+      }
+      else if (scheduleAndContact.selectSchedule == 'hour') {
+        json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60;
+      }
+      else if (scheduleAndContact.selectSchedule == 'day') {
+        json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
+      }
+      contact['method'] = scheduleAndContact.selectMethod
+      contact['value'] = scheduleAndContact.inputMethod
+      json_result['contact'] = contact
+      this.http.post(SERVER_API_URL + '/query', json_result, { observe: 'response' })
+        .subscribe(
+          res => {
+            this.showToast('Notification', 'Action completed', 'success');
+            this.scheduleAndContactForm.reset();
+            this.manualInputForm.reset();
+          }, (error) => {
+            this.showToast('An unexpected error occured', error.error.message, 'danger');
+          }, () => { },
+        );
+    }
+    else if (this.schedule == 'quick-input') {
+      const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
+      const quickInput = this.quickInputForm.getRawValue();
+      // console.log('quick')
+    }
+  }
+
+  selectedMethod(selected: string): void {
+    // console.log(selected);
+    this.methodSelected = selected;
   }
 
   onSelectInputCheck(value: string): void {

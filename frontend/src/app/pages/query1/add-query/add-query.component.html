@@ -24,6 +24,10 @@
                                         (click)="onSelectSchedule('manual-input')">
                                         <textarea rows="5" formControlName="manualText" nbInput fullWidth shape="round"
                                             placeholder="Text Area"></textarea>
+                                        <div
+                                            *ngIf="manualInputForm.get('manualText').touched && manualInputForm.get('manualText').errors?.validMaster">
+                                            <span class="helper-text">Query input is invalid</span>
+                                        </div>
                                     </div>
                                     <!-- <button nbButton type="submit">submit</button> -->
                                 </div>
@@ -324,7 +328,7 @@
                                 <!-- <button nbButton type="submit">submit</button> -->
                             </form>
                             <div style="margin-top: 30px;">
-                                <button style="float: right;" nbButton nbStepperNext>next</button>
+                                <button status="success" style="float: right;" nbButton nbStepperNext>next</button>
                             </div>
                         </div>
                     </nb-step>
@@ -332,14 +336,22 @@
                     <nb-step [label]="labelTwo">
                         <ng-template #labelTwo>Second step</ng-template>
                         <label for="schedule" class="label"></label>
-                        <form class="row" [formGroup]="scheduleAndContact" (ngSubmit)="onScheduleAndContact()">
+                        <form class="row" [formGroup]="scheduleAndContactForm" (ngSubmit)="onScheduleAndContact()">
                             <div class="form-group col-md-6">
                                 <div class="row">
                                     <label for="inputEmail1" class="label col-sm-3 col-form-label">Topic kafka
                                         output:</label>
                                     <div class="col-sm-9">
-                                        <input required type="email" nbInput fullWidth id="inputEmail1"
-                                            placeholder="Bootstrap-server..." />
+                                        <input formControlName="topicOutput" required type="email" nbInput fullWidth
+                                            id="topicOutput" (ngModelChange)="isValidTopic($event)"
+                                            placeholder="Topic kafka output..." />
+                                        <div *ngIf="scheduleAndContactForm.get('topicOutput').touched && topicValid">
+                                            <span class="helper-text">Topic is exist</span>
+                                        </div>
+                                        <div
+                                            *ngIf="scheduleAndContactForm.get('topicOutput').touched && scheduleAndContactForm.get('topicOutput').errors?.required">
+                                            <span class="helper-text">Topic output is required</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -349,15 +361,74 @@
                                 <div class="row">
                                     <label for="inputEmail1" class="label col-sm-3 col-form-label">Notification
                                         schedule:</label>
-                                    <div class="col-sm-9">
-                                        <input required type="email" nbInput fullWidth id="inputEmail1"
-                                            placeholder="Bootstrap-server..." />
+                                    <div class="col-sm-9 row">
+                                        <div>
+                                            <nb-select selected="minute" class="col-sm-1"
+                                                formControlName="selectSchedule">
+                                                <nb-option value="day">Days</nb-option>
+                                                <nb-option value="hour">Hours</nb-option>
+                                                <nb-option value="minute">Minutes</nb-option>
+                                            </nb-select>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input formControlName="inputTime" fullWidth required type="email" nbInput
+                                                id="inputEmail1" placeholder="Input time..." />
+                                            <div
+                                                *ngIf="scheduleAndContactForm.get('inputTime').touched && scheduleAndContactForm.get('inputTime').errors?.required">
+                                                <span class="helper-text">Input time is required</span>
+                                            </div>
+                                            <div
+                                                *ngIf="scheduleAndContactForm.get('inputTime').touched && scheduleAndContactForm.get('inputTime').errors?.pattern">
+                                                <span class="helper-text">Input time need to be a number</span>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group col-md-6">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="inputEmail1" class="label col-sm-3 col-form-label">Contact
+                                        method:</label>
+                                    <div class="col-sm-9 row">
+                                        <div>
+                                            <nb-select formControlName="selectMethod" class="col-sm-1"
+                                                placeholder="Select method" (selectedChange)="selectedMethod($event)">
+                                                <nb-option value="email">Email</nb-option>
+                                                <nb-option value="telegram">Telegram</nb-option>
+                                                <nb-option value="messenger">Messenger</nb-option>
+                                            </nb-select>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <input formControlName="inputMethod" fullWidth required type="email" nbInput
+                                                id="inputEmail1" placeholder="Input contact..." />
+                                            <div
+                                                *ngIf="scheduleAndContactForm.get('inputMethod').touched && scheduleAndContactForm.get('inputMethod').errors?.required">
+                                                <span class="helper-text">Contact address is required</span>
+                                            </div>
+                                            <div
+                                                *ngIf="(scheduleAndContactForm.get('inputMethod').errors?.email && methodSelected == 'email')">
+                                                <span class="helper-text">Email is invalid format</span>
+                                            </div>
+                                            <div
+                                                *ngIf="(scheduleAndContactForm.get('inputMethod').errors?.pattern && methodSelected == 'telegram')">
+                                                <span class="helper-text">Telegram is invalid format</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <button nbButton type="submit">submit</button> -->
+
                         </form>
                         <div style="margin-top: 30px;">
-                            <button style="float: right;" nbButton nbStepperPrevious>back</button>
+                            <button [disabled]="(!scheduleAndContactForm.valid || !manualInputForm.valid) && (!scheduleAndContactForm.valid || !quickInputForm.valid)" status="info"
+                                (click)="onSubmitAll()" style="float: right;" nbButton type="submit">add query</button>
+
+                            <button status="success" style="float: right; margin-right: 20px;" nbButton
+                                nbStepperPrevious>back</button>
                         </div>
                     </nb-step>
                 </nb-stepper>
