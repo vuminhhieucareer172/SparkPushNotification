@@ -84,9 +84,9 @@ export class AddQueryComponent implements OnInit {
 
   onSelectSchedule(value: string): void {
     this.schedule = value;
-    if (this.schedule == 'manual-input') {
+    if (this.schedule === 'manual-input') {
       this.quickInputForm.reset();
-    } else if (this.schedule == 'quick-input') {
+    } else if (this.schedule === 'quick-input') {
       this.manualInputForm.reset();
     }
   }
@@ -276,7 +276,7 @@ export class AddQueryComponent implements OnInit {
   }
 
   onSubmitAll(): void {
-    if (this.schedule == 'manual-input') {
+    if (this.schedule === 'manual-input') {
       const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
       const manualInput = this.manualInputForm.getRawValue();
       const json_result = {};
@@ -286,13 +286,11 @@ export class AddQueryComponent implements OnInit {
         json_result['sql'] = manualInput.manualText;
       }
       json_result['topic_kafka_output'] = scheduleAndContact.topicOutput;
-      if (scheduleAndContact.selectSchedule == 'minute') {
+      if (scheduleAndContact.selectSchedule === 'minute') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60;
-      }
-      else if (scheduleAndContact.selectSchedule == 'hour') {
+      } else if (scheduleAndContact.selectSchedule === 'hour') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60;
-      }
-      else if (scheduleAndContact.selectSchedule == 'day') {
+      } else if (scheduleAndContact.selectSchedule === 'day') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
       }
       contact['method'] = scheduleAndContact.selectMethod;
@@ -308,7 +306,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-    } else if (this.schedule == 'quick-input') {
+    } else if (this.schedule === 'quick-input') {
       const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
       const quickInput = this.quickInputForm.getRawValue();
       // console.log('quick')
