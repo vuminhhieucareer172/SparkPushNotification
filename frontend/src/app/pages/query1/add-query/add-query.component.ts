@@ -87,9 +87,9 @@ export class AddQueryComponent implements OnInit {
 
   onSelectSchedule(value: string): void {
     this.schedule = value;
-    if (this.schedule == 'manual-input') {
+    if (this.schedule === 'manual-input') {
       this.quickInputForm.reset();
-    } else if (this.schedule == 'quick-input') {
+    } else if (this.schedule === 'quick-input') {
       this.manualInputForm.reset();
     }
   }
@@ -271,29 +271,29 @@ export class AddQueryComponent implements OnInit {
   }
 
   isValidRegex(inputValue): void {
-    let emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-    let teleRegex = new RegExp(/^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$/);
-    if (this.methodSelected == 'email') {
+    const emailRegex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+    const teleRegex = new RegExp(/^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$/);
+    if (this.methodSelected === 'email') {
       if (emailRegex.test(inputValue)) {
         this.isValidEmail = emailRegex.test(inputValue);
       } else {
         this.isValidEmail = false;
       }
-    } else if (this.methodSelected == 'telegram') {
+    } else if (this.methodSelected === 'telegram') {
       if (teleRegex.test(inputValue)) {
         this.isValidTele = teleRegex.test(inputValue);
       } else {
         this.isValidTele = false;
       }
     }
-    console.log('scheduleAndContactForm ' + !this.scheduleAndContactForm.valid);
+    // console.log('scheduleAndContactForm ' + !this.scheduleAndContactForm.valid);
     // console.log('manualInputForm ' + !this.manualInputForm.valid);
     // console.log('isValidEmail ' + !this.isValidEmail);
     // console.log('tong hop form' + ((!this.scheduleAndContactForm.valid || !this.manualInputForm.valid) || !this.isValidEmail));
-    console.log('quickInputForm ' + !this.quickInputForm.valid);
-    console.log('tong hop quick ' + (!this.scheduleAndContactForm.valid || !this.quickInputForm.valid));
+    // console.log('quickInputForm ' + !this.quickInputForm.valid);
+    // console.log('tong hop quick ' + (!this.scheduleAndContactForm.valid || !this.quickInputForm.valid));
 
-    console.log('-------/-');
+    // console.log('-------/-');
 
     // console.log(((!this.scheduleAndContactForm.valid || !this.manualInputForm.valid) || !this.isValidEmail) && (!this.scheduleAndContactForm.valid || !this.quickInputForm.valid));
 
@@ -306,21 +306,21 @@ export class AddQueryComponent implements OnInit {
   }
 
   onSubmitAll(): void {
-    if (this.schedule == 'manual-input') {
+    if (this.schedule === 'manual-input') {
       const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
       const manualInput = this.manualInputForm.getRawValue();
       const json_result = {};
       const contact = {};
-      console.log(scheduleAndContact);
+      // console.log(scheduleAndContact);
       if (manualInput.manualText.toLowerCase().includes('from')) {
         json_result['sql'] = manualInput.manualText;
       }
       json_result['topic_kafka_output'] = scheduleAndContact.topicOutput;
-      if (scheduleAndContact.selectSchedule == 'minute') {
+      if (scheduleAndContact.selectSchedule === 'minute') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60;
-      } else if (scheduleAndContact.selectSchedule == 'hour') {
+      } else if (scheduleAndContact.selectSchedule === 'hour') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60;
-      } else if (scheduleAndContact.selectSchedule == 'day') {
+      } else if (scheduleAndContact.selectSchedule === 'day') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
       }
 
@@ -345,7 +345,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-    } else if (this.schedule == 'quick-input') {
+    } else if (this.schedule === 'quick-input') {
       let finalSQL = 'select ';
       const json_result = {};
       const contact = {};
@@ -422,11 +422,11 @@ export class AddQueryComponent implements OnInit {
       }
       json_result['sql'] = finalSQL;
       json_result['topic_kafka_output'] = scheduleAndContact.topicOutput;
-      if (scheduleAndContact.selectSchedule == 'minute') {
+      if (scheduleAndContact.selectSchedule === 'minute') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60;
-      } else if (scheduleAndContact.selectSchedule == 'hour') {
+      } else if (scheduleAndContact.selectSchedule === 'hour') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60;
-      } else if (scheduleAndContact.selectSchedule == 'day') {
+      } else if (scheduleAndContact.selectSchedule === 'day') {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
       }
 
@@ -443,7 +443,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-      console.log(finalSQL)
+      // console.log(finalSQL)
     }
   }
 
