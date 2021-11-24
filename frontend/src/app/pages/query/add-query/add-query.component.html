@@ -6,41 +6,32 @@
           <nb-step [stepControl]="firstForm" label="First step">
             <form [formGroup]="firstForm" (ngSubmit)="onFirstSubmit()" class="step-container">
               <div class="form-group">
-                <!-- <label for="schedule" class="label">Scheduler:</label> -->
+                <label for="schedule" class="label">Scheduler:</label>
                 <div>
                   <div class="row schedule">
-                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;"
-                      (click)="onSelectSchedule('quick-schedule')">
-                      <input type="radio" name="schedule" id="quick-schedule" value="quick-schedule"
-                        [checked]="schedule == 'quick-schedule' " formControlName="quick_schedule" />
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('quick-schedule')">
+                      <input type="radio" name="schedule" id="quick-schedule" value="quick-schedule" [checked]="schedule == 'quick-schedule' " formControlName="quick_schedule" />
                       <label for="quick-schedule"></label>
                     </div>
-                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}"
-                      (click)="onSelectSchedule('quick-schedule')">
-                      <label for="quick-schedule" style="color: black;" class="label">Manual:</label>
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
+                      <label for="quick-schedule" class="label">Quick schedule:</label>
                     </div>
                   </div>
 
-                  <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}"
-                    (click)="onSelectSchedule('quick-schedule')">
+                  <div [ngClass]="{'schedule-inactive': schedule != 'quick-schedule'}" (click)="onSelectSchedule('quick-schedule')">
                     <textarea rows="5" nbInput fullWidth shape="round" placeholder="Text Area"></textarea>
                   </div>
 
                   <!--FORM NGUOI DUNG TUONG TAC DE QUERY-->
-
                   <div class="row schedule">
-                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;"
-                      (click)="onSelectSchedule('manual-schedule')">
-                      <input type="radio" name="schedule" id="manual-schedule" value="manual-schedule"
-                        [checked]="schedule == 'manual-schedule'" formControlName="manual_schedule" />
+                    <div class="round schedule-head" style="margin: 10px 20px 0 30px;" (click)="onSelectSchedule('manual-schedule')">
+                      <input type="radio" name="schedule" id="manual-schedule" value="manual-schedule" [checked]="schedule == 'manual-schedule'" formControlName="manual_schedule" />
                       <label for="manual-schedule"></label>
                     </div>
-                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}"
-                      (click)="onSelectSchedule('manual-schedule')">
+                    <div class="col-md-2 schedule-head" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
                       <label for="manual-schedule" class="label">User Interface:</label>
                     </div>
-                    <div [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}"
-                      (click)="onSelectSchedule('manual-schedule')">
+                    <div [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
                       <!--BANG NAO-->
 
                       <div class="row schedule" style="margin: 10px 20px 0 30px;">
@@ -79,8 +70,7 @@
                                   </nb-select>
                                 </td>
                                 <td>
-                                  <input type="text" fullWidth style="border: none;" formControlName="name_field"
-                                    id="{{'name_field' + i}}" placeholder="Name column" />
+                                  <input type="text" fullWidth style="border: none;" formControlName="name_field" id="{{'name_field' + i}}" placeholder="Name column" />
                                 </td>
                                 <td>
                                   <nb-select fullWidth placeholder="Select type column" formControlName="type">
@@ -89,8 +79,7 @@
                                   </nb-select>
                                 </td>
                                 <td style="padding: 0 0 0 10px;">
-                                  <button type="button" id="drop-column" class="btn btn-sm font-size-20"
-                                    (click)="dropColumn(i)">
+                                  <button type="button" id="drop-column" class="btn btn-sm font-size-20" (click)="dropColumn(i)">
                                     <i class="fas fa-trash"></i>
                                   </button>
                                 </td>
@@ -133,8 +122,7 @@
               <div class="form-group">
                 <div class="row schedule">
                   <label for="table-responsive" class="label">Notification Scheduler</label>
-                  <div class="col-md-12 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}"
-                    (click)="onSelectSchedule('manual-schedule')">
+                  <div class="col-md-12 row" [ngClass]="{'schedule-inactive': schedule != 'manual-schedule'}" (click)="onSelectSchedule('manual-schedule')">
                     <nb-select selected="0">
                       <nb-option *ngFor="let e of days" value="{{e}}">{{e}}</nb-option>
                     </nb-select>
@@ -176,13 +164,11 @@
                           </nb-select>
                         </td>
                         <td style="padding: 0 0 0 10px;">
-                          <input type="text" fullWidth style="border: none;" formControlName="name_field"
-                            id="{{'name_field' + i}}" placeholder="Name column" />
+                          <input type="text" fullWidth style="border: none;" formControlName="name_field" id="{{'name_field' + i}}" placeholder="Name column" />
                         </td>
 
                         <td style="padding: 0 0 0 10px;">
-                          <button type="button" id="drop-column" class="btn btn-sm font-size-20"
-                            (click)="dropColumn(i)">
+                          <button type="button" id="drop-column" class="btn btn-sm font-size-20" (click)="dropColumn(i)">
                             <i class="fas fa-trash"></i>
                           </button>
                         </td>

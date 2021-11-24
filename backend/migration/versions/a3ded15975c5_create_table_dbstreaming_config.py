@@ -20,7 +20,8 @@ def upgrade():
     op.create_table(
         'dbstreaming_config',
         sa.Column('id', sa.INTEGER, primary_key=True, index=True, autoincrement=True),
-        sa.Column('name', sa.Enum('spark', 'mail', 'kafka', 'zalo', 'job_streaming'), nullable=False),
+        sa.Column('name', sa.Enum('spark', 'mail', 'kafka', 'zalo', 'job_streaming', 'telegram'), nullable=False,
+                  unique=True),
         sa.Column('value', sa.JSON, nullable=False),
     )
 

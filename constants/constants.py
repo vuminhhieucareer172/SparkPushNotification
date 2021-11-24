@@ -42,6 +42,7 @@ DATA_TYPE_SQLALCHEMY = {
 MAP_SQLALCHEMY_TYPE_TO_SPARK_SQL_TYPE = {
     "VARCHAR": 'StringType',
     "INTEGER": 'IntegerType',
+    "SMALLINT": 'IntegerType',
     "TEXT": 'StringType',
     "DATETIME": 'DatetimeConverter',
     "TIMESTAMP": 'TimestampType',
@@ -81,6 +82,7 @@ CONFIG_JOB_STREAMING = 'job_streaming'
 CONFIG_KAFKA = 'kafka'
 CONFIG_MAIL = 'mail'
 CONFIG_ZALO = 'zalo'
+CONFIG_TELEGRAM = 'telegram'
 
 GENERATE_STREAMING_SUCCESSFUL = "successful"
 

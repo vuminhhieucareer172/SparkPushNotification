@@ -1,10 +1,11 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
-from backend.schemas.email import AuthEmail
+
+from backend.schemas.configuration import ConfigEmail
 
 
-def email_sender(source: AuthEmail, email_destination: str, subject: str, content: str = '', using_ssl=True):
+def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: str = '', using_ssl=True):
     try:
         msg = EmailMessage()
         msg['Subject'] = subject

@@ -79,10 +79,6 @@ nb-card.inline-form-card nb-card-body {
   padding-top: 10px;
 }
 
-label {
-  color: #000000;
-}
-
 .round label {
   background-color: #fff;
   border: 1px solid #ccc;
@@ -102,7 +98,7 @@ label {
   content: '';
   height: 5px;
   left: 4px;
-  // opacity: 0;
+  opacity: 0;
   top: 6px;
   position: absolute;
   transform: rotate(-45deg);
@@ -119,7 +115,7 @@ label {
 }
 
 .round input[type='radio']:checked + label::after {
-  // opacity: 1;
+  opacity: 1;
 }
 
 .schedule-inactive {

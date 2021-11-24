@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 export class AddQueryComponent  implements OnInit, OnDestroy {
   firstForm: FormGroup;
   secondForm: FormGroup;
+  thirdForm: FormGroup;
   hours: any[];
   minutes: number[];
   seconds: number[];
@@ -52,10 +53,6 @@ export class AddQueryComponent  implements OnInit, OnDestroy {
     this.hours = Array.from(Array(24), (_, i) => i);
     this.days = Array.from(Array(30), (_, i) => i);
   }
-
-  // manualForm = this.fb.group({
-  //   manualText: ['', [Validators.required]],
-  // });
 
   ngOnInit() {
     this.firstForm = this.fb.group({});

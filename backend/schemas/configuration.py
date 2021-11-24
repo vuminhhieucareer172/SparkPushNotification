@@ -17,3 +17,14 @@ class ConfigurationUpdate(BaseModel):
     class Config:
         orm_mode = True
 
+
+class ConfigEmail(BaseModel):
+    host: str
+    port: int
+    email: str
+    username: str
+    password: str
+
+
+class ConfigTelegram(BaseModel):
+    token: str

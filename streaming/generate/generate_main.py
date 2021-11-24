@@ -16,28 +16,25 @@ def generate_job_stream(db: DB, app_name: str, file_job_name: str, path_job_fold
     try:
         query_session = SessionHandler.create(session, UserQuery)
         data = query_session.get_all(to_json=True)
-    except Exception as e:
-        print(e)
-        return "Error {}".format(str(e))
 
-    if data is None:
-        return "No query in database"
-    spark_config = get_config(constants.CONFIG_SPARK)
-    if spark_config is None:
-        return "No config spark in database"
-    kafka_config = get_config(constants.CONFIG_KAFKA)
-    if kafka_config is None:
-        return "No config kafka in database"
+        if data is None:
+            return "No query in database"
+        spark_config = get_config(constants.CONFIG_SPARK)
+        if spark_config is None:
+            return "No config spark in database"
+        kafka_config = get_config(constants.CONFIG_KAFKA)
+        if kafka_config is None:
+            return "No config kafka in database"
 
-    with open(path_job_folder + file_job_name + ".py", 'w') as f_job:
-        # import dependency
-        r = """from pyspark.sql import SparkSession
+        with open(path_job_folder + file_job_name + ".py", 'w') as f_job:
+            # import dependency
+            r = """from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, udf
 from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType,\\
 DatetimeConverter, TimestampType, ArrayType, ShortType, BinaryType, DecimalType, DoubleType, MapType"""
 
-        # init spark app with name and log level
-        r += """
+            # init spark app with name and log level
+            r += """
 def main():
     concurrent_job = 3
     spark = SparkSession \\
@@ -56,45 +53,45 @@ def main():
     spark.conf.set("spark.streaming.concurrentJobs", str(concurrent_job))""".format(app_name,
                                                                                     kwargs.get("log_level", "ERROR"))
 
-        # set other config
-        for config in kwargs.keys():
-            r += """
+            # set other config
+            for config in kwargs.keys():
+                r += """
     spark.conf.set("{}", "{}")""".format(config, kwargs.get(config))
 
-        # read from streaming tables in db
-        inspector = inspect(db.engine)
-        tables = inspector.get_table_names()
-        query_session = SessionHandler.create(get_session(database=db), KafkaStreaming)
-        for table in tables:
-            if table.startswith(PREFIX_DB_TABLE_STREAMING):
-                mapping_kafka_streaming = query_session.get_one(query_dict=dict(table_streaming=table))
-                if mapping_kafka_streaming is None:
-                    return f"table {table} has not corresponding topic kafka"
-                r += """
+            # read from streaming tables in db
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
+            query_session = SessionHandler.create(get_session(database=db), KafkaStreaming)
+            for table in tables:
+                if table.startswith(PREFIX_DB_TABLE_STREAMING):
+                    mapping_kafka_streaming = query_session.get_one(query_dict=dict(table_streaming=table))
+                    if mapping_kafka_streaming is None:
+                        return f"table {table} has not corresponding topic kafka"
+                    r += """
     {} = spark \\
         .readStream \\
         .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("subscribe", "{}") \\
         .load()""".format(table, kafka_config.value['bootstrap.servers'], mapping_kafka_streaming.topic_kafka)
-                r += """
+                    r += """
     schema_{} = {}
-""".format(table, get_schema_table(inspector, table))
+    """.format(table, get_schema_table(inspector, table))
 
-                r += """
+                    r += """
     data_{} = {}.withColumn(
         "data", from_json(col("value").astype(StringType()), schema_{})
     ).select("key", "offset", "partition", "timestamp", "timestampType", "topic", "data.*")
-""".format(table, table, table)
+    """.format(table, table, table)
 
-                r += """
+                    r += """
     data_{}.createOrReplaceTempView("{}")
-""".format(table, table)
+    """.format(table, table)
 
-        # generate query
-        for record in data:
-            table_name = 'table' + str(record['id'])
-            r += """
+            # generate query
+            for record in data:
+                table_name = 'table' + str(record['id'])
+                r += """
     data = spark.sql("{}")
     check_matching = udf(
         lambda x: "{}----" + str({}), StringType()
@@ -106,18 +103,21 @@ def main():
         .option("checkpointLocation", "{}") \\
         .trigger(processingTime='{}') \\
         .option("topic", "{}").start()
-""".format(record['sql'], table_name, record['id'], kafka_config.value['bootstrap.servers'],
-           constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'],
-           record['topic_kafka_output'])
+    """.format(record['sql'], table_name, record['id'], kafka_config.value['bootstrap.servers'],
+               constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'],
+               record['topic_kafka_output'])
 
-        r += """
+            r += """
     spark.streams.awaitAnyTermination()
 
 if __name__ == '__main__':
     main()
 """
-        f_job.write(r)
-    return GENERATE_STREAMING_SUCCESSFUL
+            f_job.write(r)
+        return GENERATE_STREAMING_SUCCESSFUL
+    except Exception as e:
+        print(e)
+        return "Error {}".format(str(e))
 
 
 if __name__ == '__main__':

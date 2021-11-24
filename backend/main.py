@@ -10,7 +10,7 @@ from starlette.responses import JSONResponse
 from backend.controller import database_connection, query, configuration, table, stream, schedule
 from backend.controller.schedule import init_scheduler, scheduler
 from backend.middleware.database import verify_database
-from backend.schemas.configuration import Configuration, ConfigurationUpdate
+from backend.schemas.configuration import ConfigurationUpdate
 from backend.schemas.database import Database
 from backend.schemas.query import Query, QueryUpdate
 from backend.schemas.stream import Stream, JobStream, KafkaTopic

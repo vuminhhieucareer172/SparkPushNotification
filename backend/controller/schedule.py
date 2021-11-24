@@ -1,6 +1,5 @@
 import logging
 
-import apscheduler.job
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
@@ -48,8 +47,9 @@ def get_job_stream():
 def job_exec(db: DB, job_id: str, job_name: str):
     result_generate = generate_job_stream(db, job_name, job_id)
     if result_generate != GENERATE_STREAMING_SUCCESSFUL:
-        return result_generate
-    process_id = Spark().submit_job_spark(file="job_streaming_example")
+        print(result_generate)
+        return
+    process_id = Spark().submit_job_spark(file=ID_JOB_STREAM)
     logging.info(f"submitting job in process: {process_id}")
 
 
@@ -77,7 +77,9 @@ def init_scheduler():
             scheduler.remove_job(job_id=ID_JOB_STREAM)
         scheduler.add_job(job_exec, CronTrigger.from_crontab(schedule), id=ID_JOB_STREAM, args=[db, ID_JOB_STREAM,
                                                                                                 job_name])
-        scheduler.start()
+        if not scheduler.running:
+            scheduler.start()
+        return "Added job into scheduler"
     except Exception as e:
         logging.error(e)
-        return f"error {e}"
+        return f"Error {e}"
