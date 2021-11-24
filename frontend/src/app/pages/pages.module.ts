@@ -12,6 +12,8 @@ import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
 import { DatabaseConnectionComponent } from './database-connection/database-connection.component';
 import { ConfigurationsComponent } from './configurations/configurations.component';
 import { ConfigurationsModule } from './configurations/configurations.module';
+import { Query1Component } from './query1/query1.component';
+import { AddQueryComponent } from './query1/add-query/add-query.component';
 
 @NgModule({
   imports: [
@@ -26,6 +28,8 @@ import { ConfigurationsModule } from './configurations/configurations.module';
   ],
   declarations: [
     PagesComponent,
+    // Query1Component,
+    // AddQueryComponent,
     // Configurations1Component,
     // ConfigurationsComponent,
   ],

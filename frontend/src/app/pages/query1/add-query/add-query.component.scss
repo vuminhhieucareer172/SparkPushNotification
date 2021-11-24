@@ -1,0 +1,127 @@
+@import '../../../@theme/styles/themes';
+
+@include nb-install-component() {
+  nb-card {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+nb-checkbox {
+  margin-bottom: 1rem;
+}
+
+.form-inline [fullWidth] {
+  flex: 1;
+}
+
+.form-inline > * {
+  margin: 0 1.5rem 1.5rem 0;
+}
+
+nb-card.inline-form-card nb-card-body {
+  padding-bottom: 0;
+}
+
+#add-column:hover {
+  background-color: #cfe3ff;
+}
+
+.hidden {
+  display: none;
+}
+
+.circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  margin: 10px;
+}
+
+.status {
+  text-align: center;
+}
+
+.service-name {
+  margin: 21px 0;
+  font: 16px Lato, sans-serif;
+}
+
+.service-status {
+  font: 24px Lato, sans-serif;
+  margin: 19px 0;
+}
+
+.service-stopped {
+  border: 3px solid #ffde00;
+}
+
+.service-stopped > h2 {
+  color: #ffde00;
+}
+
+.service-running {
+  border: 3px solid #00ff00;
+}
+
+.service-running > h2 {
+  color: #00ff00;
+}
+
+.round {
+  position: relative;
+}
+
+.schedule {
+  margin-top: 10px;
+}
+
+.schedule-head {
+  padding-top: 10px;
+}
+
+.round label {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 20px;
+  left: 0;
+  top: 0;
+  position: absolute;
+  width: 20px;
+}
+
+.round label::after {
+  border: 2px solid #fff;
+  border-top: none;
+  border-right: none;
+  content: '';
+  height: 5px;
+  left: 4px;
+  opacity: 0;
+  top: 6px;
+  position: absolute;
+  transform: rotate(-45deg);
+  width: 10px;
+}
+
+.round input[type='radio'] {
+  visibility: hidden;
+}
+
+.round input[type='radio']:checked + label {
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.round input[type='radio']:checked + label::after {
+  opacity: 1;
+}
+
+.schedule-inactive {
+  opacity: 0.5;
+}
+
+.helper-text {
+  color: red;
+}

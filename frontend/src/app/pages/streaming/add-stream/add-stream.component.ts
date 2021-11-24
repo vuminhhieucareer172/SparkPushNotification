@@ -27,6 +27,7 @@ export class AddStreamComponent implements OnInit {
     .subscribe(
       res => {
         this.listTopicKafka = Object.keys(res.body).map((key) => res.body[key]);
+        // console.log(this.listTopicKafka)
       }, (error) => {
         this.showToast('An unexpected error occured', error.error.message, 'danger');
       }, () => {},
