@@ -13,7 +13,8 @@ from backend.schemas.configuration import ConfigEmail, ConfigTelegram
 from backend.utils import util_mail, util_get_config, util_kafka, util_process, util_telegram
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING, ID_JOB_STREAM
-from database.db import get_db, DB
+from database.db import get_db, DB, get_session
+from database.session import SessionHandler
 from streaming.generate.generate_main import generate_job_stream
 from streaming.spark import Spark
 
@@ -146,27 +147,45 @@ def handle_output(new_query: UserQuery, data):
             pass
         else:
             contact_info: dict = new_query.contact
+            result = None
             if 'method' not in contact_info:
-                return 'wrong format contact'
+                print('wrong format contact')
+                return
             if contact_info.get('method') == constants.CONFIG_MAIL:
                 mail_info = util_get_config.get_config(constants.CONFIG_MAIL).value
-                util_mail.email_sender(
+                result = util_mail.email_sender(
                     ConfigEmail(
                         host=mail_info.get('host'),
                         port=mail_info.get('port'),
                         email=mail_info.get('email'),
                         username=mail_info.get('username'),
                         password=mail_info.get('password'),
+                        ssl=mail_info.get('ssl')
                     ), email_destination=contact_info.get('value'), subject='dbstreaming nofity',
                     content=json.dumps(data)
                 )
             elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
                 telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value
-                util_telegram.send_test_message(
+                result = util_telegram.send_test_message(
                     ConfigTelegram(token=telegram_info.get('token')),
                     chat_id=contact_info.get('value'),
                     message=json.dumps(data)
                 )
+            print(result)
     except Exception as e:
         print(e)
         return 'Error: {}'.format(str(e))
+
+
+def init_scheduler_from_query():
+    try:
+        db = get_db()
+        session = get_session(database=db)
+        query_session = SessionHandler.create(session, UserQuery)
+        data = query_session.get_all()
+        for query in data:
+            scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
+                              id=query.topic_kafka_output)
+    except Exception as e:
+        print(e)
+        return "Error {}".format(str(e))

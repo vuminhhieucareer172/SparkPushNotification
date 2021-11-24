@@ -24,6 +24,7 @@ class ConfigEmail(BaseModel):
     email: str
     username: str
     password: str
+    ssl: bool
 
 
 class ConfigTelegram(BaseModel):

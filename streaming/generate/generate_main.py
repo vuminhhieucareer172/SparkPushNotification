@@ -29,7 +29,7 @@ def generate_job_stream(db: DB, app_name: str, file_job_name: str, path_job_fold
         with open(path_job_folder + file_job_name + ".py", 'w') as f_job:
             # import dependency
             r = """from pyspark.sql import SparkSession
-from pyspark.sql.functions import from_json, col, udf
+from pyspark.sql.functions import from_json, col, udf, to_json, struct
 from pyspark.sql.types import StringType, StructType, IntegerType, StructField, DateType, LongType, FloatType,\\
 DatetimeConverter, TimestampType, ArrayType, ShortType, BinaryType, DecimalType, DoubleType, MapType"""
 
@@ -42,7 +42,7 @@ def main():
         .appName("{}") \\
         .getOrCreate()
     conf = spark.sparkContext.getConf().setAll(
-        [('spark.executor.memory', '4g'), ('spark.app.name', 'Job Alert Yourway'), ('spark.executor.cores', '4'),
+        [('spark.executor.memory', '4g'), ('spark.app.name', '{}'), ('spark.executor.cores', '4'),
          ('spark.cores.max', '12'), ('spark.driver.memory', '4g')])
     spark.sparkContext.stop()
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
@@ -50,7 +50,7 @@ def main():
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
     spark.sparkContext.setLogLevel("{}")
-    spark.conf.set("spark.streaming.concurrentJobs", str(concurrent_job))""".format(app_name,
+    spark.conf.set("spark.streaming.concurrentJobs", str(concurrent_job))""".format(app_name, app_name,
                                                                                     kwargs.get("log_level", "ERROR"))
 
             # set other config
@@ -93,16 +93,13 @@ def main():
                 table_name = 'table' + str(record['id'])
                 r += """
     data = spark.sql("{}")
-    check_matching = udf(
-        lambda x: "{}----" + str({}), StringType()
-    )
-    data = data.withColumn("value", check_matching(col("key")))
+    data = data.withColumn("value", to_json(struct([c for c in data.columns])))
     data.writeStream \\
         .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("checkpointLocation", "{}") \\
         .option("topic", "{}").start()
-    """.format(record['sql'], table_name, record['id'], kafka_config.value['bootstrap.servers'],
+    """.format(record['sql'], kafka_config.value['bootstrap.servers'],
                constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'])
 
             r += """
@@ -119,4 +116,4 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    print(generate_job_stream(app_name="Job Alert Yourway", file_job_name="example"))
+    print(generate_job_stream(app_name="dbstreaming", file_job_name="example"))
