@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from apscheduler.triggers.cron import CronTrigger
@@ -174,6 +175,8 @@ def stop_job_streaming():
 def start_job_streaming():
     try:
         result = init_scheduler()
+        print(result)
+        scheduler.modify_job(job_id=constants.ID_JOB_STREAM, next_run_time=datetime.datetime.now())
         return JSONResponse(content={"message": result}, status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
@@ -184,7 +187,7 @@ def update_job_streaming(schema: JobStream, db: DB):
     session = get_session(database=db)
     try:
         job_streaming_session = SessionHandler.create(session, Config)
-        job_streaming = job_streaming_session.get_one(query_dict=dict(id=constants.CONFIG_JOB_STREAMING))
+        job_streaming = job_streaming_session.get_one(query_dict=dict(name=constants.CONFIG_JOB_STREAMING))
         if job_streaming is not None:
             job_streaming.value = dict(name_job=schema.name_job, schedule=schema.schedule)
         else:

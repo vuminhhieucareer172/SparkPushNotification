@@ -44,7 +44,7 @@ MAP_SQLALCHEMY_TYPE_TO_SPARK_SQL_TYPE = {
     "INTEGER": 'IntegerType',
     "SMALLINT": 'IntegerType',
     "TEXT": 'StringType',
-    "DATETIME": 'DatetimeConverter',
+    "DATETIME": 'TimestampType',
     "TIMESTAMP": 'TimestampType',
     "DATE": 'DateType',
     "FLOAT": "FloatType",

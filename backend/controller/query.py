@@ -34,9 +34,11 @@ def add_query(new_query: Query, db: DB):
     session = get_session(database=db)
     try:
         query_session = SessionHandler.create(session, UserQuery)
-        query_in_db: UserQuery = query_session.add(new_query.dict())
+        query_session.add(new_query.dict())
         session.commit()
-        result_add_job = add_job_output(query_in_db)
+        result_add_job = add_job_output(UserQuery(topic_kafka_output=new_query.topic_kafka_output,
+                                                  time_trigger=new_query.time_trigger,
+                                                  contact=new_query.contact))
         if result_add_job == "ok":
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
         return JSONResponse(content={"message": result_add_job}, status_code=status.HTTP_400_BAD_REQUEST)

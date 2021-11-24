@@ -51,14 +51,14 @@
 
                                         <!-- TABLE QUERY -->
                                         <div class="row schedule" style="margin: 10px 20px 0 30px;">
-                                            <div>
+                                            <div class="col-1">
                                                 <label for="table" class="label">Table query:</label>
                                                 <p><strong>(FROM)</strong></p>
                                             </div>
-                                            <div formArrayName="fieldsTableQuery">
+                                            <div class="col-6" formArrayName="fieldsTableQuery">
                                                 <div *ngFor="let t of fieldsTableQuery.controls; let i = index"
                                                     [formGroupName]="i" class="row">
-                                                    <div style="margin-bottom: 10px;">
+                                                    <div class="col-8" style="margin-bottom: 10px;">
                                                         <nb-select fullWidth style="margin: 0 20px 0 30px;"
                                                             (selectedChange)="selecteTableStream($event)"
                                                             placeholder="Select table query"
@@ -80,7 +80,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style="padding-left: 100px;">
+                                            <div class="col-2" style="padding-left: 100px;">
                                                 <button (click)="addTableQuery()" id="add-column" class="btn btn-sm"
                                                     type="button">
                                                     <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
@@ -95,14 +95,14 @@
 
                                         <!-- QUERY FIELDS -->
                                         <div class="row schedule" style="margin: 10px 20px 0 30px;">
-                                            <div>
+                                            <div class="col-1">
                                                 <label for="table" class="label">Query fields:</label>
                                                 <p><strong>(SELECT)</strong></p>
                                             </div>
-                                            <div formArrayName="fieldsQueryField">
+                                            <div class="col-6" formArrayName="fieldsQueryField">
                                                 <div *ngFor="let t of fieldsQueryField.controls; let i = index"
                                                     [formGroupName]="i" class="row">
-                                                    <div style="margin-bottom: 10px;">
+                                                    <div class="col-8" style="margin-bottom: 10px;">
                                                         <nb-select fullWidth style="margin: 0 20px 0 30px;"
                                                             placeholder="Select query field"
                                                             formControlName="queryField">
@@ -120,7 +120,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style="padding-left: 100px;">
+                                            <div class="col-2" style="padding-left: 100px;">
                                                 <button (click)="addQueryField()" id="add-column" class="btn btn-sm"
                                                     type="button">
                                                     <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>

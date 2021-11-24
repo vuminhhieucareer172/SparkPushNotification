@@ -20,7 +20,7 @@ def upgrade():
     op.create_table(
         'dbstreaming_query',
         sa.Column('id', sa.INTEGER, primary_key=True, index=True, autoincrement=True),
-        sa.Column('sql', sa.VARCHAR(50), nullable=False),
+        sa.Column('sql', sa.TEXT, nullable=False),
         sa.Column('topic_kafka_output', sa.VARCHAR(50), nullable=False),
         sa.Column('time_trigger', sa.VARCHAR(50), nullable=False, server_default='1 second'),
         sa.Column('created_at', sa.TIMESTAMP, nullable=False, server_default=sa.func.now()),
