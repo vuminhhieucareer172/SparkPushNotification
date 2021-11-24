@@ -34,6 +34,9 @@ class SessionHandler:
     def add(self, record_dict):
         record_model = self.model(**record_dict)
         self.session.add(record_model)
+        self.session.flush()
+        self.session.refresh(record_model)
+        return record_model
 
     def insert_many(self, record_list):
         statements = [pg_insert(self.model).values(record_dict).on_conflict_do_nothing() for record_dict in record_list]

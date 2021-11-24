@@ -89,6 +89,7 @@ def get_latest_message(topic: str):
             return {}, 'Topic {} does not have any message!'.format(topic)
 
         message_value = msg.value().decode('utf-8')
+        kafka.consumer.commit()
         try:
             return json.loads(message_value), ''
         except JSONDecodeError as e:

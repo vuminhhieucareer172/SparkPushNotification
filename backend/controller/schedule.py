@@ -1,13 +1,16 @@
+import json
 import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from confluent_kafka import TopicPartition
 from dotenv import load_dotenv
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.utils.util_get_config import get_config
-from backend.utils.util_process import is_process_running
+from backend.models.dbstreaming_query import UserQuery
+from backend.schemas.configuration import ConfigEmail, ConfigTelegram
+from backend.utils import util_mail, util_get_config, util_kafka, util_process, util_telegram
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING, ID_JOB_STREAM
 from database.db import get_db, DB
@@ -21,7 +24,7 @@ scheduler = BackgroundScheduler({
 
 def get_job_stream():
     try:
-        spark_properties = get_config(constants.CONFIG_SPARK)
+        spark_properties = util_get_config.get_config(constants.CONFIG_SPARK)
         if spark_properties is None:
             return None
         spark_properties = spark_properties.value
@@ -36,8 +39,8 @@ def get_job_stream():
                                            dict_crontab[CronTrigger.FIELD_NAMES.index("month")],
                                            dict_crontab[CronTrigger.FIELD_NAMES.index("day_of_week")])
         return JSONResponse(content=dict(app_name=ID_JOB_STREAM, schedule=schedule, port=Spark().get_pid(),
-                                         status="running" if is_process_running(Spark().get_pid(),
-                                                                                "org.apache.spark.deploy.SparkSubmit") else "stopped"),
+                                         status="running" if util_process.is_process_running(
+                                             Spark().get_pid(), "org.apache.spark.deploy.SparkSubmit") else "stopped"),
                             status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
@@ -57,7 +60,7 @@ def init_scheduler():
     db = get_db()
     if db is None:
         return "Fail to connect database"
-    job_streaming_properties = get_config(CONFIG_JOB_STREAMING)
+    job_streaming_properties = util_get_config.get_config(CONFIG_JOB_STREAMING)
     if job_streaming_properties is None:
         return "missing job streaming config"
 
@@ -83,3 +86,87 @@ def init_scheduler():
     except Exception as e:
         logging.error(e)
         return f"Error {e}"
+
+
+def add_job_output(new_query: UserQuery):
+    try:
+        scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[new_query],
+                          id=new_query.topic_kafka_output)
+        return "ok"
+    except Exception as e:
+        print(e)
+        return "Error: {}".format(str(e))
+
+
+def update_job_output(new_query: UserQuery):
+    try:
+        scheduler.modify_job(job_id=new_query.topic_kafka_output, seconds=int(new_query.time_trigger))
+        return "ok"
+    except Exception as e:
+        print(e)
+        return "Error: {}".format(str(e))
+
+
+def trigger_output(new_query: UserQuery):
+    consumer = util_kafka.Kafka.create().consumer
+    consumer.subscribe([new_query.topic_kafka_output])
+
+    topic = consumer.list_topics(topic=new_query.topic_kafka_output)
+    partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
+                  list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
+    print('partitions', partitions)
+    commited_offset = consumer.committed(partitions)
+    print('commited_offset', commited_offset)
+    low, high = consumer.get_watermark_offsets(partitions[0])
+    print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
+    consumer.assign(commited_offset)
+
+    data = []
+    if commited_offset[0].offset < high:
+        while True:
+            msg = consumer.poll(1)
+            consumer.commit()
+
+            if msg is None:
+                print(msg)
+                continue
+            data.append(msg.value().decode('utf-8'))
+            print(msg.value().decode('utf-8'))
+
+            if msg.offset() == high - 1:
+                break
+    print('len', len(data))
+    handle_output(new_query, data)
+
+
+def handle_output(new_query: UserQuery, data):
+    try:
+        if new_query.contact is None:
+            print(data)
+            pass
+        else:
+            contact_info: dict = new_query.contact
+            if 'method' not in contact_info:
+                return 'wrong format contact'
+            if contact_info.get('method') == constants.CONFIG_MAIL:
+                mail_info = util_get_config.get_config(constants.CONFIG_MAIL).value
+                util_mail.email_sender(
+                    ConfigEmail(
+                        host=mail_info.get('host'),
+                        port=mail_info.get('port'),
+                        email=mail_info.get('email'),
+                        username=mail_info.get('username'),
+                        password=mail_info.get('password'),
+                    ), email_destination=contact_info.get('value'), subject='dbstreaming nofity',
+                    content=json.dumps(data)
+                )
+            elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
+                telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value
+                util_telegram.send_test_message(
+                    ConfigTelegram(token=telegram_info.get('token')),
+                    chat_id=contact_info.get('value'),
+                    message=json.dumps(data)
+                )
+    except Exception as e:
+        print(e)
+        return 'Error: {}'.format(str(e))

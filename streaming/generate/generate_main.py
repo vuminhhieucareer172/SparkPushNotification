@@ -98,7 +98,7 @@ def main():
     )
     data = data.withColumn("value", check_matching(col("key")))
     data.writeStream \\
-        .format("kafka") \\
+        .format("kafka") \\    
         .option("kafka.bootstrap.servers", "{}") \\
         .option("checkpointLocation", "{}") \\
         .trigger(processingTime='{}') \\
