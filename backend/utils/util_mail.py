@@ -5,7 +5,7 @@ from email.message import EmailMessage
 from backend.schemas.configuration import ConfigEmail
 
 
-def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: str = '', using_ssl=True):
+def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: str = ''):
     try:
         msg = EmailMessage()
         msg['Subject'] = subject
@@ -13,7 +13,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
         msg['To'] = email_destination
         msg.set_content(content)
         context = ssl.create_default_context()
-        if using_ssl:
+        if source.ssl:
             server = smtplib.SMTP_SSL(host=source.host, port=source.port, context=context)
         else:
             server = smtplib.SMTP(host=source.host, port=source.port)

@@ -181,6 +181,7 @@ async def startup_event():
     result_scheduler = init_scheduler()
     if isinstance(result_scheduler, str):
         print(result_scheduler)
+    schedule.init_scheduler_from_query()
 
 
 @app.on_event("shutdown")

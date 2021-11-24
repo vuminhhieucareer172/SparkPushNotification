@@ -9,7 +9,7 @@ def main():
     concurrent_job = 3
     spark = SparkSession \
         .builder \
-        .appName("Job Alert Yourway") \
+        .appName("dbstreaming") \
         .getOrCreate()
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
