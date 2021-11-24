@@ -58,7 +58,7 @@ export class ConfigurationsComponent implements OnInit {
           this.sparkForm.controls['master'].setValue(res.body['value']['master']);
           this.sparkForm.controls['ip'].setValue(res.body['value']['ip']);
           // if (res.body['value']['more.config'] == null)
-          console.log(res.body['value']['more.config']);
+          // console.log(res.body['value']['more.config']);
           Object.entries(res.body['value']['more.config']).forEach(
             ([key, value]) => more_config.push({ 'optionConfig': key, 'valueConfig': value }),
           );
