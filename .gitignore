@@ -5,8 +5,15 @@ example/
 *.out
 test.py
 
-backend/test.txt
 backend/test_schedule.py
+producer_sample_mess/
+backend/controller/test.txt
+backend/controller/test1.py
+backend/controller/test2.py
+backend/controller/topictest10.txt
+backend/controller/topictest11.txt
+backend/test.txt
+backend/write.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
