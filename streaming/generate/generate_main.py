@@ -98,14 +98,12 @@ def main():
     )
     data = data.withColumn("value", check_matching(col("key")))
     data.writeStream \\
-        .format("kafka") \\    
+        .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("checkpointLocation", "{}") \\
-        .trigger(processingTime='{}') \\
         .option("topic", "{}").start()
     """.format(record['sql'], table_name, record['id'], kafka_config.value['bootstrap.servers'],
-               constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['time_trigger'],
-               record['topic_kafka_output'])
+               constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'])
 
             r += """
     spark.streams.awaitAnyTermination()
