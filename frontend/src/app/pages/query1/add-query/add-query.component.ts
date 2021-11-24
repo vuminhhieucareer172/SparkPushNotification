@@ -72,19 +72,6 @@ export class AddQueryComponent implements OnInit {
       config);
   }
 
-
-  disableOrNot() {
-    // if (this.input_check == 'quick_input') {
-    //   return true
-    // }
-    // if (this.input_check == 'manual_input') {
-    //   return false
-    // }
-    // if (this.input_check == '') {
-    //   return true
-    // }
-  }
-
   onSelectSchedule(value: string): void {
     this.schedule = value;
     if (this.schedule === 'manual-input') {

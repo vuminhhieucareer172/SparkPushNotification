@@ -111,7 +111,27 @@
                 <span class="helper-text">The email name is required</span>
               </div>
             </div>
-
+          </div>
+          <div class="form-group col-md-6">
+            <div class="row">
+              <label for="inputEmail1" style="text-align: left;" class="label col-sm-3 col-form-label">Using
+                SSL:</label>
+              <div class="col-sm-9">
+                <!-- <input formControlName="password" [type]="show ? 'text' : 'password'" nbInput fullWidth id="inputEmail1"
+                  placeholder="Password..." /> -->
+                <nb-select style="max-width: none;" placeholder="Select SSL" formControlName="ssl">
+                  <nb-option style="width: auto;" value="true">
+                    True
+                  </nb-option>
+                  <nb-option style="width: auto;" value="false">
+                    False
+                  </nb-option>
+                </nb-select>
+                <div *ngIf="emailForm.get('ssl').touched && emailForm.get('ssl').errors?.required">
+                  <span class="helper-text">ssl is required</span>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="form-group offset-sm-3 col-sm-9 row">
             <div class="offset-sm-3 col-sm-9" style="padding-right: 0;">
@@ -143,9 +163,9 @@
                 <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.required">
                   <span class="helper-text">Spark master is required</span>
                 </div>
-                <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.validMaster">
+                <!-- <div *ngIf="sparkForm.get('master').touched && sparkForm.get('master').errors?.validMaster">
                   <span class="helper-text">Spark master is invalid</span>
-                </div>
+                </div> -->
               </div>
             </div>
             <div class="col-sm-6">
