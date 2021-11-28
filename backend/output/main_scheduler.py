@@ -181,7 +181,7 @@ async def startup_event():
     result_scheduler = init_scheduler()
     if isinstance(result_scheduler, str):
         print(result_scheduler)
-    # schedule.init_scheduler_from_query()
+    schedule.init_scheduler_from_query()
 
 
 @app.on_event("shutdown")
@@ -193,5 +193,5 @@ async def shutdown_event():
 
 if __name__ == '__main__':
     load_dotenv()
-    uvicorn.run("backend.main:app", host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')),
+    uvicorn.run("backend.output.main_scheduler:app", host=os.getenv('APP_HOST'), port=5006,
                 reload=bool(os.getenv('DEV_ENV')))

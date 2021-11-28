@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
+import { environment } from '../../../../environments/environment';
 import { SERVER_API_URL } from '../../../app.constants';
 
 @Component({
@@ -322,7 +323,14 @@ export class AddQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/query', json_result, { observe: 'response' })
+      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+        .subscribe(
+          res => {
+            this.showToast('Notification', 'Added new topic kafka', 'success');
+          }, (error) => {
+            this.showToast('An unexpected error occured', error.error.message, 'danger');
+          }, () => { });
+      this.http.post('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');
@@ -420,7 +428,14 @@ export class AddQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/query', json_result, { observe: 'response' })
+      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+        .subscribe(
+          res => {
+            this.showToast('Notification', 'Added new topic kafka', 'success');
+          }, (error) => {
+            this.showToast('An unexpected error occured', error.error.message, 'danger');
+          }, () => { });
+      this.http.post('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');

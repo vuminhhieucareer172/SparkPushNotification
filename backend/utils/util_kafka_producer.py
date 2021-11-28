@@ -1,5 +1,7 @@
 import json
-from time import time
+# from time import time
+# from datetime import time
+import time
 
 from confluent_kafka import Producer
 
@@ -20,13 +22,14 @@ def send_message_to_kafka(table_fake_data: str, topic: str, limit: int = 10):
     result = db.engine.execute("select * from {} limit {}".format(table_fake_data, limit))
     count = 1
     data = list(map(lambda record: json.loads(json.dumps(dict(record), cls=SchemaEncoder, ensure_ascii=False)), result))
-    for row in data:
-        message = json.dumps(row, ensure_ascii=False)
-        producer.produce(topic=topic, key='aaa', value=message)
-        print(f"sending data to {topic}, #{count}: {message}")
-        count += 1
-        producer.flush()
-
+    while True:
+        for row in data:
+            message = json.dumps(row, ensure_ascii=False)
+            producer.produce(topic=topic, key='aaa', value=message)
+            print(f"sending data to {topic}, #{count}: {message}")
+            count += 1
+            producer.flush()
+        time.sleep(10)
 
 if __name__ == '__main__':
-    send_message_to_kafka(topic='dbstreaming_streaming_baiviet', table_fake_data='dbstreaming_streaming_baiviet')
+    send_message_to_kafka(topic='dbstreaming_streaming_mobile', table_fake_data='dbstreaming_streaming_mobile')

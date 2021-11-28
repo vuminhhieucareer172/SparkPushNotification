@@ -12,4 +12,5 @@ export const environment = {
   production: false,
   APP_HOST: '0.0.0.0',
   APP_PORT: 5005,
+  APP_PORT_SCHEDULER: 5006,
 };

@@ -161,8 +161,8 @@ def handle_output(new_query: UserQuery, data):
                         username=mail_info.get('username'),
                         password=mail_info.get('password'),
                         ssl=mail_info.get('ssl')
-                    ), email_destination=contact_info.get('value'), subject='dbstreaming nofity',
-                    content=json.dumps(data)
+                    ), email_destination=contact_info.get('value'), subject='dbstreaming notify', content=data
+                    # content=json.dumps(data)
                 )
             elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
                 telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value
@@ -171,7 +171,7 @@ def handle_output(new_query: UserQuery, data):
                     chat_id=contact_info.get('value'),
                     message=json.dumps(data)
                 )
-            print(result)
+            print('result, ', result)
     except Exception as e:
         print(e)
         return 'Error: {}'.format(str(e))
@@ -186,6 +186,8 @@ def init_scheduler_from_query():
         for query in data:
             scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
                               id=query.topic_kafka_output)
+            print('da vao')
+        print(scheduler.get_job(job_id='output_jobetl'))
     except Exception as e:
         print(e)
         return "Error {}".format(str(e))
