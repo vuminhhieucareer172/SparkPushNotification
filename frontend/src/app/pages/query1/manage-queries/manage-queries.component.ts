@@ -4,6 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 import { LocalDataSource } from 'ng2-smart-table';
+import { environment } from '../../../../environments/environment';
 import { SERVER_API_URL } from '../../../app.constants';
 
 @Component({
@@ -112,13 +113,19 @@ export class ManageQueriesComponent implements OnInit {
     },
   };
 
+
+  onUserRowSelect(event): void {
+    this.router.navigate(['/pages/query1/detail/' + event['data']['id']]);
+    // console.log(event);
+  }
+
   onCustom(event) {
     if (event.action === 'edit-query') {
-      this.router.navigate(['/query/' + event.data.id]);
+      this.router.navigate(['/pages/query1/detail/' + event.data.id]);
     } else if (event.action === 'delete') {
       const res = confirm(`Are you sure want to delete this config`);
       if (res) {
-        this.http.delete(SERVER_API_URL + '/query/' + event.data.id, {observe: 'response'})
+        this.http.delete('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query/' + event.data.id, {observe: 'response'})
         .subscribe(
           res => {
             this.showToast('Successfull', '', 'success');

@@ -62,7 +62,10 @@ export class ConfigurationsComponent implements OnInit {
           Object.entries(res.body['value']['more.config']).forEach(
             ([key, value]) => more_config.push({ 'optionConfig': key, 'valueConfig': value }),
           );
+          // console.log(Object.entries(res.body['value']['more.config']));
+
           more_config.forEach(e => {
+            // console.log(e);
             this.fields.push(this.createFieldTable(e['optionConfig'], e['valueConfig']));
           });
         }, (error) => {
@@ -100,7 +103,7 @@ export class ConfigurationsComponent implements OnInit {
     ip: ['', [
       Validators.required,
       Validators.pattern('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')]],
-    fields: this.fb.array([this.createFieldTable()]),
+    fields: this.fb.array([]),
   });
 
   isMasterSpark(control: FormControl): { [key: string]: boolean } | null {
@@ -115,6 +118,7 @@ export class ConfigurationsComponent implements OnInit {
   }
 
   createFieldTable(optionConfig: string = null, valueConfig: string = null): FormGroup {
+    console.log(optionConfig);
     return this.fb.group({
       optionConfig: [optionConfig, []],
       valueConfig: [valueConfig, []],
@@ -134,6 +138,7 @@ export class ConfigurationsComponent implements OnInit {
     }
     result['more.config'] = more_config;
     json_result['value'] = result;
+    result['name_job'] = 'dbstreaming';
     this.http.put(SERVER_API_URL + '/config', json_result, { observe: 'response' })
       .subscribe(
         res => {

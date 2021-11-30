@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AddQueryComponent } from './add-query/add-query.component';
 import { ManageQueriesComponent } from './manage-queries/manage-queries.component';
 import { Query1Component } from './query1.component';
+import { DetailQueryComponent } from './detail-query/detail-query.component';
 
 const routes: Routes = [{
   path: '',
@@ -16,8 +17,11 @@ const routes: Routes = [{
       path: 'manage-queries',
       component: ManageQueriesComponent,
     },
+    {
+      path: 'detail/:queryId',
+      component: DetailQueryComponent,
+    },
   ],
-
 }];
 
 @NgModule({

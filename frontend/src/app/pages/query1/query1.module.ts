@@ -20,12 +20,14 @@ import {
 } from '@nebular/theme';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { NbIconModule, NbInputModule, NbTreeGridModule } from '@nebular/theme';
+import { DetailQueryComponent } from './detail-query/detail-query.component';
 
 @NgModule({
   declarations: [
     Query1Component,
     AddQueryComponent,
     ManageQueriesComponent,
+    DetailQueryComponent,
   ],
   imports: [
     CommonModule,

@@ -26,21 +26,21 @@ export class DetailStreamComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastrService: NbToastrService) {
-      this.route.params.subscribe(
-        param => {
-          this.streamName = param.streamName;
-        },
-      );
-      this.messageSample = '';
-      this.http.get(SERVER_API_URL + '/kafka-topic', {observe: 'response'})
+    this.route.params.subscribe(
+      param => {
+        this.streamName = param.streamName;
+      },
+    );
+    this.messageSample = '';
+    this.http.get(SERVER_API_URL + '/kafka-topic', { observe: 'response' })
       .subscribe(
         res => {
           this.listTopicKafka = Object.keys(res.body).map((key) => res.body[key]);
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
-        }, () => {},
+        }, () => { },
       );
-      this.http.get(SERVER_API_URL + '/stream/' + this.streamName, {observe: 'response'})
+    this.http.get(SERVER_API_URL + '/stream/' + this.streamName, { observe: 'response' })
       .subscribe(
         res => {
           if (res.body['table']['collate'] === '') {
@@ -57,7 +57,7 @@ export class DetailStreamComponent implements OnInit {
           });
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
-        }, () => {},
+        }, () => { },
       );
   }
 
@@ -78,12 +78,12 @@ export class DetailStreamComponent implements OnInit {
   }
 
   get fields(): FormArray {
-    return <FormArray> this.table.get('fields');
+    return <FormArray>this.table.get('fields');
   }
 
   createFieldTable(nameField: string = null, type: string = null, primaryKey: boolean = false, autoIncrement: boolean = false,
-                    notNull: boolean = false, unique: boolean = false, defaultValue: string = null,
-                    length: number = 0, value: string = '', collation: string = null, comment: string = null): FormGroup {
+    notNull: boolean = false, unique: boolean = false, defaultValue: string = null,
+    length: number = 0, value: string = '', collation: string = null, comment: string = null): FormGroup {
     return this.fb.group({
       name_field: [nameField, [Validators.required]],
       type: [type, [Validators.required]],
@@ -112,18 +112,18 @@ export class DetailStreamComponent implements OnInit {
   }
 
   onCreateTopic(topic: string): void {
-    this.http.post(SERVER_API_URL + '/kafka-topic/create', {'topic_name': topic}, {observe: 'response'})
+    this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': topic }, { observe: 'response' })
       .subscribe(
         res => {
           this.listTopicKafka.push(topic);
           this.showToast('Notification', 'Added new topic kafka', 'success');
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
-        }, () => {});
+        }, () => { });
   }
 
   selecteTopic(topic: string): void {
-    this.http.get(SERVER_API_URL + '/kafka-topic/' + topic, {observe: 'response'})
+    this.http.get(SERVER_API_URL + '/kafka-topic/' + topic, { observe: 'response' })
       .subscribe(
         res => {
           this.messageSample = res.body['message_sample'];
@@ -133,7 +133,7 @@ export class DetailStreamComponent implements OnInit {
           });
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'warning');
-        }, () => {});
+        }, () => { });
   }
 
   private showToast(title: string, body: string, typeStatus: string) {
@@ -163,14 +163,14 @@ export class DetailStreamComponent implements OnInit {
 
   onSubmit(): void {
     const stream = this.streamForm.getRawValue();
-    this.http.put(SERVER_API_URL + '/update-stream', stream, {observe: 'response'})
+    this.http.put(SERVER_API_URL + '/update-stream', stream, { observe: 'response' })
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
           this.router.navigate(['/pages/streaming/manage-streams']);
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
-        }, () => {},
-    );
+        }, () => { },
+      );
   }
 }

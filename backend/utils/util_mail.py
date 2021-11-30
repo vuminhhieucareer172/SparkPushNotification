@@ -104,7 +104,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                 <tbody>
                                                     <tr>
                                                         <td style="padding-bottom:4px">
-                                                            <a style="color:#0a66c2;font-weight:700;text-decoration:none;display:inline-block;font-size:16px">{}
+                                                            <a style="color:#0a66c2;font-weight:700;text-decoration:none;display:inline-block;font-size:16px">{} - {}
                                                             </a>
                                                         </td>
                                                     </tr>
@@ -125,7 +125,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                         </table>
                     </td>
                 </tr>
-            """.format(str(matching['company_name']), str(matching['position']))
+            """.format(str(matching['company_name']), str(matching['location']), str(matching['position']))
 
         html += """\
                                                     </tbody>
