@@ -10,7 +10,7 @@ import { SERVER_API_URL } from '../../../app.constants';
 @Component({
   selector: 'ngx-detail-query',
   templateUrl: './detail-query.component.html',
-  styleUrls: ['./detail-query.component.scss']
+  styleUrls: ['./detail-query.component.scss'],
 })
 export class DetailQueryComponent implements OnInit {
   input_check = '';
@@ -33,7 +33,7 @@ export class DetailQueryComponent implements OnInit {
     private fb: FormBuilder,
     private toastrService: NbToastrService,
     private router: Router,
-    private route: ActivatedRoute,) {
+    private route: ActivatedRoute) {
     this.route.params.subscribe(
       param => {
         this.queryId = param.queryId;
@@ -78,25 +78,25 @@ export class DetailQueryComponent implements OnInit {
     this.http.get(SERVER_API_URL + '/query/' + this.queryId, { observe: 'response' })
       .subscribe(
         res => {
-          console.log(res);
+          // console.log(res);
           this.manualInputForm.controls['manualText'].setValue(res.body['sql']);
           this.scheduleAndContactForm.controls['topicOutput'].setValue(res.body['topic_kafka_output']);
           this.scheduleAndContactForm.controls['selectMethod'].setValue(res.body['contact']['method']);
           this.scheduleAndContactForm.controls['inputMethod'].setValue(res.body['contact']['value']);
-          if (res.body['time_trigger'] < (60 * 60) && ((res.body['time_trigger'] % 60) == 0)) {
+          if (res.body['time_trigger'] < (60 * 60) && ((res.body['time_trigger'] % 60) === 0)) {
             this.scheduleAndContactForm.controls['selectSchedule'].setValue('minute');
             this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / 60);
-          } else if (res.body['time_trigger'] < (60 * 60 * 24) && ((res.body['time_trigger'] % 3600) == 0)) {
+          } else if (res.body['time_trigger'] < (60 * 60 * 24) && ((res.body['time_trigger'] % 3600) === 0)) {
             this.scheduleAndContactForm.controls['selectSchedule'].setValue('hour');
             this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / 3600);
-          } else if (res.body['time_trigger'] >= (60 * 60 * 24) && ((res.body['time_trigger'] % (60 * 60 * 24)) == 0)) {
+          } else if (res.body['time_trigger'] >= (60 * 60 * 24) && ((res.body['time_trigger'] % (60 * 60 * 24)) === 0)) {
             this.scheduleAndContactForm.controls['selectSchedule'].setValue('day');
             this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / (60 * 60 * 24));
           }
 
           // push vao from =========================================
           if (res.body['sql'].split('select')[1].split('from')[1].includes('where')) {
-            var fromTable = [];
+            let fromTable = [];
             if (res.body['sql'].split('select')[1].split('from')[1].split('where')[0].includes(',')) {
               for (const table of res.body['sql'].split('select')[1].split('from')[1].split('where')[0].split(',')) {
                 fromTable.push({ 'tableQuery': table.trim() });
@@ -111,7 +111,7 @@ export class DetailQueryComponent implements OnInit {
               });
             }
           } else {
-            var fromTable = [];
+            let fromTable = [];
             fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].trim() });
             fromTable.forEach(e => {
               this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
@@ -122,7 +122,7 @@ export class DetailQueryComponent implements OnInit {
           // push vao select =========================================
           if (res.body['sql'].split('select')[1].split('from')[0].includes(',')) {
             const selectArr = [];
-            for (let selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
+            for (const selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
               selectArr.push({ 'queryField': selectColumn.trim() });
             }
             // console.log(selectArr);
@@ -170,9 +170,9 @@ export class DetailQueryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('a');
+    // console.log('a');
     for (const stream of this.listTableQuery) {
-      console.log('av');
+      // console.log('av');
       this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
       .subscribe(
         res => {

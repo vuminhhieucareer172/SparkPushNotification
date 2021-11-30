@@ -118,7 +118,7 @@ export class ConfigurationsComponent implements OnInit {
   }
 
   createFieldTable(optionConfig: string = null, valueConfig: string = null): FormGroup {
-    console.log(optionConfig);
+    // console.log(optionConfig);
     return this.fb.group({
       optionConfig: [optionConfig, []],
       valueConfig: [valueConfig, []],

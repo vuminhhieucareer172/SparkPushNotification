@@ -8,7 +8,7 @@ describe('DetailQueryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DetailQueryComponent ]
+      declarations: [ DetailQueryComponent ],
     })
     .compileComponents();
   });
