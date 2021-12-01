@@ -95,7 +95,7 @@ const routes: Routes = [{
     },
     {
       path: '',
-      redirectTo: 'dashboard',
+      redirectTo: 'database-connection',
       pathMatch: 'full',
     },
     {
