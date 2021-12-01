@@ -2,22 +2,14 @@ import os
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette import status
-from starlette.responses import JSONResponse
 
-from backend.controller import database_connection, query, configuration, table, stream, schedule
-from backend.controller.schedule import init_scheduler, scheduler
-from backend.middleware.database import verify_database
-from backend.schemas.configuration import ConfigurationUpdate
-from backend.schemas.database import Database
-from backend.schemas.query import Query, QueryUpdate
-from backend.schemas.stream import Stream, JobStream, KafkaTopic
-from backend.utils import util_kafka
-from backend.utils.util_kafka import get_list_topics
+from backend.controller import schedule
+from backend.controller.schedule import scheduler
+from backend.models.dbstreaming_query import UserQuery
+from backend.schemas.query import Query
 from database.db import DB
-from streaming import spark
 
 app = FastAPI()
 
@@ -30,157 +22,23 @@ app.add_middleware(
 )
 
 
-@app.post("/test-connect-database")
-def test_connect_database(database_information: Database):
-    is_connectable = database_connection.test_connect_database(database_information)
-    if is_connectable:
-        return JSONResponse(content={"message": "Connect successfully"}, status_code=status.HTTP_202_ACCEPTED)
-    return JSONResponse(content={"message": "cannot to connect db"}, status_code=status.HTTP_400_BAD_REQUEST)
+@app.post("/add-job-output")
+def add_output(new_query: Query):
+    return schedule.add_job_output(new_query)
 
 
-@app.post("/connect-database")
-def connect_database(database_information: Database):
-    return database_connection.connect_database(database_information)
+@app.put("/update-job-output")
+def update_output(new_query: Query):
+    return schedule.update_job_output(new_query)
 
 
-@app.get("/connect-database")
-def get_config_connect_database():
-    return database_connection.get_config_connect_database()
-
-
-@app.get("/stream")
-def get_all_stream(db=Depends(verify_database)):
-    return stream.get_all_stream(db)
-
-
-@app.get("/stream/{stream_name}")
-def get_stream(stream_name: str, db=Depends(verify_database)):
-    return stream.get_stream_by_name(stream_name, db)
-
-
-@app.get("/stream/record/{stream_name}")
-def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10000, db=Depends(verify_database)):
-    return stream.get_record_by_stream_name(stream_name, db, skip, limit)
-
-
-@app.post("/add-stream")
-def add_stream(new_schema: Stream, db=Depends(verify_database)):
-    return stream.add_stream(new_schema, db)
-
-
-@app.put("/update-stream")
-def update_stream(update_schema: Stream, db=Depends(verify_database)):
-    return stream.update_stream(update_schema, db)
-
-
-@app.delete("/stream/{name}")
-def delete_stream(name: str, db=Depends(verify_database)):
-    return stream.delete_stream(name, db)
-
-
-@app.get("/check-status-job-on-spark")
-def check_status_spark(db=Depends(verify_database)):
-    return stream.check_status_spark(db)
-
-
-@app.get("/status-spark")
-def status_spark(db=Depends(verify_database)):
-    return spark.status_spark(db)
-
-
-@app.get("/status-kafka")
-def status_kafka(db=Depends(verify_database)):
-    return util_kafka.check_status(db)
-
-
-@app.get("/status-mysql")
-def status_mysql():
-    return database_connection.status_mysql()
-
-
-@app.get("/query")
-def get_query(skip: int = 0, limit: int = 10, db=Depends(verify_database)):
-    return query.get_query(db, skip, limit)
-
-
-@app.get("/query/{query_id}")
-def get_query_by_id(query_id: int, db=Depends(verify_database)):
-    return query.get_query_by_id(query_id, db)
-
-
-@app.post("/query")
-def add_query(new_query: Query, db=Depends(verify_database)):
-    return query.add_query(new_query, db)
-
-
-@app.put("/query")
-def update_query(new_query: QueryUpdate, db=Depends(verify_database)):
-    return query.update_query(new_query, db)
-
-
-@app.delete("/query/{query_id}")
-def delete_query(query_id: int, db=Depends(verify_database)):
-    return query.delete_query(query_id, db)
-
-
-@app.get("/config")
-def get_config(skip: int = 0, limit: int = 10, db=Depends(verify_database)):
-    return configuration.get_config(db, skip=skip, limit=limit)
-
-
-@app.get("/config/{config_name}")
-def get_config(config_name: str, db=Depends(verify_database)):
-    return configuration.get_config_by_name(config_name, db)
-
-
-@app.put("/config")
-def update_config(new_config: ConfigurationUpdate, db=Depends(verify_database)):
-    return configuration.update_config(new_config, db)
-
-
-@app.get("/kafka-topic/{topic}")
-def get_schema_from_kafka_topic(topic: str, db=Depends(verify_database)):
-    return table.get_schema_from_kafka_topic(topic=topic)
-
-
-@app.get("/kafka-topic")
-def get_list_kafka_topics(db=Depends(verify_database)):
-    list_topic_kafka = get_list_topics()
-    if isinstance(list_topic_kafka, str):
-        return JSONResponse(list_topic_kafka, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(list_topic_kafka, status_code=status.HTTP_200_OK)
-
-
-@app.post("/kafka-topic/create")
-def create_kafka_topic(schema_topic: KafkaTopic, db=Depends(verify_database)):
-    return util_kafka.create_topic(schema_topic)
-
-
-@app.get("/job-streaming")
-def job_streaming():
-    return schedule.get_job_stream()
-
-
-@app.get("/start-job-streaming")
-def start_job_streaming():
-    return stream.start_job_streaming()
-
-
-@app.post("/update-job-streaming")
-def update_job_streaming(new_schema_job: JobStream, db=Depends(verify_database)):
-    return stream.update_job_streaming(new_schema_job, db)
-
-
-@app.get("/stop-job-streaming")
-def stop_job_streaming():
-    return stream.stop_job_streaming()
+@app.delete("/delete-job-output/{job_id: str}")
+def delete_output(job_id: str):
+    return schedule.delete_job_output(job_id)
 
 
 @app.on_event("startup")
 async def startup_event():
-    result_scheduler = init_scheduler()
-    if isinstance(result_scheduler, str):
-        print(result_scheduler)
     schedule.init_scheduler_from_query()
 
 
@@ -193,5 +51,5 @@ async def shutdown_event():
 
 if __name__ == '__main__':
     load_dotenv()
-    uvicorn.run("backend.output.main_scheduler:app", host=os.getenv('APP_HOST'), port=5006,
+    uvicorn.run("backend.output.main_scheduler:app", host=os.getenv('APP_HOST'), port=int(os.getenv('APP_OUTPUT_PORT')),
                 reload=bool(os.getenv('DEV_ENV')))

@@ -13,9 +13,9 @@ const routes: Routes = [{
   component: PagesComponent,
   children: [
     {
-      path: 'query1',
-      loadChildren: () => import('./query1/query1.module')
-        .then(m => m.Query1Module),
+      path: 'query',
+      loadChildren: () => import('./query/query.module')
+        .then(m => m.QueryModule),
     },
     {
       path: 'streaming',

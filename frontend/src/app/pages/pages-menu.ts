@@ -42,11 +42,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
     children: [
       {
         title: 'Add query',
-        link: '/pages/query1/add-query',
+        link: '/pages/query/add-query',
       },
       {
         title: 'Manage queries',
-        link: '/pages/query1/manage-queries',
+        link: '/pages/query/manage-queries',
       },
     ],
   },

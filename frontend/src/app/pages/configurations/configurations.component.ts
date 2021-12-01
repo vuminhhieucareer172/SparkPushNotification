@@ -14,7 +14,7 @@ import { SERVER_API_URL } from '../../app.constants';
 export class ConfigurationsComponent implements OnInit {
 
   destroyByClick = true;
-  duration = 2000;
+  duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
   show: boolean = false;
