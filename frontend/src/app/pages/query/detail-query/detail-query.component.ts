@@ -123,7 +123,6 @@ export class DetailQueryComponent implements OnInit {
 
           // push vao select =========================================
           if (res.body['sql'].split('select')[1].split('from')[0].includes(',')) {
-            // console.log('1');
             const selectArr = [];
             for (const selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
               selectArr.push({ 'queryField': selectColumn.trim() });
@@ -171,6 +170,19 @@ export class DetailQueryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // console.log('a');
+    for (const stream of this.listTableQuery) {
+      // console.log('av');
+      this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
+      .subscribe(
+        res => {
+          for (const name_field of res.body['table']['fields']) {
+            this.listQueryField.push(stream + '.' + name_field['name_field']);
+          }
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.error.message, 'warning');
+        }, () => { });
+    }
   }
 
 
@@ -224,6 +236,9 @@ export class DetailQueryComponent implements OnInit {
   }
 
   createFieldQueryField(queryField: string = null): FormGroup {
+    // console.log(this.fb.group({
+    //   queryField: [queryField, []],
+    // }));
     return this.fb.group({
       queryField: [queryField, []],
     });
