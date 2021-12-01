@@ -60,7 +60,7 @@
                                                     [formGroupName]="i" class="row">
                                                     <div class="col-8" style="margin-bottom: 10px;">
                                                         <nb-select fullWidth style="margin: 0 20px 0 30px;"
-                                                            (selectedChange)="selecteTableStream($event)"
+                                                            (ngModelChange)="selecteTableStream($event)"
                                                             placeholder="Select table query"
                                                             formControlName="tableQuery">
                                                             <nb-option *ngFor="let e of listTableQuery" value="{{e}}">

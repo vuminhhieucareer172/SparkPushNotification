@@ -45,6 +45,9 @@ export class DetailQueryComponent implements OnInit {
           for (const table of Object(res.body)) {
             this.listTableQuery.push(table['table_name']);
           }
+          // for (const column of this.listTableQuery) {
+
+          // }
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => { },
@@ -96,7 +99,7 @@ export class DetailQueryComponent implements OnInit {
 
           // push vao from =========================================
           if (res.body['sql'].split('select')[1].split('from')[1].includes('where')) {
-            let fromTable = [];
+            const fromTable = [];
             if (res.body['sql'].split('select')[1].split('from')[1].split('where')[0].includes(',')) {
               for (const table of res.body['sql'].split('select')[1].split('from')[1].split('where')[0].split(',')) {
                 fromTable.push({ 'tableQuery': table.trim() });
@@ -111,7 +114,7 @@ export class DetailQueryComponent implements OnInit {
               });
             }
           } else {
-            let fromTable = [];
+            const fromTable = [];
             fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].trim() });
             fromTable.forEach(e => {
               this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
@@ -121,19 +124,18 @@ export class DetailQueryComponent implements OnInit {
 
           // push vao select =========================================
           if (res.body['sql'].split('select')[1].split('from')[0].includes(',')) {
+            console.log('1');
             const selectArr = [];
             for (const selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
               selectArr.push({ 'queryField': selectColumn.trim() });
             }
-            // console.log(selectArr);
 
             selectArr.forEach(e => {
-              // console.log(e);
-              this.fieldsQueryField.push(this.createFieldQueryField(e['queryField']));
+              this.fieldsQueryField.push(this.createFieldQueryField(e['queryField'].trim()));
             });
           } else {
             // console.log(res.body['sql'].split('select')[1].split('from'));
-            this.fieldsQueryField.push(this.createFieldQueryField(res.body['sql'].split('select')[1].split('from')[0]));
+            this.fieldsQueryField.push(this.createFieldQueryField(res.body['sql'].split('select')[1].split('from')[0].trim()));
           }
           // push vao select =========================================
 
@@ -170,19 +172,6 @@ export class DetailQueryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // console.log('a');
-    for (const stream of this.listTableQuery) {
-      // console.log('av');
-      this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
-      .subscribe(
-        res => {
-          for (const name_field of res.body['table']['fields']) {
-            this.listQueryField.push(stream + '.' + name_field['name_field']);
-          }
-        }, (error) => {
-          this.showToast('An unexpected error occured', error.error.message, 'warning');
-        }, () => { });
-    }
   }
 
 
@@ -236,9 +225,6 @@ export class DetailQueryComponent implements OnInit {
   }
 
   createFieldQueryField(queryField: string = null): FormGroup {
-    // console.log(this.fb.group({
-    //   queryField: [queryField, []],
-    // }));
     return this.fb.group({
       queryField: [queryField, []],
     });
@@ -284,6 +270,7 @@ export class DetailQueryComponent implements OnInit {
   });
 
   selecteTableStream(stream: string): void {
+    // console.log()
     this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
       .subscribe(
         res => {
@@ -378,7 +365,6 @@ export class DetailQueryComponent implements OnInit {
     inputTime: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
     selectMethod: ['', [Validators.required]],
     inputMethod: ['', [Validators.required]],
-    // inputMethodTelegram: ['', [Validators.pattern('^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$')]],
   });
 
   isValidTopic(inputValue): void {
@@ -430,7 +416,6 @@ export class DetailQueryComponent implements OnInit {
       const manualInput = this.manualInputForm.getRawValue();
       const json_result = {};
       const contact = {};
-      // console.log(scheduleAndContact);
       if (manualInput.manualText.toLowerCase().includes('from')) {
         json_result['sql'] = manualInput.manualText;
       }
@@ -446,13 +431,15 @@ export class DetailQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+      if (!this.topicValid) {
+        this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Added new topic kafka', 'success');
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { });
+      }
       this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
@@ -551,13 +538,15 @@ export class DetailQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+      if (!this.topicValid) {
+        this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Added new topic kafka', 'success');
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { });
+      }
       this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
@@ -568,7 +557,6 @@ export class DetailQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-      // console.log(finalSQL)
     }
   }
 

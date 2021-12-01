@@ -93,6 +93,7 @@ def add_job_output(new_query: UserQuery):
     try:
         scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[new_query],
                           id=new_query.topic_kafka_output)
+        print(scheduler.get_job(job_id=new_query.topic_kafka_output))
         return "ok"
     except Exception as e:
         print(e)
