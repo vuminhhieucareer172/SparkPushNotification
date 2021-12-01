@@ -106,7 +106,8 @@ def update_job_output(new_query: Query):
     try:
         model_query = UserQuery(topic_kafka_output=new_query.topic_kafka_output, time_trigger=new_query.time_trigger,
                                 contact=new_query.contact)
-        scheduler.modify_job(job_id=new_query.topic_kafka_output, seconds=int(new_query.time_trigger), args=[model_query])
+        scheduler.add_job(func=trigger_output, replace_existing=True, trigger='interval',
+                          seconds=int(new_query.time_trigger), id=new_query.topic_kafka_output, args=[model_query])
         return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
