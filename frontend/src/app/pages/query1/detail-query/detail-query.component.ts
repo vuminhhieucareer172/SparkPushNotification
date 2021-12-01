@@ -124,7 +124,7 @@ export class DetailQueryComponent implements OnInit {
 
           // push vao select =========================================
           if (res.body['sql'].split('select')[1].split('from')[0].includes(',')) {
-            console.log('1');
+            // console.log('1');
             const selectArr = [];
             for (const selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
               selectArr.push({ 'queryField': selectColumn.trim() });
