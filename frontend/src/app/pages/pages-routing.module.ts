@@ -18,11 +18,6 @@ const routes: Routes = [{
         .then(m => m.QueryModule),
     },
     {
-      path: 'query1',
-      loadChildren: () => import('./query1/query1.module')
-        .then(m => m.Query1Module),
-    },
-    {
       path: 'streaming',
       loadChildren: () => import('./streaming/streaming.module')
         .then(m => m.StreamingModule),

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ManageQueriesComponent } from './manage-queries.component';
+import { DetailQueryComponent } from './detail-query.component';
 
-describe('ManageQueriesComponent', () => {
-  let component: ManageQueriesComponent;
-  let fixture: ComponentFixture<ManageQueriesComponent>;
+describe('DetailQueryComponent', () => {
+  let component: DetailQueryComponent;
+  let fixture: ComponentFixture<DetailQueryComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ManageQueriesComponent ],
+      declarations: [ DetailQueryComponent ],
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ManageQueriesComponent);
+    fixture = TestBed.createComponent(DetailQueryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

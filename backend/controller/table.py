@@ -126,7 +126,7 @@ def get_schema_from_kafka_topic(topic: str):
         for key_column in latest_mess.keys():
             type_column = ''
             if isinstance(latest_mess[key_column], str):
-                type_column = 'VARCHAR'
+                type_column = 'TEXT'
             if isinstance(latest_mess[key_column], int):
                 if -2147483648 <= latest_mess[key_column] <= 2147483648:
                     type_column = 'INTEGER'
@@ -134,9 +134,18 @@ def get_schema_from_kafka_topic(topic: str):
                     type_column = 'LONG'
             if isinstance(latest_mess[key_column], float):
                 type_column = 'FLOAT'
-            date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y %H:%M:%S')
-            if isinstance(date_time_obj, datetime.datetime):
-                type_column = 'DATETIME'
+            try:
+                date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y %H:%M:%S')
+                if isinstance(date_time_obj, datetime.datetime):
+                    type_column = 'DATETIME'
+            except:
+                pass
+            try:
+                date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y')
+                if isinstance(date_time_obj, datetime.date):
+                    type_column = 'DATE'
+            except:
+                pass
             column = {
                 "name_field": key_column,
                 "type": type_column,

@@ -6,6 +6,7 @@ import { QueryRoutingModule } from './query-routing.module';
 import { AddQueryComponent } from './add-query/add-query.component';
 import { ManageQueriesComponent } from './manage-queries/manage-queries.component';
 import { QueryComponent } from './query.component';
+
 import {
   NbAccordionModule,
   NbButtonModule,
@@ -19,12 +20,14 @@ import {
 } from '@nebular/theme';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { NbIconModule, NbInputModule, NbTreeGridModule } from '@nebular/theme';
+import { DetailQueryComponent } from './detail-query/detail-query.component';
 
 @NgModule({
   declarations: [
     QueryComponent,
     AddQueryComponent,
     ManageQueriesComponent,
+    DetailQueryComponent,
   ],
   imports: [
     CommonModule,

@@ -113,7 +113,7 @@ def add_query(new_query: Query, db=Depends(verify_database)):
     return query.add_query(new_query, db)
 
 
-@app.put("/query")
+@app.put("/update-query")
 def update_query(new_query: QueryUpdate, db=Depends(verify_database)):
     return query.update_query(new_query, db)
 
@@ -181,7 +181,6 @@ async def startup_event():
     result_scheduler = init_scheduler()
     if isinstance(result_scheduler, str):
         print(result_scheduler)
-    schedule.init_scheduler_from_query()
 
 
 @app.on_event("shutdown")

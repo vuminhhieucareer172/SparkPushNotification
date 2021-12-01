@@ -14,7 +14,7 @@ import { SERVER_API_URL } from '../../app.constants';
 export class ConfigurationsComponent implements OnInit {
 
   destroyByClick = true;
-  duration = 2000;
+  duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
   show: boolean = false;
@@ -40,11 +40,12 @@ export class ConfigurationsComponent implements OnInit {
       .subscribe(
         res => {
           if (res.body != null) {
-            this.emailForm.controls['hostname'].setValue(res.body['value']['hostname']);
+            this.emailForm.controls['hostname'].setValue(res.body['value']['host']);
             this.emailForm.controls['port'].setValue(res.body['value']['port']);
             this.emailForm.controls['username'].setValue(res.body['value']['username']);
             this.emailForm.controls['password'].setValue(res.body['value']['password']);
-            this.emailForm.controls['mailname'].setValue(res.body['value']['mailname']);
+            this.emailForm.controls['mailname'].setValue(res.body['value']['email']);
+            this.emailForm.controls['ssl'].setValue(res.body['value']['ssl']);
           }
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
@@ -56,10 +57,15 @@ export class ConfigurationsComponent implements OnInit {
           const more_config = [];
           this.sparkForm.controls['master'].setValue(res.body['value']['master']);
           this.sparkForm.controls['ip'].setValue(res.body['value']['ip']);
+          // if (res.body['value']['more.config'] == null)
+          // console.log(res.body['value']['more.config']);
           Object.entries(res.body['value']['more.config']).forEach(
             ([key, value]) => more_config.push({ 'optionConfig': key, 'valueConfig': value }),
           );
+          // console.log(Object.entries(res.body['value']['more.config']));
+
           more_config.forEach(e => {
+            // console.log(e);
             this.fields.push(this.createFieldTable(e['optionConfig'], e['valueConfig']));
           });
         }, (error) => {
@@ -93,7 +99,7 @@ export class ConfigurationsComponent implements OnInit {
   }
 
   sparkForm = this.fb.group({
-    master: ['', [Validators.required, this.isMasterSpark]],
+    master: ['', [Validators.required]],
     ip: ['', [
       Validators.required,
       Validators.pattern('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')]],
@@ -101,13 +107,6 @@ export class ConfigurationsComponent implements OnInit {
   });
 
   isMasterSpark(control: FormControl): { [key: string]: boolean } | null {
-// <<<<<<< HEAD
-//     // console.log(control.value)
-//     if (control.value == null) {
-//       return { validMaster: true };
-//     }
-// =======
-// >>>>>>> cd01ba233496a48134b627322a6160501b44f46c
     if (!control.value.startsWith('spark://')) {
       return { validMaster: true };
     }
@@ -119,9 +118,10 @@ export class ConfigurationsComponent implements OnInit {
   }
 
   createFieldTable(optionConfig: string = null, valueConfig: string = null): FormGroup {
+    // console.log(optionConfig);
     return this.fb.group({
-      optionConfig: [optionConfig, [Validators.required]],
-      valueConfig: [valueConfig, [Validators.required]],
+      optionConfig: [optionConfig, []],
+      valueConfig: [valueConfig, []],
     });
   }
 
@@ -138,6 +138,7 @@ export class ConfigurationsComponent implements OnInit {
     }
     result['more.config'] = more_config;
     json_result['value'] = result;
+    result['name_job'] = 'dbstreaming';
     this.http.put(SERVER_API_URL + '/config', json_result, { observe: 'response' })
       .subscribe(
         res => {
@@ -175,17 +176,19 @@ export class ConfigurationsComponent implements OnInit {
     username: ['', [Validators.required]],
     password: ['', [Validators.required]],
     mailname: ['', [Validators.required, <any>Validators.email]],
+    ssl: ['', [Validators.required]],
   });
 
   onSubmitEmail(): void {
     const addMail = this.emailForm.getRawValue();
-    addMail['value'] = { 'hostname': addMail.hostname, 'port': addMail.port, 'username': addMail.username, 'password': addMail.password, 'mailname': addMail.mailname };
+    addMail['value'] = { 'host': addMail.hostname, 'port': addMail.port, 'username': addMail.username, 'password': addMail.password, 'email': addMail.mailname, 'ssl': addMail.ssl };
     delete addMail.username;
     delete addMail.password;
     delete addMail.hostname;
     delete addMail.port;
     delete addMail.mailname;
     addMail['name'] = 'mail';
+
     const res = this.http.put(SERVER_API_URL + '/config', addMail)
       .subscribe(
         res => {

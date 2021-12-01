@@ -1,8 +1,11 @@
+import os
+
+import requests
 from sqlalchemy import exc
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller.schedule import add_job_output, scheduler, update_job_output
+from backend.controller.schedule import scheduler
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query, QueryUpdate
 from database.db import DB, get_session
@@ -36,12 +39,16 @@ def add_query(new_query: Query, db: DB):
         query_session = SessionHandler.create(session, UserQuery)
         query_session.add(new_query.dict())
         session.commit()
-        result_add_job = add_job_output(UserQuery(topic_kafka_output=new_query.topic_kafka_output,
-                                                  time_trigger=new_query.time_trigger,
-                                                  contact=new_query.contact))
-        if result_add_job == "ok":
+        response_output = requests.post(url='http://{}:{}/add-job-output'.format(os.getenv('APP_HOST'),
+                                                                                 os.getenv('APP_OUTPUT_PORT')),
+                                        json=query_session.to_json(
+                                            UserQuery(topic_kafka_output=new_query.topic_kafka_output,
+                                                      time_trigger=new_query.time_trigger,
+                                                      contact=new_query.contact)))
+        if response_output.status_code == status.HTTP_200_OK:
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
-        return JSONResponse(content={"message": result_add_job}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": response_output.json()["message"]},
+                            status_code=status.HTTP_400_BAD_REQUEST)
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
@@ -60,10 +67,13 @@ def update_query(new_query: QueryUpdate, db: DB):
         query.contact = new_query.contact
         query.time_trigger = new_query.time_trigger
         session.commit()
-        result_update = update_job_output(new_query=query)
-        if result_update == "ok":
+        response_output = requests.put(url='http://{}:{}/update-job-output'.format(os.getenv('APP_HOST'),
+                                                                                   os.getenv('APP_OUTPUT_PORT')),
+                                       json=query_session.to_json(query))
+        if response_output.status_code == status.HTTP_200_OK:
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
-        return JSONResponse(content={"message": result_update}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"message": response_output.json()["message"]},
+                            status_code=status.HTTP_400_BAD_REQUEST)
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
@@ -77,9 +87,14 @@ def delete_query(query_id: int, db: DB):
         query_in_db: UserQuery = query_session.get(_id=query_id)
         query_session.delete(dict(id=query_id))
         session.commit()
-        scheduler.remove_job(job_id=query_in_db.topic_kafka_output)
+        response_output = requests.delete(url='http://{}:{}/delete-job-output/{}'.format(os.getenv('APP_HOST'),
+                                                                                         os.getenv('APP_OUTPUT_PORT'),
+                                                                                         query_in_db.topic_kafka_output))
+        if response_output.status_code == status.HTTP_200_OK:
+            return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
+        return JSONResponse(content={"message": response_output.json()["message"]},
+                            status_code=status.HTTP_400_BAD_REQUEST)
     except exc.SQLAlchemyError as e:
         print(e)
         session.rollback()
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
-    return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
