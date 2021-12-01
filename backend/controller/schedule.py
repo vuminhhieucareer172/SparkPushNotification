@@ -83,7 +83,7 @@ def init_scheduler():
                                                                                                 job_name])
         if not scheduler.running:
             scheduler.start()
-        return "Added job into scheduler"
+        return "started scheduler"
     except Exception as e:
         logging.error(e)
         return f"Error {e}"
@@ -116,14 +116,14 @@ def trigger_output(new_query: UserQuery):
     partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
                   list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
     print('partitions', partitions)
-    commited_offset = consumer.committed(partitions)
-    print('commited_offset', commited_offset)
+    committed_offset = consumer.committed(partitions)
+    print('committed_offset', committed_offset)
     low, high = consumer.get_watermark_offsets(partitions[0])
     print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
-    consumer.assign(commited_offset)
+    consumer.assign(committed_offset)
 
     data = []
-    if commited_offset[0].offset < high:
+    if committed_offset[0].offset < high:
         while True:
             msg = consumer.poll(1)
             consumer.commit()
@@ -132,11 +132,10 @@ def trigger_output(new_query: UserQuery):
                 print(msg)
                 continue
             data.append(msg.value().decode('utf-8'))
-            print(msg.value().decode('utf-8'))
 
             if msg.offset() == high - 1:
                 break
-    print('len', len(data))
+
     handle_output(new_query, data)
 
 
@@ -162,7 +161,6 @@ def handle_output(new_query: UserQuery, data):
                         password=mail_info.get('password'),
                         ssl=mail_info.get('ssl')
                     ), email_destination=contact_info.get('value'), subject='dbstreaming notify', content=data
-                    # content=json.dumps(data)
                 )
             elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
                 telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value

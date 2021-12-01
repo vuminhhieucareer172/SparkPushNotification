@@ -103,6 +103,39 @@ def get_latest_message(topic: str):
         return {}, 'error: {}'.format(str(e))
 
 
+def get_multi_message(topic: str):
+    try:
+        kafka = Kafka.create()
+        if topic not in kafka.consumer.list_topics().topics.keys():
+            return {}, 'Not found topic {} in kafka server'.format(topic)
+
+        def on_assign(consumer, partitions):
+            last_offset = consumer.get_watermark_offsets(partitions[0])
+            beginning_offset = 0
+            if last_offset[1] > 1000:
+                beginning_offset = last_offset[1] - 1000
+            partitions[0].offset = beginning_offset
+            kafka.consumer.assign(partitions)
+
+        kafka.consumer.subscribe([topic], on_assign=on_assign)
+
+        msg: list = kafka.consumer.consume(num_messages=1000, timeout=5.0)
+        if msg is None:
+            return {}, 'Topic {} does not have any message!'.format(topic)
+
+        message_value = list(map(lambda mess: json.loads(mess.value().decode('utf-8')), msg))
+        return message_value, ''
+    except JSONDecodeError as e:
+        print(e)
+        return {}, 'Cannot decode string to json'
+    except TypeError as e:
+        print(e)
+        return {}, 'TypeError: {}'.format(str(e))
+    except Exception as e:
+        print(e)
+        return {}, 'error: {}'.format(str(e))
+
+
 def status_kafka(temp, return_dict):
     try:
         admin_client = AdminClient(Kafka.get_credentials())
