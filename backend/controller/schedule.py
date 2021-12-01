@@ -10,6 +10,7 @@ from starlette.responses import JSONResponse
 
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.configuration import ConfigEmail, ConfigTelegram
+from backend.schemas.query import Query
 from backend.utils import util_mail, util_get_config, util_kafka, util_process, util_telegram
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING, ID_JOB_STREAM
@@ -83,33 +84,47 @@ def init_scheduler():
                                                                                                 job_name])
         if not scheduler.running:
             scheduler.start()
-        return "Added job into scheduler"
+        return "started scheduler"
     except Exception as e:
         logging.error(e)
         return f"Error {e}"
 
 
-def add_job_output(new_query: UserQuery):
+def add_job_output(new_query: Query):
     try:
-        scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[new_query],
+        model_query = UserQuery(topic_kafka_output=new_query.topic_kafka_output, time_trigger=new_query.time_trigger,
+                                contact=new_query.contact)
+        scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[model_query],
                           id=new_query.topic_kafka_output)
-        print(scheduler.get_job(job_id=new_query.topic_kafka_output))
-        return "ok"
+        return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
-        return "Error: {}".format(str(e))
+        return JSONResponse(content=dict(message="Error: {}".format(str(e))), status_code=status.HTTP_400_BAD_REQUEST)
 
 
-def update_job_output(new_query: UserQuery):
+def update_job_output(new_query: Query):
     try:
-        scheduler.modify_job(job_id=new_query.topic_kafka_output, seconds=int(new_query.time_trigger))
-        return "ok"
+        model_query = UserQuery(topic_kafka_output=new_query.topic_kafka_output, time_trigger=new_query.time_trigger,
+                                contact=new_query.contact)
+        scheduler.add_job(func=trigger_output, replace_existing=True, trigger='interval',
+                          seconds=int(new_query.time_trigger), id=new_query.topic_kafka_output, args=[model_query])
+        return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)
-        return "Error: {}".format(str(e))
+        return JSONResponse(content=dict(message="Error: {}".format(str(e))), status_code=status.HTTP_400_BAD_REQUEST)
+
+
+def delete_job_output(job_id: str):
+    try:
+        scheduler.remove_job(job_id=job_id)
+        return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content=dict(message="Error: {}".format(str(e))), status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def trigger_output(new_query: UserQuery):
+    print('contact, ', new_query.contact)
     consumer = util_kafka.Kafka.create().consumer
     consumer.subscribe([new_query.topic_kafka_output])
 
@@ -117,14 +132,14 @@ def trigger_output(new_query: UserQuery):
     partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
                   list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
     print('partitions', partitions)
-    commited_offset = consumer.committed(partitions)
-    print('commited_offset', commited_offset)
+    committed_offset = consumer.committed(partitions)
+    print('committed_offset', committed_offset)
     low, high = consumer.get_watermark_offsets(partitions[0])
     print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
-    consumer.assign(commited_offset)
+    consumer.assign(committed_offset)
 
     data = []
-    if commited_offset[0].offset < high:
+    if committed_offset[0].offset < high:
         while True:
             msg = consumer.poll(1)
             consumer.commit()
@@ -133,11 +148,10 @@ def trigger_output(new_query: UserQuery):
                 print(msg)
                 continue
             data.append(msg.value().decode('utf-8'))
-            print(msg.value().decode('utf-8'))
 
             if msg.offset() == high - 1:
                 break
-    print('len', len(data))
+
     handle_output(new_query, data)
 
 
@@ -163,7 +177,6 @@ def handle_output(new_query: UserQuery, data):
                         password=mail_info.get('password'),
                         ssl=mail_info.get('ssl')
                     ), email_destination=contact_info.get('value'), subject='dbstreaming notify', content=data
-                    # content=json.dumps(data)
                 )
             elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
                 telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value
@@ -187,8 +200,8 @@ def init_scheduler_from_query():
         for query in data:
             scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
                               id=query.topic_kafka_output)
-            print('da vao')
-        print(scheduler.get_job(job_id='output_jobetl'))
+        if not scheduler.running:
+            scheduler.start()
     except Exception as e:
         print(e)
         return "Error {}".format(str(e))

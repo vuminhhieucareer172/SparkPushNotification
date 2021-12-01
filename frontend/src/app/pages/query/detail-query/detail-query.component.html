@@ -60,7 +60,7 @@
                                                     [formGroupName]="i" class="row">
                                                     <div class="col-8" style="margin-bottom: 10px;">
                                                         <nb-select fullWidth style="margin: 0 20px 0 30px;"
-                                                            (selectedChange)="selecteTableStream($event)"
+                                                            (ngModelChange)="selecteTableStream($event)"
                                                             placeholder="Select table query"
                                                             formControlName="tableQuery">
                                                             <nb-option *ngFor="let e of listTableQuery" value="{{e}}">
@@ -80,7 +80,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-2" style="padding-left: 100px;">
+                                            <div class="col-3" style="padding-left: 100px;">
                                                 <button (click)="addTableQuery()" id="add-column" class="btn btn-sm"
                                                     type="button">
                                                     <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
@@ -120,7 +120,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-2" style="padding-left: 100px;">
+                                            <div class="col-3" style="padding-left: 100px;">
                                                 <button (click)="addQueryField()" id="add-column" class="btn btn-sm"
                                                     type="button">
                                                     <i style="color: #276FCE; margin: 5px" class="fas fa-plus"></i>
@@ -394,9 +394,6 @@
                                         <input formControlName="topicOutput" required type="email" nbInput fullWidth
                                             id="topicOutput" (ngModelChange)="isValidTopic($event)"
                                             placeholder="Topic kafka output..." />
-                                        <div *ngIf="scheduleAndContactForm.get('topicOutput').touched && topicValid">
-                                            <span class="helper-text">Topic is exist</span>
-                                        </div>
                                         <div
                                             *ngIf="scheduleAndContactForm.get('topicOutput').touched && scheduleAndContactForm.get('topicOutput').errors?.required">
                                             <span class="helper-text">Topic output is required</span>

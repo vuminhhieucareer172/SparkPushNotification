@@ -1,23 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
 import { environment } from '../../../../environments/environment';
 import { SERVER_API_URL } from '../../../app.constants';
 
 @Component({
-  selector: 'ngx-add-query',
-  templateUrl: './add-query.component.html',
-  styleUrls: ['./add-query.component.scss'],
+  selector: 'ngx-detail-query',
+  templateUrl: './detail-query.component.html',
+  styleUrls: ['./detail-query.component.scss'],
 })
-export class AddQueryComponent implements OnInit {
+export class DetailQueryComponent implements OnInit {
   input_check = '';
   destroyByClick = true;
-  duration = 2000;
+  duration = 5000;
   hasIcon = true;
   preventDuplicates = false;
-  schedule: string;
+  schedule: string = 'manual-input';
   listTableQuery = [];
   listQueryField = [];
   listTopicKafka = [];
@@ -25,22 +25,48 @@ export class AddQueryComponent implements OnInit {
   methodSelected = '';
   isValidEmail = true;
   isValidTele = true;
+  queryId: string;
 
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
     private toastrService: NbToastrService,
-    private router: Router) {
+    private router: Router,
+    private route: ActivatedRoute) {
+    this.route.params.subscribe(
+      param => {
+        this.queryId = param.queryId;
+      },
+    );
     this.http.get(SERVER_API_URL + '/stream', { observe: 'response' })
       .subscribe(
         res => {
           for (const table of Object(res.body)) {
             this.listTableQuery.push(table['table_name']);
           }
+          // for (const column of this.listTableQuery) {
+
+          // }
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => { },
       );
+
+    // for (const stream of this.listTableQuery) {
+    //   console.log('av');
+    // }
+    // this.http.get(SERVER_API_URL + '/stream/' + 'dbstreaming_streaming_jobetl', { observe: 'response' })
+    //   .subscribe(
+    //     res => {
+    //       // for (const name_field of res.body['table']['fields']) {
+    //       //   this.listQueryField.push(stream + '.' + name_field['name_field']);
+    //       // }
+    //       console.log(res);
+    //     }, (error) => {
+    //       this.showToast('An unexpected error occured', error.error.message, 'warning');
+    //     }, () => { });
+    // }
+
     this.http.get(SERVER_API_URL + '/kafka-topic', { observe: 'response' })
       .subscribe(
         res => {
@@ -51,10 +77,102 @@ export class AddQueryComponent implements OnInit {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => { },
       );
+    this.http.get(SERVER_API_URL + '/query/' + this.queryId, { observe: 'response' })
+      .subscribe(
+        res => {
+          // console.log(res);
+          this.manualInputForm.controls['manualText'].setValue(res.body['sql']);
+          this.scheduleAndContactForm.controls['topicOutput'].setValue(res.body['topic_kafka_output']);
+          this.scheduleAndContactForm.controls['selectMethod'].setValue(res.body['contact']['method']);
+          this.scheduleAndContactForm.controls['inputMethod'].setValue(res.body['contact']['value']);
+          if (res.body['time_trigger'] < (60 * 60) && ((res.body['time_trigger'] % 60) === 0)) {
+            this.scheduleAndContactForm.controls['selectSchedule'].setValue('minute');
+            this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / 60);
+          } else if (res.body['time_trigger'] < (60 * 60 * 24) && ((res.body['time_trigger'] % 3600) === 0)) {
+            this.scheduleAndContactForm.controls['selectSchedule'].setValue('hour');
+            this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / 3600);
+          } else if (res.body['time_trigger'] >= (60 * 60 * 24) && ((res.body['time_trigger'] % (60 * 60 * 24)) === 0)) {
+            this.scheduleAndContactForm.controls['selectSchedule'].setValue('day');
+            this.scheduleAndContactForm.controls['inputTime'].setValue(res.body['time_trigger'] / (60 * 60 * 24));
+          }
+
+          // push vao from =========================================
+          if (res.body['sql'].split('select')[1].split('from')[1].includes('where')) {
+            const fromTable = [];
+            if (res.body['sql'].split('select')[1].split('from')[1].split('where')[0].includes(',')) {
+              for (const table of res.body['sql'].split('select')[1].split('from')[1].split('where')[0].split(',')) {
+                fromTable.push({ 'tableQuery': table.trim() });
+              }
+              fromTable.forEach(e => {
+                this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+              });
+            } else {
+              fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].split('where')[0].trim() });
+              fromTable.forEach(e => {
+                this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+              });
+            }
+          } else {
+            const fromTable = [];
+            fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].trim() });
+            fromTable.forEach(e => {
+              this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+            });
+          }
+          // push vao from =========================================
+
+          // push vao select =========================================
+          if (res.body['sql'].split('select')[1].split('from')[0].includes(',')) {
+            // console.log('1');
+            const selectArr = [];
+            for (const selectColumn of res.body['sql'].split('select')[1].split('from')[0].split(',')) {
+              selectArr.push({ 'queryField': selectColumn.trim() });
+            }
+
+            selectArr.forEach(e => {
+              this.fieldsQueryField.push(this.createFieldQueryField(e['queryField'].trim()));
+            });
+          } else {
+            // console.log(res.body['sql'].split('select')[1].split('from'));
+            this.fieldsQueryField.push(this.createFieldQueryField(res.body['sql'].split('select')[1].split('from')[0].trim()));
+          }
+          // push vao select =========================================
+
+          // push vao where =========================================
+          // if (res.body['sql'].split('select')[1].split('from')[1].includes('where')) {
+          //   var fromTable = [];
+          //   if (res.body['sql'].split('select')[1].split('from')[1].split('where')[0].includes(',')) {
+          //     for (const table of res.body['sql'].split('select')[1].split('from')[1].split('where')[0].split(',')) {
+          //       fromTable.push({ 'tableQuery': table.trim() });
+          //     }
+          //     fromTable.forEach(e => {
+          //       this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+          //     });
+          //   } else {
+          //     fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].split('where')[0].trim() });
+          //     fromTable.forEach(e => {
+          //       this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+          //     });
+          //   }
+          // } else {
+          //   var fromTable = [];
+          //   fromTable.push({ 'tableQuery': res.body['sql'].split('select')[1].split('from')[1].trim() });
+          //   fromTable.forEach(e => {
+          //     this.fieldsTableQuery.push(this.createFieldTableQuery(e['tableQuery']));
+          //   });
+          // }
+
+          // push vao where =========================================
+
+        }, (error) => {
+          this.showToast('An unexpected error occured', error.error.message, 'danger');
+        }, () => { },
+      );
   }
 
   ngOnInit(): void {
   }
+
 
   private showToast(title: string, body: string, typeStatus: string) {
     const config = {
@@ -76,9 +194,9 @@ export class AddQueryComponent implements OnInit {
   onSelectSchedule(value: string): void {
     this.schedule = value;
     if (this.schedule === 'manual-input') {
-      this.quickInputForm.reset();
+      // this.quickInputForm.reset();
     } else if (this.schedule === 'quick-input') {
-      this.manualInputForm.reset();
+      // this.manualInputForm.reset();
     }
   }
 
@@ -95,21 +213,19 @@ export class AddQueryComponent implements OnInit {
     return null;
   }
 
-
   onSubmitManual(): void {
     const manualValue = this.manualInputForm.getRawValue();
-    // console.log(manualValue)
   }
 
   createFieldTableQuery(tableQuery: string = null): FormGroup {
     return this.fb.group({
-      tableQuery: [tableQuery, [Validators.required]],
+      tableQuery: [tableQuery, []],
     });
   }
 
   createFieldQueryField(queryField: string = null): FormGroup {
     return this.fb.group({
-      queryField: [queryField, [Validators.required]],
+      queryField: [queryField, []],
     });
   }
 
@@ -144,8 +260,8 @@ export class AddQueryComponent implements OnInit {
   }
 
   quickInputForm = this.fb.group({
-    fieldsTableQuery: this.fb.array([this.createFieldTableQuery()]),
-    fieldsQueryField: this.fb.array([this.createFieldQueryField()]),
+    fieldsTableQuery: this.fb.array([]),
+    fieldsQueryField: this.fb.array([]),
     fieldsConditions: this.fb.array([]),
     fieldsGroup: this.fb.array([]),
     fieldsHavingConditions: this.fb.array([]),
@@ -153,6 +269,7 @@ export class AddQueryComponent implements OnInit {
   });
 
   selecteTableStream(stream: string): void {
+    // console.log()
     this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
       .subscribe(
         res => {
@@ -247,7 +364,6 @@ export class AddQueryComponent implements OnInit {
     inputTime: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
     selectMethod: ['', [Validators.required]],
     inputMethod: ['', [Validators.required]],
-    // inputMethodTelegram: ['', [Validators.pattern('^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$')]],
   });
 
   isValidTopic(inputValue): void {
@@ -299,7 +415,6 @@ export class AddQueryComponent implements OnInit {
       const manualInput = this.manualInputForm.getRawValue();
       const json_result = {};
       const contact = {};
-      // console.log(scheduleAndContact);
       if (manualInput.manualText.toLowerCase().includes('from')) {
         json_result['sql'] = manualInput.manualText;
       }
@@ -312,25 +427,20 @@ export class AddQueryComponent implements OnInit {
         json_result['time_trigger'] = scheduleAndContact.inputTime * 60 * 60 * 24;
       }
 
-      // if (scheduleAndContact.selectMethod == 'email') {
-      //   contact['method'] = scheduleAndContact.selectMethod;
-      //   contact['value'] = scheduleAndContact.inputMethodEmail;
-      // }
-      // else if (scheduleAndContact.selectMethod == 'telegram') {
-      //   contact['method'] = scheduleAndContact.selectMethod;
-      //   contact['value'] = scheduleAndContact.inputMethodTelegram;
-      // }
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+      json_result['id'] = this.queryId;
+      if (!this.topicValid) {
+        this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Added new topic kafka', 'success');
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { });
-      this.http.post('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
+      }
+      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');
@@ -346,8 +456,7 @@ export class AddQueryComponent implements OnInit {
       const contact = {};
       const scheduleAndContact = this.scheduleAndContactForm.getRawValue();
       const quickInput = this.quickInputForm.getRawValue();
-      // console.log(quickInput);
-      // console.log(scheduleAndContact);
+
       let lenQueryField = quickInput.fieldsQueryField.length;
       for (const queryField of quickInput.fieldsQueryField) {
         if (lenQueryField >= 2) {
@@ -411,10 +520,11 @@ export class AddQueryComponent implements OnInit {
             finalSQL += fieldOrder['orderField'] + ' ' + fieldOrder['order'] + ', ';
             lenOrder -= 1;
           } else if (lenOrder < 2) {
-            finalSQL += fieldOrder['orderField'] + ' ' + fieldOrder['order'] + ';';
+            finalSQL += fieldOrder['orderField'] + ' ' + fieldOrder['order'];
           }
         }
       }
+      finalSQL += ';';
       json_result['sql'] = finalSQL;
       json_result['topic_kafka_output'] = scheduleAndContact.topicOutput;
       if (scheduleAndContact.selectSchedule === 'minute') {
@@ -428,14 +538,17 @@ export class AddQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
+      json_result['id'] = this.queryId;
+      if (!this.topicValid) {
+        this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Added new topic kafka', 'success');
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { });
-      this.http.post('http://' + environment.APP_HOST + ':' + environment.APP_PORT_SCHEDULER + '/query', json_result, { observe: 'response' })
+      }
+      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');
@@ -445,7 +558,6 @@ export class AddQueryComponent implements OnInit {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
         );
-      // console.log(finalSQL)
     }
   }
 
@@ -456,4 +568,5 @@ export class AddQueryComponent implements OnInit {
   onSelectInputCheck(value: string): void {
     this.input_check = value;
   }
+
 }

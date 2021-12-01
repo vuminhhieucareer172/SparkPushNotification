@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import status
@@ -15,10 +14,11 @@ from backend.models.dbstreaming_kafka_streaming import KafkaStreaming
 from backend.schemas.configuration import Configuration
 from backend.schemas.stream import Stream, JobStream
 from backend.utils.util_get_config import get_config
+from backend.utils.util_kafka import get_multi_message
 from constants import constants
 from constants.constants import ID_JOB_STREAM, PREFIX_DB_TABLE_STREAMING
 from database.db import DB, get_session
-from database.session import SessionHandler, SchemaEncoder
+from database.session import SessionHandler
 from streaming.spark import Spark
 
 
@@ -82,16 +82,13 @@ def get_stream_by_name(stream_name: str, db: DB):
     return JSONResponse(json_result, status_code=status.HTTP_200_OK)
 
 
-def get_record_by_stream_name(table_stream: str, db: DB, skip: int = 0, limit: int = 10000):
-    session = get_session(database=db)
+def get_record_by_stream_name(table_stream: str, db: DB):
     try:
         if not table_stream.startswith(PREFIX_DB_TABLE_STREAMING):
             return JSONResponse(content={"message": "Invalid stream name"}, status_code=status.HTTP_404_NOT_FOUND)
-        query = Table(table_stream, MetaData(db.engine), autoload=True)
-        record_session = SessionHandler.create(session, query)
-        records = record_session.get_from_offset(skip=skip, limit=limit)
-        data = list(map(
-            lambda record: json.loads(json.dumps(dict(record), cls=SchemaEncoder, ensure_ascii=False)), records))
+        data, error = get_multi_message(topic=table_stream)
+        if error != '':
+            return JSONResponse(content={"message": error}, status_code=status.HTTP_400_BAD_REQUEST)
         return JSONResponse(data, status_code=status.HTTP_200_OK)
     except Exception as e:
         print(e)

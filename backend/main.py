@@ -59,8 +59,8 @@ def get_stream(stream_name: str, db=Depends(verify_database)):
 
 
 @app.get("/stream/record/{stream_name}")
-def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10000, db=Depends(verify_database)):
-    return stream.get_record_by_stream_name(stream_name, db, skip, limit)
+def get_stream_record(stream_name: str, db=Depends(verify_database)):
+    return stream.get_record_by_stream_name(stream_name, db)
 
 
 @app.post("/add-stream")
@@ -113,7 +113,7 @@ def add_query(new_query: Query, db=Depends(verify_database)):
     return query.add_query(new_query, db)
 
 
-@app.put("/query")
+@app.put("/update-query")
 def update_query(new_query: QueryUpdate, db=Depends(verify_database)):
     return query.update_query(new_query, db)
 
@@ -181,7 +181,6 @@ async def startup_event():
     result_scheduler = init_scheduler()
     if isinstance(result_scheduler, str):
         print(result_scheduler)
-    # schedule.init_scheduler_from_query()
 
 
 @app.on_event("shutdown")
