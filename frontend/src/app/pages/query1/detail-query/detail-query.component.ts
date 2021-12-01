@@ -431,6 +431,7 @@ export class DetailQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
+      json_result['id'] = this.queryId;
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
@@ -538,6 +539,7 @@ export class DetailQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
+      json_result['id'] = this.queryId;
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
