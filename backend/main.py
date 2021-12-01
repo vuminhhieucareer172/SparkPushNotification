@@ -59,8 +59,8 @@ def get_stream(stream_name: str, db=Depends(verify_database)):
 
 
 @app.get("/stream/record/{stream_name}")
-def get_stream_record(stream_name: str, skip: int = 0, limit: int = 10000, db=Depends(verify_database)):
-    return stream.get_record_by_stream_name(stream_name, db, skip, limit)
+def get_stream_record(stream_name: str, db=Depends(verify_database)):
+    return stream.get_record_by_stream_name(stream_name, db)
 
 
 @app.post("/add-stream")
