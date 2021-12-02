@@ -446,7 +446,7 @@ export class DetailQueryComponent implements OnInit {
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
       json_result['id'] = this.queryId;
-      console.log(json_result);
+      // console.log(json_result);
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
           .subscribe(
@@ -497,22 +497,22 @@ export class DetailQueryComponent implements OnInit {
         finalSQL += 'where ';
         for (const condition of quickInput.fieldsConditions) {
           if (lenConditions >= 2) {
-            if (condition['operator'].toLowerCase() == 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'" + ' ' + 'and ';
+            if (condition['operator'].toLowerCase() === 'like') {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"' + ' ' + 'and ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
             }
             lenConditions -= 1;
           } else if (lenConditions < 2) {
-            if (condition['operator'].toLowerCase() == 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'"  + ' ' + 'and ';
+            if (condition['operator'].toLowerCase() === 'like') {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"'  + ' ' + 'and ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
             }
           }
         }
       }
-      console.log(finalSQL);
+      // console.log(finalSQL);
       let lenGroup = quickInput.fieldsGroup.length;
       if (lenGroup > 0) {
         finalSQL += 'group by ';
@@ -564,7 +564,7 @@ export class DetailQueryComponent implements OnInit {
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
       json_result['id'] = this.queryId;
-      console.log(json_result);
+      // console.log(json_result);
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
           .subscribe(

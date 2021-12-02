@@ -372,14 +372,14 @@ export class AddQueryComponent implements OnInit {
         finalSQL += 'where ';
         for (const condition of quickInput.fieldsConditions) {
           if (lenConditions >= 2) {
-            if (condition['operator'].toLowerCase() == 'like') {
+            if (condition['operator'].toLowerCase() === 'like') {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"' + ' ' + 'and ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
             }
             lenConditions -= 1;
           } else if (lenConditions < 2) {
-            if (condition['operator'].toLowerCase() == 'like') {
+            if (condition['operator'].toLowerCase() === 'like') {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"'  + ' ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ';
@@ -437,7 +437,7 @@ export class AddQueryComponent implements OnInit {
       contact['method'] = scheduleAndContact.selectMethod;
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
-      console.log(json_result);
+      // console.log(json_result);
 
       this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
         .subscribe(
