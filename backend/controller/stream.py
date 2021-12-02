@@ -83,10 +83,15 @@ def get_stream_by_name(stream_name: str, db: DB):
 
 
 def get_record_by_stream_name(table_stream: str, db: DB):
+    session = get_session(database=db)
     try:
         if not table_stream.startswith(PREFIX_DB_TABLE_STREAMING):
             return JSONResponse(content={"message": "Invalid stream name"}, status_code=status.HTTP_404_NOT_FOUND)
-        data, error = get_multi_message(topic=table_stream)
+        stream_session = SessionHandler.create(session, KafkaStreaming)
+        stream_in_db = stream_session.get_one(query_dict=dict(table_streaming=table_stream))
+        if stream_in_db is None:
+            return JSONResponse(content={"message": "This stream does not match any topic kafka"}, status_code=status.HTTP_404_NOT_FOUND)
+        data, error = get_multi_message(topic=stream_in_db.topic_kafka)
         if error != '':
             return JSONResponse(content={"message": error}, status_code=status.HTTP_400_BAD_REQUEST)
         return JSONResponse(data, status_code=status.HTTP_200_OK)

@@ -26,6 +26,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Streaming',
     icon: 'flash-off-outline',
+    expanded: true,
     children: [
       {
         title: 'Add stream',
@@ -40,6 +41,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Query',
     icon: 'list-outline',
+    expanded: true,
     children: [
       {
         title: 'Add query',
@@ -54,6 +56,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Job stream',
     icon: 'film-outline',
+    expanded: true,
     children: [
       {
         title: 'Manage',

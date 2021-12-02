@@ -5,7 +5,6 @@ from sqlalchemy import exc
 from starlette import status
 from starlette.responses import JSONResponse
 
-from backend.controller.schedule import scheduler
 from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query, QueryUpdate
 from database.db import DB, get_session

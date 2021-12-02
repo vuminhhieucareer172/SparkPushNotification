@@ -56,7 +56,7 @@ export class RecordComponent implements OnInit {
               this.source.load(this.data);
             }
           }, (error) => {
-            this.showToast('An unexpected error occured', error.message, 'danger');
+            this.showToast('An unexpected error occurred', error.error.message, 'danger');
           }, () => {},
         );
   }
