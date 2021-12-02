@@ -174,14 +174,14 @@ export class DetailQueryComponent implements OnInit {
     for (const stream of this.listTableQuery) {
       // console.log('av');
       this.http.get(SERVER_API_URL + '/stream/' + stream, { observe: 'response' })
-      .subscribe(
-        res => {
-          for (const name_field of res.body['table']['fields']) {
-            this.listQueryField.push(stream + '.' + name_field['name_field']);
-          }
-        }, (error) => {
-          this.showToast('An unexpected error occured', error.error.message, 'warning');
-        }, () => { });
+        .subscribe(
+          res => {
+            for (const name_field of res.body['table']['fields']) {
+              this.listQueryField.push(stream + '.' + name_field['name_field']);
+            }
+          }, (error) => {
+            this.showToast('An unexpected error occured', error.error.message, 'warning');
+          }, () => { });
     }
   }
 
@@ -446,16 +446,17 @@ export class DetailQueryComponent implements OnInit {
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
       json_result['id'] = this.queryId;
+      console.log(json_result);
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
-        .subscribe(
-          res => {
-            this.showToast('Notification', 'Added new topic kafka', 'success');
-          }, (error) => {
-            this.showToast('An unexpected error occured', error.error.message, 'danger');
-          }, () => { });
+          .subscribe(
+            res => {
+              this.showToast('Notification', 'Added new topic kafka', 'success');
+            }, (error) => {
+              this.showToast('An unexpected error occured', error.error.message, 'danger');
+            }, () => { });
       }
-      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/query', json_result, { observe: 'response' })
+      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/update-query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');
@@ -496,13 +497,22 @@ export class DetailQueryComponent implements OnInit {
         finalSQL += 'where ';
         for (const condition of quickInput.fieldsConditions) {
           if (lenConditions >= 2) {
-            finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
+            if (condition['operator'].toLowerCase() == 'like') {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'" + ' ' + 'and ';
+            } else {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
+            }
             lenConditions -= 1;
           } else if (lenConditions < 2) {
-            finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ';
+            if (condition['operator'].toLowerCase() == 'like') {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'"  + ' ' + 'and ';
+            } else {
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
+            }
           }
         }
       }
+      console.log(finalSQL);
       let lenGroup = quickInput.fieldsGroup.length;
       if (lenGroup > 0) {
         finalSQL += 'group by ';
@@ -554,16 +564,17 @@ export class DetailQueryComponent implements OnInit {
       contact['value'] = scheduleAndContact.inputMethod;
       json_result['contact'] = contact;
       json_result['id'] = this.queryId;
+      console.log(json_result);
       if (!this.topicValid) {
         this.http.post(SERVER_API_URL + '/kafka-topic/create', { 'topic_name': scheduleAndContact.topicOutput }, { observe: 'response' })
-        .subscribe(
-          res => {
-            this.showToast('Notification', 'Added new topic kafka', 'success');
-          }, (error) => {
-            this.showToast('An unexpected error occured', error.error.message, 'danger');
-          }, () => { });
+          .subscribe(
+            res => {
+              this.showToast('Notification', 'Added new topic kafka', 'success');
+            }, (error) => {
+              this.showToast('An unexpected error occured', error.error.message, 'danger');
+            }, () => { });
       }
-      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/query', json_result, { observe: 'response' })
+      this.http.put('http://' + environment.APP_HOST + ':' + environment.APP_PORT + '/update-query', json_result, { observe: 'response' })
         .subscribe(
           res => {
             this.showToast('Notification', 'Action completed', 'success');

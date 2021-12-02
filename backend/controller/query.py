@@ -39,15 +39,16 @@ def add_query(new_query: Query, db: DB):
         query_session = SessionHandler.create(session, UserQuery)
         query_session.add(new_query.dict())
         session.commit()
+
         response_output = requests.post(url='http://{}:{}/add-job-output'.format(os.getenv('APP_HOST'),
                                                                                  os.getenv('APP_OUTPUT_PORT')),
                                         json=query_session.to_json(
                                             UserQuery(topic_kafka_output=new_query.topic_kafka_output,
-                                                      time_trigger=new_query.time_trigger,
+                                                      time_trigger=new_query.time_trigger, sql=new_query.sql,
                                                       contact=new_query.contact)))
-        if response_output.status_code == status.HTTP_200_OK:
+        if response_output.status_code == status.HTTP_201_CREATED:
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
-        return JSONResponse(content={"message": response_output.json()["message"]},
+        return JSONResponse(content={"message": response_output.json()},
                             status_code=status.HTTP_400_BAD_REQUEST)
     except exc.SQLAlchemyError as e:
         print(e)
