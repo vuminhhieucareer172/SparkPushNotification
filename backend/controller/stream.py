@@ -177,7 +177,6 @@ def stop_job_streaming():
 def start_job_streaming():
     try:
         result = init_scheduler()
-        print(result)
         scheduler.modify_job(job_id=constants.ID_JOB_STREAM, next_run_time=datetime.datetime.now())
         return JSONResponse(content={"message": result}, status_code=status.HTTP_200_OK)
     except Exception as e:

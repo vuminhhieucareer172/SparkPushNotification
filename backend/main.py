@@ -6,6 +6,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 
 from backend.controller import database_connection, query, configuration, table, stream, schedule
 from backend.controller.schedule import init_scheduler, scheduler
@@ -18,6 +19,8 @@ from backend.utils import util_kafka
 from backend.utils.util_kafka import get_list_topics
 from database.db import DB
 from streaming import spark
+from pathlib import Path
+Path("logs").mkdir(parents=True, exist_ok=True)
 
 app = FastAPI()
 
@@ -28,6 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount('/static/log-job-dbstreaming', StaticFiles(directory='logs'), name='log-job-dbstreaming')
 
 
 @app.post("/test-connect-database")

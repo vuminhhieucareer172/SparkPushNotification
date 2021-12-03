@@ -59,6 +59,10 @@ export class ManageComponent implements OnInit {
     window.open('http://localhost:4040', '_blank').focus();
   }
 
+  navigateJobLog(): void {
+    window.open('http://localhost:5005/static/log-job-dbstreaming/dbstreaming.log', '_blank').focus();
+  }
+
   onSelectSchedule(value: string): void {
     this.schedule = value;
   }

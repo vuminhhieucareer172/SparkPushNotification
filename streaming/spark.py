@@ -74,7 +74,7 @@ class Spark:
             return Spark.__spark_job_pid
         cmd = "nohup", "spark-submit", "--packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2", \
               "streaming/job_stream/job/" + file + ".py"
-        proc = subprocess.Popen(cmd)
+        proc = subprocess.Popen(cmd, stdout=open('logs/dbstreaming.log', 'w'))
         Spark.__spark_job_pid = proc.pid
         return proc.pid
 
