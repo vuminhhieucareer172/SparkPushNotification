@@ -15,13 +15,13 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
     try:
         countData = len(content)
         type = ''
-        lastData = []
+        jsonData = []
         for record in content:
             record = json.loads(record)
             record_key = record.keys()
             break
         for record in content:
-            lastData.append(json.loads(record))
+            jsonData.append(json.loads(record))
         msg = MIMEMultipart("alternative")
         # msg = EmailMessage()
         msg['Subject'] = subject
@@ -151,14 +151,111 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
 
                 part2 = MIMEText(html, "html")
                 msg.attach(part2)
-            elif 'where' in query.sql or 'group by' in query.sql:
+            else:
+                # elif 'where' in query.sql or 'group by' in query.sql:
                 msg = MIMEMultipart("alternative")
                 # msg = EmailMessage()
                 msg['Subject'] = subject
                 msg['From'] = source.email
                 msg['To'] = email_destination
-                html = """{table}"""
-                html = html.format(table=tabulate(lastData, headers="keys", tablefmt="pretty"))
+
+                # html = """\
+                # <table border="1">
+                #     <tr>
+                # """
+
+                html = """\
+                <html>
+                    <body>
+                        <div class="row">
+                            <table style="background-color:#ffffff;table-layout:fixed" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F3F2EF" align="center">
+                                <tbody>
+                                    <tr> 
+                                        <td style="padding-top:24px" align="center">
+                                            <center style="width:100%">
+                                                <table>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td valign="middle" align="left">
+                                                                <a style="color:#0a66c2;display:inline-block;text-decoration:none">
+                                                                    <img class="CToWUd" style="max-height:38px;outline:none;color:#ffffff;max-width:unset!important;text-decoration:none" height="38" border="0" src="https://cam.soict.ai/images/logo-soict.png">
+                                                                </a>
+                                                            </td>
+                                                            <td width="100%" valign="middle" align="right">
+                                                                <a style="margin:0;color:#0a66c2;display:inline-block;text-decoration:none">
+                                                                    <p style="margin:0;font-weight:400">
+                                                                        <span style="word-wrap:break-word;color:#000000;word-break:break-word;font-weight:400;font-size:14px;line-height:1.429">Nguyen Tien - Vu Hieu</span>
+                                                                    </p>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table>
+                                                    <tr>
+                                                        <td>
+                                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td style="padding:24px 24px 8px">
+                                                                            <h2 style="text-align:center;margin:0;color:#000000;font-weight:400;font-size:24px;line-height:1.333"><span style="color:#242424;display:inline;text-decoration:none">Your job alert</span></h2>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="padding:0 24px 16px">
+                                                                            <p style="text-align:center;margin:0;color:#000000;font-weight:400;font-size:16px;line-height:1.5">
+                                                                                {} new job matches your preferences.
+                                                                            </p>
+                                                                        </td>
+                                                                    </tr>    
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <table border="1">
+                                                    <tr>
+                """.format(countData)
+
+                # table header#################################
+                for column in record_key:
+                    html += """
+                                                        <th style="text-align:center;">{}</th>
+                    """.format(str(column))
+                html += """                 
+                                                    </tr>
+                """
+                # table header#################################
+
+                # table content#################################
+                for data in jsonData:
+                    html += """
+                                                    <tr>
+                    """
+                    for key in record_key:
+                        html += """
+                                                        <td style="text-align:center;">{}</td>
+                        """.format(data[key])
+                    html += """
+                                                    </tr>
+                    """
+                # table content#################################
+
+                html += """\
+                                                </table>
+                                            </center>
+                """
+                html += """\
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </body>
+                </html>
+                """
+                # html = """{table}"""
+                # html = html.format(table=tabulate(lastData, headers="keys", tablefmt="pretty"))
                 part2 = MIMEText(html, "html")
                 msg.attach(part2)
         else:
