@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import make_msgid
 
-from pip._internal.utils.misc import tabulate
+from tabulate import tabulate
 
 from backend.schemas.configuration import ConfigEmail
 
@@ -15,10 +15,13 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
     try:
         countData = len(content)
         type = ''
+        lastData = []
         for record in content:
             record = json.loads(record)
             record_key = record.keys()
             break
+        for record in content:
+            lastData.append(json.loads(record))
         msg = MIMEMultipart("alternative")
         # msg = EmailMessage()
         msg['Subject'] = subject
@@ -155,7 +158,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                 msg['From'] = source.email
                 msg['To'] = email_destination
                 html = """{table}"""
-                html = html.format(table=tabulate(content, headers="keys", tablefmt="pretty"))
+                html = html.format(table=tabulate(lastData, headers="keys", tablefmt="pretty"))
                 part2 = MIMEText(html, "html")
                 msg.attach(part2)
         else:

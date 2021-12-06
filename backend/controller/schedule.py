@@ -203,6 +203,7 @@ def init_scheduler_from_query():
         for query in data:
             scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
                               id=query.topic_kafka_output)
+        print(scheduler.print_jobs())
         if not scheduler.running:
             scheduler.start()
     except Exception as e:

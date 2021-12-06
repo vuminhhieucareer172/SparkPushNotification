@@ -373,14 +373,14 @@ export class AddQueryComponent implements OnInit {
         for (const condition of quickInput.fieldsConditions) {
           if (lenConditions >= 2) {
             if (condition['operator'].toLowerCase() === 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"' + ' ' + 'and ';
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'" + ' ' + 'and ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
             }
             lenConditions -= 1;
           } else if (lenConditions < 2) {
             if (condition['operator'].toLowerCase() === 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"'  + ' ';
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'"  + ' ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ';
             }
