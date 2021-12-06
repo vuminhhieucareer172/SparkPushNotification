@@ -16,3 +16,4 @@ psutil
 psycopg2
 pyodbc==4.0.32
 python-telegram-bot
+sqlparse

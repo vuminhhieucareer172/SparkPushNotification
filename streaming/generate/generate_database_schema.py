@@ -26,3 +26,10 @@ def to_string_structure_type(columns: List[dict]) -> str:
         res += 'StructField("' + column.get('name') + '", ' + spark_type + '()),\n'
     res += '])'
     return res
+
+
+def get_list_column_of_table(inspector: Inspector, table_name: str):
+    columns = []
+    for column in inspector.get_columns(table_name):
+        columns.append(column['name'])
+    return columns

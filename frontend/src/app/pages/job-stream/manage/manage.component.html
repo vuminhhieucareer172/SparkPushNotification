@@ -13,7 +13,7 @@
                 <div class="col-md-2">
                     <label class="label">Status services:</label>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2" (click)="navigateJobLog()">
                     <div class="circle status" [ngClass]="'service-' + statusJob">
                         <h4 class="service-name">Job streaming</h4>
                         <h2 class="service-status">{{ statusJob }}</h2>
