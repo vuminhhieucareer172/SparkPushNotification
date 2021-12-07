@@ -31,6 +31,8 @@ export class ManageQueriesComponent implements OnInit {
         res => {
           this.data = Object.keys(res.body).map((key) => res.body[key]);
           this.source.load(this.data);
+          console.log(this.data);
+        
         }, (error) => {
           this.showToast('An unexpected error occured', error.message, 'danger');
           this.data = [];
@@ -56,6 +58,10 @@ export class ManageQueriesComponent implements OnInit {
   }
 
   settings = {
+    pager: {
+      display: true,
+      perPage: 10,
+    },
     actions: {
       edit: false,
       add: false,

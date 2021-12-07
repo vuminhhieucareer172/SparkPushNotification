@@ -120,7 +120,7 @@ def get_schema_from_kafka_topic(topic: str):
     try:
         latest_mess, message = get_latest_message(topic=topic)
         if latest_mess == {}:
-            return JSONResponse(content=message, status_code=status.HTTP_400_BAD_REQUEST)
+            return JSONResponse(content={"message": message}, status_code=status.HTTP_400_BAD_REQUEST)
         list_column = []
         data = {}
         for key_column in latest_mess.keys():
@@ -138,9 +138,6 @@ def get_schema_from_kafka_topic(topic: str):
                 date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y %H:%M:%S')
                 if isinstance(date_time_obj, datetime.datetime):
                     type_column = 'DATETIME'
-            except:
-                pass
-            try:
                 date_time_obj = datetime.datetime.strptime(latest_mess[key_column], '%d/%m/%Y')
                 if isinstance(date_time_obj, datetime.date):
                     type_column = 'DATE'
@@ -151,10 +148,11 @@ def get_schema_from_kafka_topic(topic: str):
                 "type": type_column,
             }
             list_column.append(column)
+        print(1)
         data["message_sample"] = str(latest_mess)
         data["table"] = list_column
         return JSONResponse(content=data, status_code=status.HTTP_200_OK)
-    except exc.SQLAlchemyError as e:
+    except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
