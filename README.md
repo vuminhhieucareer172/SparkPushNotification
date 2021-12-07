@@ -44,12 +44,3 @@ Make sure to install enough requirements before continue. All requirements are l
 ### Upgrade database (make sure .env is configured)
 
     ./upgrade_db.sh
-
-
-## Option (should read)
-
-- If you want to have some queries group by not full field in table, please execute this command in super privilege:
-
-
-    SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
-

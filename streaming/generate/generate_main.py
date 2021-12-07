@@ -79,7 +79,8 @@ def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspe
         sql: str = record['sql']
         parsed = sqlparse.parse(sql)
         if len(sqlparse.split(sql)) > 1:
-            raise ValueError("unsupported more than 1 sql statements")
+            print("unsupported more than 1 sql statements, use only first statement!")
+            sql = sqlparse.split(sql)[0]
         if parsed[0].get_type() != "SELECT":
             raise ValueError("only supported sql statements type SELECT")
 
@@ -94,8 +95,9 @@ def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspe
         .format("kafka") \\
         .option("kafka.bootstrap.servers", "{}") \\
         .option("checkpointLocation", "{}") \\
-        .option("topic", "{}").start()
-    """.format(sql, 'query-' + str(record['id']), bootstrap_servers, constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'])
+        .option("topic", "{}"){}.start()
+    """.format(sql, 'query-' + str(record['id']), bootstrap_servers, constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'],
+               '.outputMode("' + record['output_mode'] + '")')
     return content
 
 
@@ -151,7 +153,6 @@ def generate_job_stream(db: DB, app_name: str, file_job_name: str, path_job_fold
         return GENERATE_STREAMING_SUCCESSFUL
     except Exception as e:
         print(e)
-        raise e
         return "Error {}".format(str(e))
 
 

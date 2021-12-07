@@ -1,6 +1,4 @@
 import json
-# from time import time
-# from datetime import time
 import time
 
 from confluent_kafka import Producer
@@ -30,6 +28,7 @@ def send_message_to_kafka(table_fake_data: str, topic: str, limit: int = 10):
             count += 1
             producer.flush()
         time.sleep(10)
+
 
 if __name__ == '__main__':
     send_message_to_kafka(topic='dbstreaming_streaming_mobile', table_fake_data='dbstreaming_streaming_mobile')
