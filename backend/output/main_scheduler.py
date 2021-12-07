@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.controller import schedule
 from backend.controller.schedule import scheduler
-from backend.models.dbstreaming_query import UserQuery
+# from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.query import Query
 from database.db import DB
 

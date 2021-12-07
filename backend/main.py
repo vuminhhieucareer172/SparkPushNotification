@@ -197,5 +197,5 @@ async def shutdown_event():
 
 if __name__ == '__main__':
     load_dotenv()
-    uvicorn.run("backend.main:app", host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')),
-                reload=bool(os.getenv('DEV_ENV')))
+    uvicorn.run("backend.main:app", host=os.getenv('APP_HOST'), port=int(os.getenv('APP_PORT')))
+                # reload=bool(os.getenv('DEV_ENV')))

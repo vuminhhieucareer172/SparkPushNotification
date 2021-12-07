@@ -93,9 +93,11 @@ def init_scheduler():
 def add_job_output(new_query: Query):
     try:
         model_query = UserQuery(topic_kafka_output=new_query.topic_kafka_output, time_trigger=new_query.time_trigger,
-                                contact=new_query.contact)
+                                contact=new_query.contact, sql=new_query.sql)
         scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[model_query],
                           id=new_query.topic_kafka_output)
+        print(scheduler.get_job(job_id=new_query.topic_kafka_output))
+
         return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
@@ -105,7 +107,7 @@ def add_job_output(new_query: Query):
 def update_job_output(new_query: Query):
     try:
         model_query = UserQuery(topic_kafka_output=new_query.topic_kafka_output, time_trigger=new_query.time_trigger,
-                                contact=new_query.contact)
+                                contact=new_query.contact, sql=new_query.sql)
         scheduler.add_job(func=trigger_output, replace_existing=True, trigger='interval',
                           seconds=int(new_query.time_trigger), id=new_query.topic_kafka_output, args=[model_query])
         return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_200_OK)
@@ -124,7 +126,6 @@ def delete_job_output(job_id: str):
 
 
 def trigger_output(new_query: UserQuery):
-    print('contact, ', new_query.contact)
     consumer = util_kafka.Kafka.create().consumer
     consumer.subscribe([new_query.topic_kafka_output])
 
@@ -140,25 +141,27 @@ def trigger_output(new_query: UserQuery):
 
     data = []
     if committed_offset[0].offset < high:
+        restart_time = 0
         while True:
             msg = consumer.poll(1)
             consumer.commit()
 
             if msg is None:
                 print(msg)
+                restart_time += 1
+                if restart_time > 10:
+                    break
                 continue
             data.append(msg.value().decode('utf-8'))
 
             if msg.offset() == high - 1:
                 break
-
     handle_output(new_query, data)
 
 
 def handle_output(new_query: UserQuery, data):
     try:
         if new_query.contact is None:
-            print(data)
             pass
         else:
             contact_info: dict = new_query.contact
@@ -176,8 +179,8 @@ def handle_output(new_query: UserQuery, data):
                         username=mail_info.get('username'),
                         password=mail_info.get('password'),
                         ssl=mail_info.get('ssl')
-                    ), email_destination=contact_info.get('value'), subject='dbstreaming notify', content=data
-                )
+                    ), email_destination=contact_info.get('value'), subject='dbstreaming notify', content=data,
+                    query=new_query)
             elif contact_info.get('method') == constants.CONFIG_TELEGRAM:
                 telegram_info = util_get_config.get_config(constants.CONFIG_TELEGRAM).value
                 result = util_telegram.send_test_message(
@@ -200,6 +203,7 @@ def init_scheduler_from_query():
         for query in data:
             scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
                               id=query.topic_kafka_output)
+        print(scheduler.print_jobs())
         if not scheduler.running:
             scheduler.start()
     except Exception as e:

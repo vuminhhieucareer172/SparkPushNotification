@@ -60,7 +60,7 @@
                                                     [formGroupName]="i" class="row">
                                                     <div class="col-8" style="margin-bottom: 10px;">
                                                         <nb-select fullWidth style="margin: 0 20px 0 30px;"
-                                                            (selectedChange)="selecteTableStream($event)"
+                                                            (ngModelChange)="selecteTableStream($event)"
                                                             placeholder="Select table query"
                                                             formControlName="tableQuery">
                                                             <nb-option *ngFor="let e of listTableQuery" value="{{e}}">
@@ -474,7 +474,7 @@
                                 status="info" (click)="onSubmitAll()" style="float: right;" nbButton type="submit">add
                                 query</button> -->
                             <button status="info" (click)="onSubmitAll()" style="float: right;" nbButton
-                                type="submit">add
+                                type="submit">update
                                 query</button>
                             <button status="success" style="float: right; margin-right: 20px;" nbButton
                                 nbStepperPrevious>back</button>
