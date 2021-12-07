@@ -9,7 +9,7 @@ Make sure to install enough requirements before continue. All requirements are l
 * Python version >= 3.6
 * [Spark 3.x](https://spark.apache.org/downloads.html) & [docs](https://spark.apache.org/docs/latest/)
 * [Kafka 2.x](https://kafka.apache.org/quickstart) & [docs](https://kafka.apache.org/documentation/)
-* Mysql/PostgreSQL/SQL server
+* Mysql(<=5.7)/PostgreSQL/SQL server
 * Npm, nodejs
 
 ## Install
@@ -44,3 +44,12 @@ Make sure to install enough requirements before continue. All requirements are l
 ### Upgrade database (make sure .env is configured)
 
     ./upgrade_db.sh
+
+
+## Option (should read)
+
+- If you want to have some queries group by not full field in table, please execute this command in super privilege:
+
+
+    SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+
