@@ -9,7 +9,7 @@ Make sure to install enough requirements before continue. All requirements are l
 * Python version >= 3.6
 * [Spark 3.x](https://spark.apache.org/downloads.html) & [docs](https://spark.apache.org/docs/latest/)
 * [Kafka 2.x](https://kafka.apache.org/quickstart) & [docs](https://kafka.apache.org/documentation/)
-* Mysql/PostgreSQL/SQL server
+* Mysql(<=5.7)/PostgreSQL/SQL server
 * Npm, nodejs
 
 ## Install

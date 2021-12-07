@@ -16,7 +16,7 @@ def get_query(db: DB, skip: int = 0, limit: int = 10):
     try:
         query_session = SessionHandler.create(session, UserQuery)
         return JSONResponse(query_session.get_from_offset(skip, limit, to_json=True), status_code=status.HTTP_200_OK)
-    except exc.SQLAlchemyError as e:
+    except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -27,7 +27,7 @@ def get_query_by_id(id_query: int, db: DB):
         query_session = SessionHandler.create(session, UserQuery)
         return JSONResponse(query_session.get_one(query_dict=dict(id=id_query), to_json=True),
                             status_code=status.HTTP_200_OK)
-    except exc.SQLAlchemyError as e:
+    except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -47,9 +47,12 @@ def add_query(new_query: Query, db: DB):
                                                       contact=new_query.contact)))
         if response_output.status_code == status.HTTP_201_CREATED:
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_201_CREATED)
-        return JSONResponse(content={"message": response_output.json()},
+        return JSONResponse(content={"message": response_output.json()["message"]}, status_code=status.HTTP_400_BAD_REQUEST)
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        return JSONResponse(content={"message": "Added query to db but cannot connect to scheduler output"},
                             status_code=status.HTTP_400_BAD_REQUEST)
-    except exc.SQLAlchemyError as e:
+    except Exception as e:
         print(e)
         session.rollback()
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
@@ -74,7 +77,11 @@ def update_query(new_query: QueryUpdate, db: DB):
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
         return JSONResponse(content={"message": response_output.json()["message"]},
                             status_code=status.HTTP_400_BAD_REQUEST)
-    except exc.SQLAlchemyError as e:
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        return JSONResponse(content={"message": "Updated query from db but cannot connect to scheduler output"},
+                            status_code=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
         print(e)
         session.rollback()
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
@@ -94,7 +101,11 @@ def delete_query(query_id: int, db: DB):
             return JSONResponse({"message": "Successful"}, status_code=status.HTTP_200_OK)
         return JSONResponse(content={"message": response_output.json()["message"]},
                             status_code=status.HTTP_400_BAD_REQUEST)
-    except exc.SQLAlchemyError as e:
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        return JSONResponse(content={"message": "Deleted query from db but cannot connect to scheduler output"},
+                            status_code=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
         print(e)
         session.rollback()
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)
