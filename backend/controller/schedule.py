@@ -3,7 +3,7 @@ import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from confluent_kafka import TopicPartition
+from confluent_kafka import TopicPartition, Consumer
 from dotenv import load_dotenv
 from starlette import status
 from starlette.responses import JSONResponse
@@ -20,7 +20,8 @@ from streaming.generate.generate_main import generate_job_stream
 from streaming.spark import Spark
 
 scheduler = BackgroundScheduler({
-    'apscheduler.job_defaults.max_instances': '10'
+    'apscheduler.job_defaults.max_instances': '10',
+    'apscheduler.job_defaults.misfire_grace_time': '900',
 })
 
 
@@ -96,8 +97,6 @@ def add_job_output(new_query: Query):
                                 contact=new_query.contact, sql=new_query.sql)
         scheduler.add_job(trigger_output, 'interval', seconds=int(new_query.time_trigger), args=[model_query],
                           id=new_query.topic_kafka_output)
-        print(scheduler.get_job(job_id=new_query.topic_kafka_output))
-
         return JSONResponse(content=dict(message="ok"), status_code=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
@@ -126,37 +125,39 @@ def delete_job_output(job_id: str):
 
 
 def trigger_output(new_query: UserQuery):
-    consumer = util_kafka.Kafka.create().consumer
-    consumer.subscribe([new_query.topic_kafka_output])
+    try:
+        consumer = Consumer(util_kafka.Kafka.create().get_credentials())
+        consumer.subscribe([new_query.topic_kafka_output])
 
-    topic = consumer.list_topics(topic=new_query.topic_kafka_output)
-    partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
-                  list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
-    print('partitions', partitions)
-    committed_offset = consumer.committed(partitions)
-    print('committed_offset', committed_offset)
-    low, high = consumer.get_watermark_offsets(partitions[0])
-    print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
-    consumer.assign(committed_offset)
+        topic = consumer.list_topics(topic=new_query.topic_kafka_output)
+        partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
+                      list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
 
-    data = []
-    if committed_offset[0].offset < high:
-        restart_time = 0
-        while True:
-            msg = consumer.poll(1)
-            consumer.commit()
+        committed_offset = consumer.committed(partitions)
+        low, high = consumer.get_watermark_offsets(partitions[0])
+        print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
+        consumer.assign(committed_offset)
 
-            if msg is None:
-                print(msg)
-                restart_time += 1
-                if restart_time > 10:
+        data = []
+        if committed_offset[0].offset < high:
+            restart_time = 0
+            while True:
+                msg = consumer.poll(1)
+                consumer.commit()
+
+                if msg is None:
+                    restart_time += 1
+                    if restart_time > 10:
+                        break
+                    continue
+                data.append(msg.value().decode('utf-8'))
+
+                if msg.offset() == high - 1:
                     break
-                continue
-            data.append(msg.value().decode('utf-8'))
-
-            if msg.offset() == high - 1:
-                break
-    handle_output(new_query, data)
+        handle_output(new_query, data)
+    except Exception as e:
+        print(e)
+        raise e
 
 
 def handle_output(new_query: UserQuery, data):
@@ -188,10 +189,10 @@ def handle_output(new_query: UserQuery, data):
                     chat_id=contact_info.get('value'),
                     message=json.dumps(data)
                 )
-            print('result, ', result)
+            print('result of query {} sending to topic {}: {}'.format(new_query.id, new_query.topic_kafka_output, result))
     except Exception as e:
         print(e)
-        return 'Error: {}'.format(str(e))
+        raise e
 
 
 def init_scheduler_from_query():
@@ -203,7 +204,6 @@ def init_scheduler_from_query():
         for query in data:
             scheduler.add_job(trigger_output, 'interval', seconds=int(query.time_trigger), args=[query],
                               id=query.topic_kafka_output)
-        print(scheduler.print_jobs())
         if not scheduler.running:
             scheduler.start()
     except Exception as e:

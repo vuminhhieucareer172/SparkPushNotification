@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('id', sa.INTEGER, primary_key=True, index=True, autoincrement=True),
         sa.Column('sql', sa.TEXT, nullable=False),
         sa.Column('topic_kafka_output', sa.VARCHAR(50), nullable=False),
-        sa.Column('time_trigger', sa.VARCHAR(50), nullable=False, server_default='1 second'),
+        sa.Column('time_trigger', sa.VARCHAR(50), nullable=False, server_default='60'),
         sa.Column('created_at', sa.TIMESTAMP, nullable=False, server_default=sa.func.now()),
         sa.Column('updated_at', sa.TIMESTAMP, nullable=False, server_default=sa.func.now(), server_onupdate=sa.func.now()),
         sa.Column('contact', sa.JSON, nullable=True),

@@ -56,6 +56,10 @@ export class ManageQueriesComponent implements OnInit {
   }
 
   settings = {
+    pager: {
+      display: true,
+      perPage: 10,
+    },
     actions: {
       edit: false,
       add: false,

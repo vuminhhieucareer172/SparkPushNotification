@@ -8,9 +8,9 @@ class UserQuery(Model):
     __tablename__ = "dbstreaming_query"
 
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
-    sql = Column(VARCHAR(1000), nullable=False)
+    sql = Column(TEXT(), nullable=False)
     topic_kafka_output = Column(VARCHAR(50), nullable=False)
-    time_trigger = Column(VARCHAR(50), nullable=False, default='1 second')
+    time_trigger = Column(VARCHAR(50), nullable=False, default='60')
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP, nullable=False, server_default=func.now(), server_onupdate=func.now())
     contact = Column(JSON, nullable=True)

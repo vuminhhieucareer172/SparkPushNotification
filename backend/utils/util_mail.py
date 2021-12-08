@@ -5,16 +5,16 @@ from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import make_msgid
+from typing import List
 
 from tabulate import tabulate
 
 from backend.schemas.configuration import ConfigEmail
 
 
-def email_sender(source: ConfigEmail, email_destination: str, subject: str, content, query):
+def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: List[str], query):
     try:
         countData = len(content)
-        type = ''
         jsonData = []
         for record in content:
             record = json.loads(record)
@@ -403,4 +403,4 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
         return "Completed"
     except Exception as e:
         print(e)
-        return "Error: {}".format(str(e))
+        raise e
