@@ -1,5 +1,5 @@
 import datetime
-import logging
+import re
 from typing import List
 
 import sqlalchemy
@@ -8,11 +8,10 @@ from sqlalchemy import exc, Column, Table, text, inspect, MetaData
 from sqlalchemy.engine import Inspector
 from starlette.responses import JSONResponse
 
-from constants import constants
 from backend.schemas import table
 from backend.utils.util_kafka import get_latest_message
-from constants.constants import PREFIX_DB_TABLE_STREAMING, DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, \
-    DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
+from constants import constants
+from constants.constants import DATA_TYPE_SQLALCHEMY, DATATYPE_STRING, DATATYPE_NUMERIC, DATATYPE_DATE_AND_TIME
 from database.db import DB, get_session
 
 
@@ -22,6 +21,8 @@ def convert_to_sqlalchemy(data_type: str):
 
 def add_column_to_table(table_instance: Table, new_columns: List[table.Field]):
     for field in new_columns:
+        if not re.findall('^[a-zA-Z_][a-zA-Z0-9_]*$', field.name_field):
+            return JSONResponse(content={"message": 'Error name column: ' + field.name_field}, status_code=status.HTTP_400_BAD_REQUEST)
         type_ = convert_to_sqlalchemy(field.type)
         if type_ in DATATYPE_STRING:
             if field.length is not None or field.length != 0:
@@ -44,9 +45,13 @@ def add_column_to_table(table_instance: Table, new_columns: List[table.Field]):
                 table_instance.append_column(Column(field.name_field, type_=type_, primary_key=field.primary_key,
                                                     nullable=not field.not_null, comment=field.comment))
         elif type_ in DATATYPE_DATE_AND_TIME:
-            table_instance.append_column(
-                Column(field.name_field, type_=type_, nullable=not field.not_null,
-                       server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'), comment=field.comment))
+            if type_ == sqlalchemy.DATE:
+                table_instance.append_column(
+                    Column(field.name_field, type_=type_, nullable=not field.not_null, comment=field.comment))
+            else:
+                table_instance.append_column(
+                    Column(field.name_field, type_=type_, nullable=not field.not_null,
+                           server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'), comment=field.comment))
         elif type_ == sqlalchemy.ARRAY:
             return JSONResponse(content={"message": "Not implemented"}, status_code=status.HTTP_501_NOT_IMPLEMENTED)
         elif type_ == sqlalchemy.JSON:
@@ -70,6 +75,8 @@ def create_table(new_schema: table.Table, db: DB) -> JSONResponse:
         new_table = Table(new_schema.name, MetaData(db.engine), mysql_engine=new_schema.engine,
                           mysql_collate=new_schema.collate)
         new_table = add_column_to_table(table_instance=new_table, new_columns=new_schema.fields)
+        if not isinstance(new_table, Table):
+            return new_table
         new_table.create(checkfirst=True)
     except TypeError as e:
         print(e)

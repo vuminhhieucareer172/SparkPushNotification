@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormBuilder, Validators, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { SERVER_API_URL } from '../../../app.constants';
 import { NbGlobalPhysicalPosition, NbToastrService } from '@nebular/theme';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'ngx-add-stream',
@@ -21,13 +22,13 @@ export class AddStreamComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
+    private router: Router,
     private toastrService: NbToastrService) {
     this.messageSample = '';
     this.http.get(SERVER_API_URL + '/kafka-topic', {observe: 'response'})
     .subscribe(
       res => {
         this.listTopicKafka = Object.keys(res.body).map((key) => res.body[key]);
-        // console.log(this.listTopicKafka)
       }, (error) => {
         this.showToast('An unexpected error occured', error.error.message, 'danger');
       }, () => {},
@@ -128,6 +129,7 @@ export class AddStreamComponent implements OnInit {
 
   onReset(): void {
     this.streamForm.reset();
+    this.messageSample = '';
   }
 
   onSubmit(): void {
@@ -136,6 +138,7 @@ export class AddStreamComponent implements OnInit {
       .subscribe(
         res => {
           this.showToast('Notification', 'Action completed', 'success');
+          this.router.navigate(['/pages/streaming/manage-streams']);
         }, (error) => {
           this.showToast('An unexpected error occured', error.error.message, 'danger');
         }, () => {},

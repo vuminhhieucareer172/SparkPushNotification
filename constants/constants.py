@@ -70,7 +70,7 @@ DATATYPE_NUMERIC = [sqlalchemy.INTEGER, sqlalchemy.BIGINT, sqlalchemy.SMALLINT, 
                     sqlalchemy.DECIMAL, sqlalchemy.REAL]
 DATATYPE_NUMERIC_NOT_REQUIRE_ARGUMENTS = [sqlalchemy.INTEGER, sqlalchemy.BIGINT, sqlalchemy.SMALLINT, sqlalchemy.BOOLEAN, sqlalchemy.FLOAT,
                     sqlalchemy.DECIMAL, sqlalchemy.REAL]
-DATATYPE_DATE_AND_TIME = [sqlalchemy.DATETIME, sqlalchemy.TIMESTAMP, sqlalchemy.DATE, sqlalchemy.TIME]
+DATATYPE_DATE_AND_TIME = [sqlalchemy.DATETIME, sqlalchemy.TIMESTAMP, sqlalchemy.TIME]
 DATATYPE_SPECIAL = [sqlalchemy.ARRAY, sqlalchemy.Enum, sqlalchemy.JSON]
 
 JOB_STREAMING_STATUS_RUNNING = 'RUNNING'
