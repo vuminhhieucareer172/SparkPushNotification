@@ -155,7 +155,6 @@ def get_schema_from_kafka_topic(topic: str):
                 "type": type_column,
             }
             list_column.append(column)
-        print(1)
         data["message_sample"] = str(latest_mess)
         data["table"] = list_column
         return JSONResponse(content=data, status_code=status.HTTP_200_OK)

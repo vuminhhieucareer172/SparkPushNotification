@@ -101,6 +101,8 @@ export class AddStreamComponent implements OnInit {
       .subscribe(
         res => {
           this.messageSample = res.body['message_sample'];
+          console.log(this.messageSample.length);
+          
           this.clearTable();
           res.body['table'].forEach(e => {
             this.fields.push(this.createFieldTable(e['name_field'], e['type']));
