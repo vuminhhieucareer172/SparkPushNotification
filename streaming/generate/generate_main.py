@@ -74,6 +74,14 @@ def build_schema_and_input(content: str, bootstrap_servers: str, db: DB, inspect
     return content
 
 
+def check_complete_mode_query(sql: str):
+    key_word_complete = ['group by', 'count(', 'min(', 'max(', 'avg(', 'sum(']
+    for key in key_word_complete:
+        if key in sql.lower():
+            return True
+    return False
+
+
 def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspector: sqlalchemy.engine.Inspector):
     for record in data:
         sql: str = record['sql']
@@ -87,7 +95,7 @@ def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspe
         sql = format_sql_spark(sql=sql, inspector=inspector)
 
         content += """
-    data = spark.sql("{}")
+    data = spark.sql('{}')
     function_key = udf(lambda x: "{}", StringType())
     data = data.withColumn("value", to_json(struct([c for c in data.columns])))
     data = data.withColumn("key", function_key(col("value")))
@@ -97,7 +105,7 @@ def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspe
         .option("checkpointLocation", "{}") \\
         .option("topic", "{}"){}.start()
     """.format(sql, 'query-' + str(record['id']), bootstrap_servers, constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'],
-               '.outputMode("complete")' if 'group by' in sql.lower() or 'count(' in sql.lower() else '')
+               '.outputMode("complete")' if check_complete_mode_query(sql) else '')
     return content
 
 

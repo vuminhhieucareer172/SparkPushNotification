@@ -336,6 +336,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('Notification', 'Action completed', 'success');
             this.scheduleAndContactForm.reset();
             this.manualInputForm.reset();
+            this.router.navigate(['pages/query/manage-queries']);
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
@@ -373,14 +374,14 @@ export class AddQueryComponent implements OnInit {
         for (const condition of quickInput.fieldsConditions) {
           if (lenConditions >= 2) {
             if (condition['operator'].toLowerCase() === 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'" + ' ' + 'and ';
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"' + ' ' + 'and ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ' + 'and ';
             }
             lenConditions -= 1;
           } else if (lenConditions < 2) {
             if (condition['operator'].toLowerCase() === 'like') {
-              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + "'" + condition['value'] + "'"  + ' ';
+              finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + '"' + condition['value'] + '"'  + ' ';
             } else {
               finalSQL += condition['field'] + ' ' + condition['operator'] + ' ' + condition['value'] + ' ';
             }
@@ -452,6 +453,8 @@ export class AddQueryComponent implements OnInit {
             this.showToast('Notification', 'Action completed', 'success');
             this.scheduleAndContactForm.reset();
             this.manualInputForm.reset();
+            this.router.navigate(['pages/query/manage-queries']);
+
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },

@@ -1,7 +1,7 @@
 """create table dbstreaming_job_stream
 
 Revision ID: 9bccbd127e10
-Revises: 
+Revises:
 Create Date: 2021-10-07 12:22:23.297192
 
 """
