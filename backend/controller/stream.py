@@ -1,5 +1,8 @@
 import datetime
+import os
+import signal
 
+import psutil
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -168,6 +171,8 @@ def delete_stream(stream_name: str, db: DB):
 def stop_job_streaming():
     try:
         Spark().get_sql_context().sparkSession.stop()
+        p = psutil.Process(Spark().get_pid())
+        p.terminate()
     except Exception as e:
         print(e)
         return JSONResponse(content={"message": "Error: {}".format(str(e))}, status_code=status.HTTP_400_BAD_REQUEST)

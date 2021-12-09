@@ -206,9 +206,9 @@ export class DetailQueryComponent implements OnInit {
   onSelectSchedule(value: string): void {
     this.schedule = value;
     if (this.schedule === 'manual-input') {
-      // this.quickInputForm.reset();
+      this.quickInputForm.reset();
     } else if (this.schedule === 'quick-input') {
-      // this.manualInputForm.reset();
+      this.manualInputForm.reset();
     }
   }
 

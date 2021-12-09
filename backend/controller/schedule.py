@@ -144,7 +144,7 @@ def trigger_output(new_query: UserQuery):
 
             committed_offset = consumer.committed(partitions)
             low, high = consumer.get_watermark_offsets(partitions[0])
-            print("topic {} with partition {} with offset is {}".format(new_query.topic_kafka_output, partitions, high))
+            print("topic {} with committed_offset {} with offset is {}".format(new_query.topic_kafka_output, committed_offset, high))
             consumer.assign(committed_offset)
 
             if committed_offset[0].offset < high:

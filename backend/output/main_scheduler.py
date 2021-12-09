@@ -32,7 +32,7 @@ def update_output(new_query: Query):
     return schedule.update_job_output(new_query)
 
 
-@app.delete("/delete-job-output/{job_id: str}")
+@app.delete("/delete-job-output/{job_id}")
 def delete_output(job_id: str):
     return schedule.delete_job_output(job_id)
 
