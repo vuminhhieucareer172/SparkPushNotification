@@ -48,8 +48,8 @@
 
           <div class="form-group">
             <label for="message_sample" class="label">Message sample:</label>
-            <input type="text" nbInput fullWidth id="message_sample" value="{{messageSample}}"
-              placeholder="Message sample ..." disabled>
+            <textarea [rows]="messageSample.length / 100 > 10 ? 10 : messageSample.length / 100" id="message_sample" nbInput fullWidth shape="round"
+                                    placeholder="Message sample ..." value="{{messageSample}}" disabled></textarea>
           </div>
 
           <div class="table-responsive">

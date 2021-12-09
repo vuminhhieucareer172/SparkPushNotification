@@ -20,14 +20,13 @@ def send_message_to_kafka(table_fake_data: str, topic: str, limit: int = 10):
     result = db.engine.execute("select * from {} limit {}".format(table_fake_data, limit))
     count = 1
     data = list(map(lambda record: json.loads(json.dumps(dict(record), cls=SchemaEncoder, ensure_ascii=False)), result))
-    while True:
-        for row in data:
-            message = json.dumps(row, ensure_ascii=False)
-            producer.produce(topic=topic, key='aaa', value=message)
-            print(f"sending data to {topic}, #{count}: {message}")
-            count += 1
-            producer.flush()
-        time.sleep(10)
+    for row in data:
+        message = json.dumps(row, ensure_ascii=False)
+        producer.produce(topic=topic, key='aaa', value=message)
+        print(f"sending data to {topic}, #{count}: {message}")
+        count += 1
+        producer.flush()
+
 
 
 if __name__ == '__main__':

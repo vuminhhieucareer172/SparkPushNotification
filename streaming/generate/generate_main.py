@@ -97,7 +97,7 @@ def build_sql_and_output(content: str, bootstrap_servers: str, data: list, inspe
         .option("checkpointLocation", "{}") \\
         .option("topic", "{}"){}.start()
     """.format(sql, 'query-' + str(record['id']), bootstrap_servers, constants.CHECKPOINT_PATH + '/query-' + str(record['id']), record['topic_kafka_output'],
-               '.outputMode("' + record['output_mode'] + '")')
+               '.outputMode("complete")' if 'group by' in sql.lower() or 'count(' in sql.lower() else '')
     return content
 
 

@@ -10,7 +10,6 @@ class UserQuery(Model):
     id = Column(INTEGER, primary_key=True, index=True, autoincrement=True)
     sql = Column(TEXT(), nullable=False)
     topic_kafka_output = Column(VARCHAR(50), nullable=False)
-    output_mode = Column(VARCHAR(50), nullable=False, server_default='append')
     time_trigger = Column(VARCHAR(50), nullable=False, default='60')
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP, nullable=False, server_default=func.now(), server_onupdate=func.now())

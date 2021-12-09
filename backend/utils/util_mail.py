@@ -5,13 +5,14 @@ from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import make_msgid
+from typing import List
 
 from tabulate import tabulate
 
 from backend.schemas.configuration import ConfigEmail
 
 
-def email_sender(source: ConfigEmail, email_destination: str, subject: str, content, query):
+def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: List[str], query):
     try:
         countData = len(content)
         jsonData = []
@@ -64,7 +65,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                                                 </tr>
                                                                             </tbody>
                                                                         </table>
-                                                                    </td> 
+                                                                    </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>
@@ -84,7 +85,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                 {} new job matches your preferences.
                                             </p>
                                         </td>
-                                    </tr>        
+                                    </tr>
                                 """.format(countData)
 
                 for matching in content:
@@ -169,7 +170,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                         <div class="row">
                             <table style="background-color:#ffffff;table-layout:fixed" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F3F2EF" align="center">
                                 <tbody>
-                                    <tr> 
+                                    <tr>
                                         <td style="padding-top:24px" align="center">
                                             <center style="width:100%">
                                                 <table>
@@ -206,7 +207,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                                                 {} new job matches your preferences.
                                                                             </p>
                                                                         </td>
-                                                                    </tr>    
+                                                                    </tr>
                                                                 </tbody>
                                                             </table>
                                                         </td>
@@ -221,7 +222,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                     html += """
                                                         <th style="text-align:center;">{}</th>
                     """.format(str(column))
-                html += """                 
+                html += """
                                                     </tr>
                 """
                 # table header#################################
@@ -294,7 +295,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                                                             </tr>
                                                                                         </tbody>
                                                                                     </table>
-                                                                                </td> 
+                                                                                </td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td>
@@ -314,7 +315,7 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
                                                             {} new job matches your preferences.
                                                         </p>
                                                     </td>
-                                                </tr>        
+                                                </tr>
                                             """.format(countData)
 
             for matching in content:
@@ -403,4 +404,3 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
     except Exception as e:
         print(e)
         raise e
-        return "Error: {}".format(str(e))
