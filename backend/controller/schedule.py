@@ -1,5 +1,6 @@
 import json
 import logging
+from hashlib import new
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -12,11 +13,12 @@ from backend.models.dbstreaming_query import UserQuery
 from backend.schemas.configuration import ConfigEmail, ConfigTelegram
 from backend.schemas.query import Query
 from backend.utils import util_mail, util_get_config, util_kafka, util_process, util_telegram
+from backend.utils.util_kafka import get_latest_message
 from constants import constants
 from constants.constants import GENERATE_STREAMING_SUCCESSFUL, CONFIG_JOB_STREAMING, ID_JOB_STREAM
 from database.db import get_db, DB, get_session
 from database.session import SessionHandler
-from streaming.generate.generate_main import generate_job_stream
+from streaming.generate.generate_main import generate_job_stream, check_complete_mode_query
 from streaming.spark import Spark
 
 scheduler = BackgroundScheduler({
@@ -126,35 +128,41 @@ def delete_job_output(job_id: str):
 
 def trigger_output(new_query: UserQuery):
     try:
-        consumer = Consumer(util_kafka.Kafka.create().get_credentials())
-        consumer.subscribe([new_query.topic_kafka_output])
-
-        topic = consumer.list_topics(topic=new_query.topic_kafka_output)
-        partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
-                      list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
-
-        committed_offset = consumer.committed(partitions)
-        low, high = consumer.get_watermark_offsets(partitions[0])
-        print("topic {} with offset is {}".format(new_query.topic_kafka_output, high))
-        consumer.assign(committed_offset)
-
         data = []
-        if committed_offset[0].offset < high:
-            restart_time = 0
-            while True:
-                msg = consumer.poll(1)
-                consumer.commit()
+        # if check_complete_mode_query(new_query.sql):
+        if False:
+            latest_mess, a = get_latest_message(new_query.topic_kafka_output)
+            data.append(json.dumps(latest_mess))
+            handle_output(new_query, data)
+        else:
+            consumer = Consumer(util_kafka.Kafka.create().get_credentials())
+            consumer.subscribe([new_query.topic_kafka_output])
 
-                if msg is None:
-                    restart_time += 1
-                    if restart_time > 10:
+            topic = consumer.list_topics(topic=new_query.topic_kafka_output)
+            partitions = [TopicPartition(new_query.topic_kafka_output, partition) for partition in
+                          list(topic.topics[new_query.topic_kafka_output].partitions.keys())]
+
+            committed_offset = consumer.committed(partitions)
+            low, high = consumer.get_watermark_offsets(partitions[0])
+            print("topic {} with partition {} with offset is {}".format(new_query.topic_kafka_output, partitions, high))
+            consumer.assign(committed_offset)
+
+            if committed_offset[0].offset < high:
+                restart_time = 0
+                while True:
+                    msg = consumer.poll(1)
+                    consumer.commit()
+
+                    if msg is None:
+                        restart_time += 1
+                        if restart_time > 10:
+                            break
+                        continue
+                    data.append(msg.value().decode('utf-8'))
+
+                    if msg.offset() == high - 1:
                         break
-                    continue
-                data.append(msg.value().decode('utf-8'))
-
-                if msg.offset() == high - 1:
-                    break
-        handle_output(new_query, data)
+                handle_output(new_query, data)
     except Exception as e:
         print(e)
         raise e

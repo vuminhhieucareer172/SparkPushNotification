@@ -174,7 +174,9 @@ def create_topic(schema_topic: KafkaTopic):
 
 
 if __name__ == '__main__':
-    # data = get_latest_message(TOPIC_JOB, '')
-    get_list_topics()
-    # data_json = json.loads(data)
-    # print(data)
+    data, a = get_latest_message('group_by_2')
+    # get_list_topics()
+    data_json = json.dumps(data)
+    print(type(data_json))
+    print((data_json))
+
