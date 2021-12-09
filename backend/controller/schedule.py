@@ -1,6 +1,5 @@
 import json
 import logging
-from hashlib import new
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
