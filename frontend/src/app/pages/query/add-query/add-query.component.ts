@@ -336,6 +336,7 @@ export class AddQueryComponent implements OnInit {
             this.showToast('Notification', 'Action completed', 'success');
             this.scheduleAndContactForm.reset();
             this.manualInputForm.reset();
+            this.router.navigate(['pages/query/manage-queries']);
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
@@ -452,6 +453,8 @@ export class AddQueryComponent implements OnInit {
             this.showToast('Notification', 'Action completed', 'success');
             this.scheduleAndContactForm.reset();
             this.manualInputForm.reset();
+            this.router.navigate(['pages/query/manage-queries']);
+
           }, (error) => {
             this.showToast('An unexpected error occured', error.error.message, 'danger');
           }, () => { },
