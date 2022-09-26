@@ -66,7 +66,7 @@ export class DatabaseConnectionComponent implements OnInit {
   onReset(): void {
     this.dbForm.reset();
   }
-
+// c
   onTestSubmit(): void {
     const stream = this.dbForm.getRawValue();
     this.http.post(SERVER_API_URL + '/test-connect-database', stream, {observe: 'response'})

@@ -12,7 +12,7 @@ from tabulate import tabulate
 from backend.schemas.configuration import ConfigEmail
 
 
-def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: List[str], query):
+def email_sender(source: ConfigEmail, email_destination: str, subject: str, content: List[str], query=''):
     try:
         countData = len(content)
         jsonData = []
@@ -404,3 +404,17 @@ def email_sender(source: ConfigEmail, email_destination: str, subject: str, cont
     except Exception as e:
         print(e)
         raise e
+
+# if __name__ == '__main__':
+#     email_sender(source=ConfigEmail(
+#             host="smtp.gmail.com",
+#             port=465,
+#             email="vuminhhieucareer172@gmail.com",
+#             username="vuminhhieucareer172@gmail.com",
+#             password="0352428080",
+#             ssl=True),
+#         email_destination="vuminhhieucareer172@gmail.com",
+#         subject="Your job alert",
+#         content=["'application_deadline':'30/12/2022', 'company_address':'101 Láng Hạ', 'company_name':'Vinetek', 'salary': '21', 'position': 'AI Engineer', 'year_experience': '1 năm'",
+#                  "'application_deadline':'30/12/2022', 'company_address':'101 Láng Hạ', 'company_name':'Vinetek', 'salary': '22', 'position': 'Data Engineer', 'year_experience': '1 năm'"],
+#     )
